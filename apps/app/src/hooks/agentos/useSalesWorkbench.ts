@@ -1,6 +1,6 @@
 "use client"
 
-import { useRef, useState } from "react"
+import { useState } from "react"
 import { useParams } from "next/navigation"
 import type {
     SalesClarificationFact,
@@ -39,7 +39,6 @@ import {
     salesWriterFence,
     type SalesCommandAnswer,
     type SalesAnswerStanding,
-    type SalesNotice,
     type SalesSurfaceStanding,
     type SalesTranslation,
 } from "@/modules/sales/sales-workbench"
@@ -51,6 +50,7 @@ import {
     parseSalesPolicyValue,
     parseSalesReadinessValue,
 } from "@/modules/api/sales/payload.guards"
+import { useWorkbenchCommand } from "./useWorkbenchCommand"
 
 /*
  * The connected Sales workbench (impl.sales.nivo-fe.opportunity-workbench-view).
@@ -74,18 +74,6 @@ import {
  * no-start proof and the writer fence the action read itself disclosed.
  */
 
-/*
- * A press identity that is unique without inventing randomness: the platform's own UUID when the
- * runtime has one, otherwise a monotonic fallback - an identity only has to be distinct, and a
- * counter is distinct within this module's life.
- */
-let pressSequence = 0
-const requestId = (): string => {
-    const uuid = globalThis.crypto?.randomUUID?.()
-    if (uuid !== undefined) return uuid
-    pressSequence += 1
-    return `request-${Date.now()}-${pressSequence}`
-}
 const PAGE_SIZE = 20
 
 /** One read's served value, or null when it has not answered with one. */
@@ -189,9 +177,6 @@ const scopeStandingFor = (
     return standing === "empty" ? "unavailable" : standing
 }
 
-/** One exact input's stable request identity, kept until that input is delivered. */
-type Intent = { readonly fingerprint: string; readonly token: string }
-
 /** Own Sales form state, the resolved installation scope, idempotent intents and readback-settled feedback. */
 export const useSalesWorkbench = (moduleId: string, locale: string, t: SalesTranslation) => {
     const params = useParams<{ readonly workspaceId?: string; readonly installationId?: string }>()
@@ -205,7 +190,6 @@ export const useSalesWorkbench = (moduleId: string, locale: string, t: SalesTran
     const ready = scope !== null
     const scopeFingerprint = scopeFingerprintOf(scope)
 
-    const [notice, setNotice] = useState<SalesNotice | null>(null)
     const [cursor, setCursor] = useState<string | null>(null)
     const [opportunityId, setOpportunityId] = useState("")
     const [commandId, setCommandId] = useState("")
@@ -232,7 +216,12 @@ export const useSalesWorkbench = (moduleId: string, locale: string, t: SalesTran
     const [closeRevision, setCloseRevision] = useState("1")
     const [policyRevision, setPolicyRevision] = useState("")
     const [policyCadence, setPolicyCadence] = useState("")
-    const intents = useRef<Record<string, Intent>>({})
+    const workbenchCommand = useWorkbenchCommand({
+        refusal: (code, reason) => t(salesRefusalKey(code), { reason }),
+        unsettled: t("refusal.unsettled"),
+        unreachable: t("refusal.unreachable"),
+        acceptsFailedAnswer: (code) => code === "outcome_unknown" || code === "DEADLINE_EXCEEDED",
+    })
 
     const pipelineInput = pipelinePageOf(scopeFingerprint, cursor)
     const pipeline = useQuerySalesPipelineSwr(addressable, pipelineInput, ready)
@@ -258,43 +247,6 @@ export const useSalesWorkbench = (moduleId: string, locale: string, t: SalesTran
     const opportunityModel = answered(opportunity.data, parseSalesOpportunityValue)
     const commandModel = answered(command.data, parseSalesCommandValue)
     const actionModel = answered(action.data, parseSalesActionValue)
-
-    const intentFor = (key: string, value: unknown): string => {
-        const valueFingerprint = JSON.stringify(value)
-        const prior = intents.current[key]
-        if (prior?.fingerprint === valueFingerprint) return prior.token
-        const token = requestId()
-        intents.current[key] = { fingerprint: valueFingerprint, token }
-        return token
-    }
-    const settle = async (
-        key: string,
-        press: () => Promise<SalesCommandAnswer>,
-        readback: (() => Promise<SalesCommandAnswer | undefined>) | null,
-        describe: (answer: SalesCommandAnswer) => string | null,
-    ): Promise<void> => {
-        setNotice(null)
-        try {
-            const answer = await press()
-            if (!answer.ok && answer.code !== "outcome_unknown" && answer.code !== "DEADLINE_EXCEEDED") {
-                setNotice({
-                    kind: "refused",
-                    message: t(salesRefusalKey(answer.code ?? ""), { reason: answer.reason ?? "" }),
-                })
-                return
-            }
-            const settled = readback === null ? answer : await readback()
-            const confirmed = settled?.ok ? describe(settled) : null
-            if (confirmed === null) {
-                setNotice({ kind: "refused", message: t("refusal.unsettled") })
-                return
-            }
-            delete intents.current[key]
-            setNotice({ kind: "success", message: confirmed })
-        } catch {
-            setNotice({ kind: "refused", message: t("refusal.unreachable") })
-        }
-    }
 
     const commandActions = salesRequestedActions(requestedActions)
     const commandInput = {
@@ -369,45 +321,41 @@ export const useSalesWorkbench = (moduleId: string, locale: string, t: SalesTran
         const state = answer.ok ? parseSalesPolicyValue(answer.data) : null
         return state?.revision === undefined ? null : t("policy.settled", { revision: state.revision })
     }
+    const success = (message: string | null) =>
+        message === null ? null : { kind: "success" as const, message }
 
     const onSubmitCommand = () => {
         if (!commandAddressable) return
-        void settle(
-            `command-${commandId}`,
-            () =>
-                submitCommand.trigger({
-                    requestId: intentFor(`command-${commandId}`, commandInput),
-                    input: commandInput,
-                }),
-            () => command.mutate(),
-            planSettled,
-        )
+        const key = `command-${commandId}`
+        void workbenchCommand.settle({
+            key,
+            value: commandInput,
+            press: (requestId) => submitCommand.trigger({ requestId, input: commandInput }),
+            readback: () => command.mutate(),
+            describe: (answer) => success(planSettled(answer)),
+        })
     }
     const onClarify = () => {
         if (!clarifyAddressable) return
-        void settle(
-            `clarify-${commandId}`,
-            () =>
-                clarifyCommand.trigger({
-                    requestId: intentFor(`clarify-${commandId}`, clarifyInput),
-                    input: clarifyInput,
-                }),
-            () => command.mutate(),
-            planSettled,
-        )
+        const key = `clarify-${commandId}`
+        void workbenchCommand.settle({
+            key,
+            value: clarifyInput,
+            press: (requestId) => clarifyCommand.trigger({ requestId, input: clarifyInput }),
+            readback: () => command.mutate(),
+            describe: (answer) => success(planSettled(answer)),
+        })
     }
     const onClose = () => {
         if (!closeAddressable) return
-        void settle(
-            `close-${closeIntentId}`,
-            () =>
-                closeOpportunity.trigger({
-                    requestId: intentFor(`close-${closeIntentId}`, closeInput),
-                    input: closeInput,
-                }),
-            () => opportunity.mutate(),
-            closeSettled,
-        )
+        const key = `close-${closeIntentId}`
+        void workbenchCommand.settle({
+            key,
+            value: closeInput,
+            press: (requestId) => closeOpportunity.trigger({ requestId, input: closeInput }),
+            readback: () => opportunity.mutate(),
+            describe: (answer) => success(closeSettled(answer)),
+        })
     }
     const onRecover = (operation: "retryNoStart" | "cancelNoStart") => {
         if (!recoveryAddressable || attestedProof === null || attestedFence === null) return
@@ -432,22 +380,19 @@ export const useSalesWorkbench = (moduleId: string, locale: string, t: SalesTran
                       oldWriterFence: attestedFence,
                       expectedRevision: Number(actionRevision),
                   }
-        void settle(
-            `${operation}-${actionId}`,
-            () =>
-                recoverAction.trigger({
-                    requestId: intentFor(`${operation}-${actionId}`, value),
-                    input: value,
-                }),
-            () => action.mutate(),
-            actionSettled,
-        )
+        const key = `${operation}-${actionId}`
+        void workbenchCommand.settle({
+            key,
+            value,
+            press: (requestId) => recoverAction.trigger({ requestId, input: value }),
+            readback: () => action.mutate(),
+            describe: (answer) => success(actionSettled(answer)),
+        })
     }
     const onConfigurePolicy = () => {
         if (!ready) return
         const expected = policyRevision.length > 0 ? Number(policyRevision) : (policyModel?.revision ?? null)
         const value = {
-            requestId: intentFor("policy", { expected, cadence: policyCadence }),
             salesInstallationId: routeInstallationId,
             expectedPolicyRevision: expected,
             values: {
@@ -458,12 +403,13 @@ export const useSalesWorkbench = (moduleId: string, locale: string, t: SalesTran
                 capacityLimits: null,
             },
         }
-        void settle(
-            "policy",
-            () => configurePolicy.trigger({ requestId: value.requestId, input: value }),
-            () => policy.mutate(),
-            policySettled,
-        )
+        void workbenchCommand.settle({
+            key: "policy",
+            value: { expected, cadence: policyCadence },
+            press: (requestId) => configurePolicy.trigger({ requestId, input: { ...value, requestId } }),
+            readback: () => policy.mutate(),
+            describe: (answer) => success(policySettled(answer)),
+        })
     }
 
     /*
@@ -480,7 +426,7 @@ export const useSalesWorkbench = (moduleId: string, locale: string, t: SalesTran
         scopeStanding,
         scopeReady: ready,
         scopeInstallation: routeInstallationId,
-        notice,
+        notice: workbenchCommand.notice,
         attention: {
             standing: regionStanding(pipeline.data, attentionRows.length > 0),
             rows: attentionRows,
@@ -510,7 +456,7 @@ export const useSalesWorkbench = (moduleId: string, locale: string, t: SalesTran
             setFingerprint: setCommandFingerprint,
             expectedRevisions,
             setExpectedRevisions,
-            isSubmitting: submitCommand.isMutating,
+            isSubmitting: submitCommand.isMutating || workbenchCommand.isPending(`command-${commandId}`),
             addressable: commandAddressable,
             onSubmit: onSubmitCommand,
         },
@@ -543,7 +489,10 @@ export const useSalesWorkbench = (moduleId: string, locale: string, t: SalesTran
             attestedFence,
             addressable: recoveryAddressable,
             isLoading: action.isLoading,
-            isRecovering: recoverAction.isMutating,
+            isRecovering:
+                recoverAction.isMutating ||
+                workbenchCommand.isPending(`retryNoStart-${actionId}`) ||
+                workbenchCommand.isPending(`cancelNoStart-${actionId}`),
             reload: () => void action.mutate(),
             onRetry: () => onRecover("retryNoStart"),
             onStop: () => onRecover("cancelNoStart"),
@@ -565,7 +514,7 @@ export const useSalesWorkbench = (moduleId: string, locale: string, t: SalesTran
             setFactKind,
             factValue,
             setFactValue,
-            isClarifying: clarifyCommand.isMutating,
+            isClarifying: clarifyCommand.isMutating || workbenchCommand.isPending(`clarify-${commandId}`),
             addressable: clarifyAddressable,
             onClarify,
         },
@@ -582,7 +531,7 @@ export const useSalesWorkbench = (moduleId: string, locale: string, t: SalesTran
             revision: closeRevision,
             setRevision: setCloseRevision,
             model: opportunityModel,
-            isClosing: closeOpportunity.isMutating,
+            isClosing: closeOpportunity.isMutating || workbenchCommand.isPending(`close-${closeIntentId}`),
             addressable: closeAddressable,
             onClose,
         },
@@ -599,7 +548,7 @@ export const useSalesWorkbench = (moduleId: string, locale: string, t: SalesTran
             setRevision: setPolicyRevision,
             cadence: policyCadence,
             setCadence: setPolicyCadence,
-            isConfiguring: configurePolicy.isMutating,
+            isConfiguring: configurePolicy.isMutating || workbenchCommand.isPending("policy"),
             onConfigure: onConfigurePolicy,
         },
     }

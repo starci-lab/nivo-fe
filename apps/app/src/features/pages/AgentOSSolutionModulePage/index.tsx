@@ -11,7 +11,7 @@ import {
     useRouter,
 } from "../../../hooks"
 import type { AgentOSModuleView } from "../../../components/blocks/agentos/ModuleRouteShellBlock"
-import { AgentOSSolutionModuleAttachments } from "../../../components/blocks/agentos/AgentOSSolutionModuleAttachments"
+import { AgentOSModuleAttachments } from "../../../components/blocks/agentos/AgentOSModuleAttachments"
 import type { DiagnosticsSurfaceProps, SetupSurfaceProps } from "../../../modules/agentos/module-page/surface-types"
 import { contextDraftFor } from "../../../modules/agentos/module-page/setup-draft"
 import { moduleScreenFor, moduleShellPropsFor } from "../../../modules/agentos/module-page/screens"
@@ -132,7 +132,8 @@ export const AgentOSSolutionModulePage = (props: AgentOSSolutionModulePageProps)
             runtime.installation.runtimeManifest.setup?.requirements.some(
                 (requirement) => requirement.citationPolicy === "attachment-content",
             ) === true ? (
-                <AgentOSSolutionModuleAttachments
+                <AgentOSModuleAttachments
+                    scope="solution"
                     workspaceId={workspaceId}
                     installationId={installationId}
                     onIndexedAttachmentsChange={setup.updateIndexedSourceAttachments}

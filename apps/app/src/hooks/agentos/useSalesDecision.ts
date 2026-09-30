@@ -10,11 +10,11 @@ import {
     salesRefusalKey,
     salesSurfaceStanding,
     type SalesAnswerStanding,
-    type SalesNotice,
     type SalesSurfaceStanding,
     type SalesTranslation,
 } from "@/modules/sales/sales-workbench"
 import { parseSalesDecisionValue } from "@/modules/api/sales/payload.guards"
+import { useWorkbenchCommand } from "./useWorkbenchCommand"
 
 /*
  * The connected decision surface (impl.sales.nivo-fe.decision-view).
@@ -34,19 +34,6 @@ import { parseSalesDecisionValue } from "@/modules/api/sales/payload.guards"
  * .decisionRequest@1` for the same identity, never out of the press; an unattested outcome is
  * reconciled by reading that identity again, never by answering a second time.
  */
-
-/*
- * An answer identity that is unique without inventing randomness: the platform's own UUID when the
- * runtime has one, otherwise a monotonic fallback - an identity only has to be distinct, and a
- * counter is distinct within this module's life.
- */
-let answerSequence = 0
-const answerRequestId = (): string => {
-    const uuid = globalThis.crypto?.randomUUID?.()
-    if (uuid !== undefined) return uuid
-    answerSequence += 1
-    return `answer-${Date.now()}-${answerSequence}`
-}
 
 /** The proposal one answer was opened on: what an answer stays bound to. */
 type AnswerBasis = { readonly version: number; readonly fingerprint: string }
@@ -90,9 +77,6 @@ const scopeStandingFor = (
     return standing === "empty" ? "unavailable" : standing
 }
 
-/** One exact answer's stable request identity, kept until that answer is delivered. */
-type Intent = { readonly fingerprint: string; readonly token: string }
-
 /** Own decision form state, the resolved installation scope, one idempotent answer and its readback-settled notice. */
 export const useSalesDecision = (workspaceId: string, installationId: string, t: SalesTranslation) => {
     const controlCenter = useQueryMyAgentWorkspaceControlCenterSwr(workspaceId, workspaceId.length > 0)
@@ -102,12 +86,16 @@ export const useSalesDecision = (workspaceId: string, installationId: string, t:
     const addressable = scope ?? { workspaceId: "", instanceId: "", installationId }
     const ready = scope !== null
 
-    const [notice, setNotice] = useState<SalesNotice | null>(null)
     const [decisionRequestId, setDecisionRequestId] = useState("")
     const [choice, setChoice] = useState<SalesDecideProposalRequest["answer"]>("approve")
     const [expectedRevision, setExpectedRevision] = useState("")
-    const intents = useRef<Record<string, Intent>>({})
     const basis = useRef<AnswerBasis | null>(null)
+    const command = useWorkbenchCommand({
+        refusal: (code, reason) => t(salesRefusalKey(code), { reason }),
+        unsettled: t("refusal.unsettled"),
+        unreachable: t("refusal.unreachable"),
+        acceptsFailedAnswer: (code) => code === "outcome_unknown" || code === "DEADLINE_EXCEEDED",
+    })
 
     const decision = useQuerySalesDecisionRequestSwr(
         addressable,
@@ -130,15 +118,6 @@ export const useSalesDecision = (workspaceId: string, installationId: string, t:
     const pending = model !== null && model.status === "pending"
     const answerAddressable = answerPressable(ready, pending, stale, revision)
 
-    const intentFor = (key: string, value: unknown): string => {
-        const valueFingerprint = JSON.stringify(value)
-        const prior = intents.current[key]
-        if (prior?.fingerprint === valueFingerprint) return prior.token
-        const token = answerRequestId()
-        intents.current[key] = { fingerprint: valueFingerprint, token }
-        return token
-    }
-
     /** Answer the proposal once, then let the readback of the same request decide what the surface may claim. */
     const onAnswer = () => {
         if (!answerAddressable || model === null || revision === null) return
@@ -151,37 +130,19 @@ export const useSalesDecision = (workspaceId: string, installationId: string, t:
             answer: choice,
             expectedDecisionRevision: revision,
         }
-        void (async () => {
-            setNotice(null)
-            try {
-                const answer = (await decideProposal.trigger({
-                    requestId: intentFor("answer", input),
-                    input,
-                }))
-                if (!answer.ok && answer.code !== "outcome_unknown" && answer.code !== "DEADLINE_EXCEEDED") {
-                    setNotice({
-                        kind: "refused",
-                        message: t(salesRefusalKey(answer.code ?? ""), { reason: answer.reason ?? "" }),
-                    })
-                    return
-                }
-                const settled = await decision.mutate()
+        void command.settle({
+            key: "answer",
+            value: input,
+            press: (requestId) => decideProposal.trigger({ requestId, input }),
+            readback: () => decision.mutate(),
+            describe: (settled) => {
                 const state = payloadState(settled)
-                const settledStatus = state?.status
-                if (settledStatus === undefined) {
-                    setNotice({ kind: "refused", message: t("refusal.unsettled") })
-                    return
-                }
-                if (state?.proposalVersion !== claim.version || state?.proposalFingerprint !== claim.fingerprint) {
-                    setNotice({ kind: "refused", message: t("refusal.conflict") })
-                    return
-                }
-                delete intents.current["answer"]
-                setNotice({ kind: "success", message: t("answer.recorded", { status: settledStatus }) })
-            } catch {
-                setNotice({ kind: "refused", message: t("refusal.unreachable") })
-            }
-        })()
+                if (state?.status === undefined) return null
+                if (state.proposalVersion !== claim.version || state.proposalFingerprint !== claim.fingerprint)
+                    return { kind: "refused", message: t("refusal.conflict") }
+                return { kind: "success", message: t("answer.recorded", { status: state.status }) }
+            },
+        })
     }
 
     /*
@@ -197,7 +158,7 @@ export const useSalesDecision = (workspaceId: string, installationId: string, t:
         scopeInstallation: installationId,
         scopeReady: ready,
         scopeStanding,
-        notice,
+        notice: command.notice,
         proposal: {
             standing: regionStanding(decision.data, model !== null),
             model,
@@ -212,7 +173,7 @@ export const useSalesDecision = (workspaceId: string, installationId: string, t:
             setChoice,
             expectedRevision,
             setExpectedRevision,
-            isAnswering: decideProposal.isMutating,
+            isAnswering: decideProposal.isMutating || command.isPending("answer"),
             addressable: answerAddressable,
             stale,
             onSubmit: onAnswer,

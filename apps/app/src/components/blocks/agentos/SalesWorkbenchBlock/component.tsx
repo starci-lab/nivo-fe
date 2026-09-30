@@ -30,6 +30,7 @@ import {
     type SalesSurfaceStanding,
     type SalesTranslation,
 } from "@/modules/sales/sales-workbench"
+import { WorkbenchRail } from "../WorkbenchRail"
 import {
     SALES_ACTION_ROW_CLASS_NAME,
     SALES_FIELD_STACK_CLASS_NAME,
@@ -852,23 +853,23 @@ export const SalesWorkbenchBlockBase = (props: SalesWorkbenchBlockProps) => {
     )
 
     const rail = () => (
-        <FieldStack>
-            <SurfaceCard label={t("rail.scope")}>
-                <ScopeLine scopeReady={scopeReady} scopeStanding={scopeStanding} t={t} />
-            </SurfaceCard>
-            {wait()}
-            <SurfaceCard label={t("rail.notice")}>
-                {notice === null ? (
-                    <Text size="xs" tone="muted">
-                        {t("rail.noticeEmpty")}
-                    </Text>
-                ) : (
-                    <StatusNotice notice={notice} />
-                )}
-            </SurfaceCard>
-            {installation()}
-            {policy()}
-        </FieldStack>
+        <WorkbenchRail
+            props={{
+                className: SALES_FIELD_STACK_CLASS_NAME,
+                scopeLabel: t("rail.scope"),
+                scope: <ScopeLine scopeReady={scopeReady} scopeStanding={scopeStanding} t={t} />,
+                beforeNotice: wait(),
+                noticeLabel: t("rail.notice"),
+                noticeEmpty: t("rail.noticeEmpty"),
+                notice: notice === null ? null : <StatusNotice notice={notice} />,
+                afterNotice: (
+                    <>
+                        {installation()}
+                        {policy()}
+                    </>
+                ),
+            }}
+        />
     )
 
     const primary = () => (

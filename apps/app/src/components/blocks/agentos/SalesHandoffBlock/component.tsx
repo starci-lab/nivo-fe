@@ -19,6 +19,7 @@ import {
     type SalesSurfaceStanding,
     type SalesTranslation,
 } from "@/modules/sales/sales-workbench"
+import { WorkbenchRail } from "../WorkbenchRail"
 import {
     SALES_HANDOFF_ACTION_ROW_CLASS_NAME,
     SALES_HANDOFF_CLASS_NAME,
@@ -305,25 +306,23 @@ export const SalesHandoffBlockBase = (props: SalesHandoffBlockProps) => {
     )
 
     const rail = () => (
-        <FieldStack>
-            <SurfaceCard label={t("rail.scope")}>
-                <FieldStack>
-                    <ScopeLine scopeReady={scopeReady} scopeStanding={scopeStanding} t={t} />
-                    <Text size="xs" tone="muted">
-                        {t("rail.installation", { workspace: scopeWorkspace, installation: scopeInstallation })}
-                    </Text>
-                </FieldStack>
-            </SurfaceCard>
-            <SurfaceCard label={t("rail.notice")}>
-                {notice === null ? (
-                    <Text size="xs" tone="muted">
-                        {t("rail.noticeEmpty")}
-                    </Text>
-                ) : (
-                    <StatusNotice notice={notice} />
-                )}
-            </SurfaceCard>
-        </FieldStack>
+        <WorkbenchRail
+            props={{
+                className: SALES_HANDOFF_FIELD_STACK_CLASS_NAME,
+                scopeLabel: t("rail.scope"),
+                scope: (
+                    <FieldStack>
+                        <ScopeLine scopeReady={scopeReady} scopeStanding={scopeStanding} t={t} />
+                        <Text size="xs" tone="muted">
+                            {t("rail.installation", { workspace: scopeWorkspace, installation: scopeInstallation })}
+                        </Text>
+                    </FieldStack>
+                ),
+                noticeLabel: t("rail.notice"),
+                noticeEmpty: t("rail.noticeEmpty"),
+                notice: notice === null ? null : <StatusNotice notice={notice} />,
+            }}
+        />
     )
 
     const primary = () => (

@@ -80,7 +80,12 @@ export const AgentOSModuleStudioPageBase = (props: AgentOSModuleStudioPageBasePr
                         <div>
                             {[
                                 <AgentOSModuleProfile key="item-0" workspaceId={workspaceId} moduleId={moduleId} />,
-                                <AgentOSModuleAttachments key="item-1" workspaceId={workspaceId} moduleId={moduleId} />,
+                                <AgentOSModuleAttachments
+                                    key="item-1"
+                                    scope="studio"
+                                    workspaceId={workspaceId}
+                                    moduleId={moduleId}
+                                />,
                             ]}
                         </div>
                     }

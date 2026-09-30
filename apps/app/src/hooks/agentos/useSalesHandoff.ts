@@ -1,6 +1,6 @@
 "use client"
 
-import { useRef, useState } from "react"
+import { useState } from "react"
 import type { SalesHandoffValue, SalesInstallationScope, SalesSubmitHandoffRequest } from "@/modules/api/sales"
 import { nivoQueryPayload } from "@/modules/query"
 import { useQueryMyAgentWorkspaceControlCenterSwr } from "@/hooks/swr/queries/useQueryMyAgentWorkspaceControlCenterSwr"
@@ -10,11 +10,11 @@ import {
     salesRefusalKey,
     salesSurfaceStanding,
     type SalesAnswerStanding,
-    type SalesNotice,
     type SalesSurfaceStanding,
     type SalesTranslation,
 } from "@/modules/sales/sales-workbench"
 import { parseSalesHandoffValue } from "@/modules/api/sales/payload.guards"
+import { useWorkbenchCommand } from "./useWorkbenchCommand"
 
 /*
  * The connected handoff surface (impl.sales.nivo-fe.handoff-view).
@@ -32,19 +32,6 @@ import { parseSalesHandoffValue } from "@/modules/api/sales/payload.guards"
  * NO PRESS CLAIMS AN EFFECT BY ITSELF. The outcome the surface shows is read out of `sales.handoff@1`
  * for the same identity, never out of the press.
  */
-
-/*
- * A submission identity that is unique without inventing randomness: the platform's own UUID when the
- * runtime has one, otherwise a monotonic fallback - an identity only has to be distinct, and a counter
- * is distinct within this module's life.
- */
-let submissionSequence = 0
-const submissionRequestId = (): string => {
-    const uuid = globalThis.crypto?.randomUUID?.()
-    if (uuid !== undefined) return uuid
-    submissionSequence += 1
-    return `submission-${Date.now()}-${submissionSequence}`
-}
 
 /** The statuses whose attempt may already have started; after them only the same identity is looked up. */
 const LOOKUP_ONLY_STATUSES: ReadonlySet<string> = new Set(["possible-start", "outcome-unknown"])
@@ -96,9 +83,6 @@ const scopeStandingFor = (
     return standing === "empty" ? "unavailable" : standing
 }
 
-/** One exact submission's stable request identity, kept until that submission is delivered. */
-type Intent = { readonly fingerprint: string; readonly token: string }
-
 /** Own submission form state, the resolved installation scope, one idempotent submission and its readback-settled notice. */
 export const useSalesHandoff = (workspaceId: string, installationId: string, t: SalesTranslation) => {
     const controlCenter = useQueryMyAgentWorkspaceControlCenterSwr(workspaceId, workspaceId.length > 0)
@@ -108,11 +92,15 @@ export const useSalesHandoff = (workspaceId: string, installationId: string, t: 
     const addressable = scope ?? { workspaceId: "", instanceId: "", installationId }
     const ready = scope !== null
 
-    const [notice, setNotice] = useState<SalesNotice | null>(null)
     const [handoffId, setHandoffId] = useState("")
     const [fingerprint, setFingerprint] = useState("")
     const [expectedRevision, setExpectedRevision] = useState("")
-    const intents = useRef<Record<string, Intent>>({})
+    const command = useWorkbenchCommand({
+        refusal: (code, reason) => t(salesRefusalKey(code), { reason }),
+        unsettled: t("refusal.unsettled"),
+        unreachable: t("refusal.unreachable"),
+        acceptsFailedAnswer: (code) => code === "outcome_unknown" || code === "DEADLINE_EXCEEDED",
+    })
 
     const handoff = useQuerySalesHandoffSwr(addressable, { handoffId }, named(ready, handoffId))
     const submitHandoff = useMutateSalesSubmitHandoffSwr(addressable, ready)
@@ -129,15 +117,6 @@ export const useSalesHandoff = (workspaceId: string, installationId: string, t: 
         revision,
     )
 
-    const intentFor = (key: string, value: unknown): string => {
-        const valueFingerprint = JSON.stringify(value)
-        const prior = intents.current[key]
-        if (prior?.fingerprint === valueFingerprint) return prior.token
-        const token = submissionRequestId()
-        intents.current[key] = { fingerprint: valueFingerprint, token }
-        return token
-    }
-
     /** Submit the prepared handoff once, then let the readback of the same handoff decide what may be claimed. */
     const onSubmit = () => {
         if (!submissionAddressable || model === null || revision === null) return
@@ -147,32 +126,18 @@ export const useSalesHandoff = (workspaceId: string, installationId: string, t: 
             fingerprint,
             expectedHandoffRevision: revision,
         }
-        void (async () => {
-            setNotice(null)
-            try {
-                const answer = (await submitHandoff.trigger({
-                    requestId: intentFor("submission", input),
-                    input,
-                }))
-                if (!answer.ok && answer.code !== "outcome_unknown" && answer.code !== "DEADLINE_EXCEEDED") {
-                    setNotice({
-                        kind: "refused",
-                        message: t(salesRefusalKey(answer.code ?? ""), { reason: answer.reason ?? "" }),
-                    })
-                    return
-                }
-                const settled = await handoff.mutate()
+        void command.settle({
+            key: "submission",
+            value: input,
+            press: (requestId) => submitHandoff.trigger({ requestId, input }),
+            readback: () => handoff.mutate(),
+            describe: (settled) => {
                 const settledStatus = payloadState(settled)?.status
-                if (settledStatus === undefined || settledStatus === "prepared") {
-                    setNotice({ kind: "refused", message: t("refusal.unsettled") })
-                    return
-                }
-                delete intents.current["submission"]
-                setNotice({ kind: "success", message: t("submission.settled", { status: settledStatus }) })
-            } catch {
-                setNotice({ kind: "refused", message: t("refusal.unreachable") })
-            }
-        })()
+                return settledStatus === undefined || settledStatus === "prepared"
+                    ? null
+                    : { kind: "success", message: t("submission.settled", { status: settledStatus }) }
+            },
+        })
     }
 
     /*
@@ -188,7 +153,7 @@ export const useSalesHandoff = (workspaceId: string, installationId: string, t: 
         scopeInstallation: installationId,
         scopeReady: ready,
         scopeStanding,
-        notice,
+        notice: command.notice,
         handoff: {
             standing: regionStanding(handoff.data, model !== null),
             model,
@@ -203,7 +168,7 @@ export const useSalesHandoff = (workspaceId: string, installationId: string, t: 
             setFingerprint,
             expectedRevision,
             setExpectedRevision,
-            isSubmitting: submitHandoff.isMutating,
+            isSubmitting: submitHandoff.isMutating || command.isPending("submission"),
             addressable: submissionAddressable,
             lookupOnly: mayLookupOnly,
             onSubmit,

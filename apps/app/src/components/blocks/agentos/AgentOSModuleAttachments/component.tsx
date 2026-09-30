@@ -1,18 +1,16 @@
 import { useState } from "react"
 import { Button, FileDropzone, SurfaceCard, Text } from "@starci/grammar/common"
-import { LifecycleStep, type LifecycleStepData } from "@nivo/ui"
+import { LifecycleStep, QueryNoticeView, type LifecycleStepData, type QueryNoticeViewData } from "@nivo/ui"
 import type { AgentosModuleStudio } from "@/modules/api/agentos-module-studio"
 
-/** Attachment lifecycle rows and their bounded upload/removal actions. */
-export type AgentOSModuleAttachmentsProps = AgentOSModuleAttachmentsViewProps
-/** Resolved attachment copy; the chunk counter is a function, so it rides in `on`. */
+/** Resolved copy for the shared attachment lifecycle. */
 export type AgentOSModuleAttachmentsLabels = {
     readonly title: string
     readonly upload: string
     readonly retry?: string
     readonly remove: string
     readonly refused: string
-    readonly empty: string
+    readonly empty?: string
     readonly uploaded: string
     readonly scanning: string
     readonly extracting: string
@@ -25,41 +23,52 @@ export type AgentOSModuleAttachmentsLabels = {
     readonly refusedStatus: string
     readonly removed: string
 }
-/** Data the pure attachments surface draws. */
-export type AgentOSModuleAttachmentsData = {
-    readonly studio?: Pick<AgentosModuleStudio, "attachments">
-    readonly pending: boolean
-    readonly labels: AgentOSModuleAttachmentsLabels
-}
-/** Bounded upload/removal actions plus the chunk-count renderer. */
-export type AgentOSModuleAttachmentsActions = {
-    readonly onChoose: (file: File) => void
-    readonly onRetry?: (id: string) => void
-    readonly onRemove: (id: string) => void
-    readonly chunks: (count: number) => string
-}
-/** Public API role for AgentOSModuleAttachmentsViewProps. */
+
+/** Data and actions drawn by the one studio and solution attachment surface. */
 export type AgentOSModuleAttachmentsViewProps = {
-    readonly state: "loading" | "refused" | "ready"
-    readonly props: AgentOSModuleAttachmentsData
-    readonly on: AgentOSModuleAttachmentsActions
+    readonly state: "attachments"
+    readonly props: {
+        readonly studio?: Pick<AgentosModuleStudio, "attachments">
+        readonly status: "loading" | "refused" | "failed" | "ready"
+        readonly notice?: QueryNoticeViewData
+        readonly pending: boolean
+        readonly labels: AgentOSModuleAttachmentsLabels
+    }
+    readonly on: {
+        readonly onChoose: (file: File) => void
+        readonly onRetry?: (id: string) => void
+        readonly onRemove: (id: string) => void
+        readonly onRetryNotice?: () => void
+        readonly chunks: (count: number) => string
+    }
 }
+
 const lifecycleState = (index: number, active: number): LifecycleStepData["state"] => {
     if (index < active) return "done"
     return index === active ? "current" : "upcoming"
 }
+
 const lifecycleStateLabel = (index: number, active: number, labels: AgentOSModuleAttachmentsLabels): string => {
     if (index < active) return labels.complete
     return index === active ? labels.current : labels.upcoming
 }
 
-/** Draw quarantined file evidence with explicit scan outcomes. */
-export const AgentOSModuleAttachmentsBase = (props: AgentOSModuleAttachmentsProps) => {
-    const { state } = props
-    const { studio, pending, labels }: AgentOSModuleAttachmentsData = props.props
-    const { onChoose, onRetry, onRemove, chunks }: AgentOSModuleAttachmentsActions = props.on
+/** Draw quarantined file evidence with explicit scan outcomes for both module scopes. */
+export const AgentOSModuleAttachmentsBase = (props: AgentOSModuleAttachmentsViewProps) => {
+    const { studio, status, notice, pending, labels } = props.props
+    const { onChoose, onRetry, onRemove, onRetryNotice, chunks } = props.on
     const [filePickerRevision, setFilePickerRevision] = useState(0)
-    if (state === "refused")
+    if (status === "failed")
+        return (
+            <SurfaceCard label={labels.title}>
+                <div>
+                    {notice === undefined || onRetryNotice === undefined ? null : (
+                        <QueryNoticeView props={notice} on={{ retry: onRetryNotice }} />
+                    )}
+                </div>
+            </SurfaceCard>
+        )
+    if (status === "refused")
         return (
             <SurfaceCard label={labels.title}>
                 <div>
@@ -70,7 +79,7 @@ export const AgentOSModuleAttachmentsBase = (props: AgentOSModuleAttachmentsProp
             </SurfaceCard>
         )
     const rows =
-        state === "loading"
+        status === "loading"
             ? [
                   {
                       id: "loading",
@@ -123,10 +132,10 @@ export const AgentOSModuleAttachmentsBase = (props: AgentOSModuleAttachmentsProp
                         <div key={file.id}>
                             <div>
                                 <div>
-                                    <Text size="sm" weight="semibold" isSkeleton={state === "loading"}>
+                                    <Text size="sm" weight="semibold" isSkeleton={status === "loading"}>
                                         {file.fileName}
                                     </Text>
-                                    <Text size="xs" tone="muted" isSkeleton={state === "loading"}>
+                                    <Text size="xs" tone="muted" isSkeleton={status === "loading"}>
                                         {caption}
                                     </Text>
                                 </div>
@@ -144,7 +153,7 @@ export const AgentOSModuleAttachmentsBase = (props: AgentOSModuleAttachmentsProp
                                         variant="ghost"
                                         size="sm"
                                         isDisabled={pending}
-                                        isSkeleton={state === "loading"}
+                                        isSkeleton={status === "loading"}
                                         onPress={() => onRemove(file.id)}
                                     >
                                         {labels.remove}
@@ -153,29 +162,26 @@ export const AgentOSModuleAttachmentsBase = (props: AgentOSModuleAttachmentsProp
                             </div>
                             <div>
                                 {stages.map((step) => (
-                                    <LifecycleStep key={step.ordinal} props={step} isLoading={state === "loading"} />
+                                    <LifecycleStep key={step.ordinal} props={step} isLoading={status === "loading"} />
                                 ))}
                             </div>
                         </div>
                     )
                 })}
-
-                <>
-                    <FileDropzone
-                        key={filePickerRevision}
-                        accept=".pdf,.docx,.txt,.md,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain,text/markdown"
-                        label={labels.upload}
-                        isLabelHidden
-                        prompt={labels.upload}
-                        hideFileList
-                        isDisabled={pending}
-                        onFilesChange={(files) => {
-                            const file = files[0]
-                            if (file !== undefined) onChoose(file)
-                            setFilePickerRevision((revision) => revision + 1)
-                        }}
-                    />
-                </>
+                <FileDropzone
+                    key={filePickerRevision}
+                    accept=".pdf,.docx,.txt,.md,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain,text/markdown"
+                    label={labels.upload}
+                    isLabelHidden
+                    prompt={labels.upload}
+                    hideFileList
+                    isDisabled={pending}
+                    onFilesChange={(files) => {
+                        const file = files[0]
+                        if (file !== undefined) onChoose(file)
+                        setFilePickerRevision((revision) => revision + 1)
+                    }}
+                />
             </div>
         </SurfaceCard>
     )

@@ -1,6 +1,6 @@
 "use client"
 
-import { useRef, useState } from "react"
+import { useState } from "react"
 import { useParams } from "next/navigation"
 import { useFormatter } from "next-intl"
 import type {
@@ -41,10 +41,10 @@ import {
     formatAccountingMinor,
     formatAccountingPeriod,
     type AccountingAnswerStanding,
-    type AccountingNotice,
     type AccountingSurfaceStanding,
     type AccountingTranslation,
 } from "@/modules/accounting/accounting-workbench"
+import { useWorkbenchCommand } from "./useWorkbenchCommand"
 
 /*
  * The connected Accounting workbench (impl.accounting.nivo-fe.workbench-view).
@@ -65,8 +65,6 @@ import {
  * replays, so an unchanged press re-sent after a transport failure stays one intent rather than two.
  */
 
-const requestId = () =>
-    globalThis.crypto?.randomUUID?.() ?? `request-${Date.now()}-${Math.random().toString(36).slice(2)}`
 const PAGE_SIZE = 20
 
 /** The closed Accounting response the settlement flow receives from a command or readback. */
@@ -105,9 +103,6 @@ const CORRECTION_STATE_KEYS = {
 const mappedState = (mapping: Readonly<Partial<Record<string, string>>>, state: string): string | undefined =>
     mapping[state]
 
-/** One exact input's stable request identity, kept until that input is delivered. */
-type Intent = { readonly fingerprint: string; readonly token: string }
-
 /** Own Accounting form state, the resolved installation scope, idempotent intents and readback-settled feedback. */
 export const useAccountingWorkbench = (moduleId: string, locale: string, t: AccountingTranslation) => {
     const format = useFormatter()
@@ -124,7 +119,6 @@ export const useAccountingWorkbench = (moduleId: string, locale: string, t: Acco
     const addressable = scope ?? { workspaceId: "", instanceId: "", installationId: routeInstallationId }
     const ready = scope !== null
 
-    const [notice, setNotice] = useState<AccountingNotice | null>(null)
     const [periodMonth, setPeriodMonth] = useState(() => accountingUtcMonth(new Date()))
     const [currency, setCurrency] = useState<string | null>(null)
     const [cursor, setCursor] = useState<string | null>(null)
@@ -158,7 +152,12 @@ export const useAccountingWorkbench = (moduleId: string, locale: string, t: Acco
     const [correctionEvidenceRefs, setCorrectionEvidenceRefs] = useState("")
     const [correctionRevision, setCorrectionRevision] = useState("0")
     const [appendAttemptId, setAppendAttemptId] = useState("")
-    const intents = useRef<Record<string, Intent>>({})
+    const workbenchCommand = useWorkbenchCommand({
+        refusal: (code, reason) => t(accountingRefusalKey(code), { reason }),
+        unsettled: t("refusal.unsettled"),
+        unreachable: t("refusal.unreachable"),
+        acceptsFailedAnswer: (code) => code === "outcome_unknown",
+    })
 
     /* An unusable month control keeps the last usable period rather than reading a period nobody chose. */
     const period = accountingMonthPeriod(periodMonth) ?? accountingMonthPeriod(accountingUtcMonth(new Date()))
@@ -197,42 +196,6 @@ export const useAccountingWorkbench = (moduleId: string, locale: string, t: Acco
     const detailModel = detail.data?.ok === true ? parseAccountingResultDetailReading(detail.data.data.payload) : null
     const correctionModel = correction.data?.ok === true ? parseAccountingCorrectionReading(correction.data.data.payload) : null
 
-    const intentFor = (key: string, value: unknown): string => {
-        const valueFingerprint = JSON.stringify(value)
-        const prior = intents.current[key]
-        if (prior?.fingerprint === valueFingerprint) return prior.token
-        const token = requestId()
-        intents.current[key] = { fingerprint: valueFingerprint, token }
-        return token
-    }
-    const settle = async (
-        key: string,
-        command: () => Promise<CommandAnswer>,
-        readback: (() => Promise<CommandAnswer | undefined>) | null,
-        describe: (answer: CommandAnswer) => string | null,
-    ): Promise<void> => {
-        setNotice(null)
-        try {
-            const answer = await command()
-            if (!answer.ok && answer.code !== "outcome_unknown") {
-                setNotice({
-                    kind: "refused",
-                    message: t(accountingRefusalKey(answer.code ?? ""), { reason: answer.reason ?? "" }),
-                })
-                return
-            }
-            const settled = readback === null ? answer : await readback()
-            const confirmed = settled?.ok ? describe(settled) : null
-            if (confirmed === null) {
-                setNotice({ kind: "refused", message: t("refusal.unsettled") })
-                return
-            }
-            delete intents.current[key]
-            setNotice({ kind: "success", message: confirmed })
-        } catch {
-            setNotice({ kind: "refused", message: t("refusal.unreachable") })
-        }
-    }
     const evidenceStateText = (answer: CommandAnswer): string | null => {
         const state = payloadState(answer)?.state
         return state === undefined
@@ -254,6 +217,8 @@ export const useAccountingWorkbench = (moduleId: string, locale: string, t: Acco
                   result: payload.resultId ?? t("none"),
               })
     }
+    const success = (message: string | null) =>
+        message === null ? null : { kind: "success" as const, message }
 
     const onAdmit = () => {
         if (
@@ -273,16 +238,14 @@ export const useAccountingWorkbench = (moduleId: string, locale: string, t: Acco
             fingerprint,
             expectedRevision: Number(intakeRevision),
         }
-        void settle(
-            `admit-${evidenceId}`,
-            () =>
-                admit.trigger({
-                    requestId: intentFor(`admit-${evidenceId}`, value),
-                    input: value,
-                }),
-            () => evidence.mutate(),
-            evidenceStateText,
-        )
+        const key = `admit-${evidenceId}`
+        void workbenchCommand.settle({
+            key,
+            value,
+            press: (requestId) => admit.trigger({ requestId, input: value }),
+            readback: () => evidence.mutate(),
+            describe: (answer) => success(evidenceStateText(answer)),
+        })
     }
     const onCommitRoutine = () => {
         if (!ready || intentId.length === 0 || itemId.length === 0 || policyRevision.length === 0) return
@@ -297,16 +260,14 @@ export const useAccountingWorkbench = (moduleId: string, locale: string, t: Acco
             policyRevision,
             expectedItemRevision: Number(itemRevision),
         }
-        void settle(
-            `routine-${intentId}`,
-            () =>
-                routineCommand.trigger({
-                    requestId: intentFor(`routine-${intentId}`, value),
-                    input: value,
-                }),
-            () => routine.mutate(),
-            routineStateText,
-        )
+        const key = `routine-${intentId}`
+        void workbenchCommand.settle({
+            key,
+            value,
+            press: (requestId) => routineCommand.trigger({ requestId, input: value }),
+            readback: () => routine.mutate(),
+            describe: (answer) => success(routineStateText(answer)),
+        })
     }
     const onRetryRoutine = () => {
         if (
@@ -318,16 +279,14 @@ export const useAccountingWorkbench = (moduleId: string, locale: string, t: Acco
         )
             return
         const value = { action: "retry" as const, intentId, oldAttemptId, notStartedProofRef, newAttemptId }
-        void settle(
-            `routine-retry-${intentId}`,
-            () =>
-                routineCommand.trigger({
-                    requestId: intentFor(`routine-retry-${intentId}`, value),
-                    input: value,
-                }),
-            () => routine.mutate(),
-            routineStateText,
-        )
+        const key = `routine-retry-${intentId}`
+        void workbenchCommand.settle({
+            key,
+            value,
+            press: (requestId) => routineCommand.trigger({ requestId, input: value }),
+            readback: () => routine.mutate(),
+            describe: (answer) => success(routineStateText(answer)),
+        })
     }
     const questionEvidence = questionEvidenceRefs
         .split(",")
@@ -341,16 +300,14 @@ export const useAccountingWorkbench = (moduleId: string, locale: string, t: Acco
             reason: questionReason,
             expectedRevision: Number(exceptionRevision),
         }
-        void settle(
-            `exception-${action}-${exceptionId}`,
-            () =>
-                exceptionCommand.trigger({
-                    requestId: intentFor(`exception-${action}-${exceptionId}`, value),
-                    input: value,
-                }),
-            intentId.length > 0 ? () => routine.mutate() : null,
-            routineStateText,
-        )
+        const key = `exception-${action}-${exceptionId}`
+        void workbenchCommand.settle({
+            key,
+            value,
+            press: (requestId) => exceptionCommand.trigger({ requestId, input: value }),
+            readback: intentId.length > 0 ? () => routine.mutate() : null,
+            describe: (answer) => success(routineStateText(answer)),
+        })
     }
     const onAnswerQuestion = () => {
         if (!ready || exceptionId.length === 0 || (choiceCode.length === 0 && questionReason.length === 0)) return
@@ -365,16 +322,14 @@ export const useAccountingWorkbench = (moduleId: string, locale: string, t: Acco
             answerEvidenceRefs: questionEvidence,
             expectedRevision: Number(exceptionRevision),
         }
-        void settle(
-            `exception-answer-${exceptionId}`,
-            () =>
-                exceptionCommand.trigger({
-                    requestId: intentFor(`exception-answer-${exceptionId}`, value),
-                    input: value,
-                }),
-            intentId.length > 0 ? () => routine.mutate() : null,
-            routineStateText,
-        )
+        const key = `exception-answer-${exceptionId}`
+        void workbenchCommand.settle({
+            key,
+            value,
+            press: (requestId) => exceptionCommand.trigger({ requestId, input: value }),
+            readback: intentId.length > 0 ? () => routine.mutate() : null,
+            describe: (answer) => success(routineStateText(answer)),
+        })
     }
     const onLoadDetail = () => {
         if (ready) void detail.mutate()
@@ -440,16 +395,14 @@ export const useAccountingWorkbench = (moduleId: string, locale: string, t: Acco
                 .filter((entry) => entry.length > 0),
             expectedResultRevision: Number(correctionRevision),
         }
-        void settle(
-            `correct-${correctionId}`,
-            () =>
-                correction.trigger({
-                    requestId: intentFor(`correct-${correctionId}`, value),
-                    input: value,
-                }),
-            () => detail.mutate(),
-            correctionStateText,
-        )
+        const key = `correct-${correctionId}`
+        void workbenchCommand.settle({
+            key,
+            value,
+            press: (requestId) => correction.trigger({ requestId, input: value }),
+            readback: () => detail.mutate(),
+            describe: (answer) => success(correctionStateText(answer)),
+        })
     }
     const onAppendCorrection = () => {
         if (!ready || correctionId.length === 0 || appendAttemptId.length === 0) return
@@ -459,16 +412,14 @@ export const useAccountingWorkbench = (moduleId: string, locale: string, t: Acco
             attemptId: appendAttemptId,
             expectedRevision: Number(correctionRevision),
         }
-        void settle(
-            `correct-append-${correctionId}`,
-            () =>
-                correction.trigger({
-                    requestId: intentFor(`correct-append-${correctionId}`, value),
-                    input: value,
-                }),
-            () => detail.mutate(),
-            correctionStateText,
-        )
+        const key = `correct-append-${correctionId}`
+        void workbenchCommand.settle({
+            key,
+            value,
+            press: (requestId) => correction.trigger({ requestId, input: value }),
+            readback: () => detail.mutate(),
+            describe: (answer) => success(correctionStateText(answer)),
+        })
     }
 
     const attention =
@@ -493,7 +444,7 @@ export const useAccountingWorkbench = (moduleId: string, locale: string, t: Acco
         setAsOfDraft,
         asOf,
         setAsOf,
-        notice,
+        notice: workbenchCommand.notice,
         overview: {
             standing: ready ? accountingSurfaceStanding(summary.data, summaryModel !== null) : scopeStanding,
             model: summaryModel,
@@ -519,7 +470,7 @@ export const useAccountingWorkbench = (moduleId: string, locale: string, t: Acco
             setIntakeRevision,
             model: evidenceModel,
             admit,
-            isAdmitting: admit.isMutating,
+            isAdmitting: admit.isMutating || workbenchCommand.isPending(`admit-${evidenceId}`),
             onAdmit,
             reload: () => void evidence.mutate(),
         },
@@ -542,7 +493,10 @@ export const useAccountingWorkbench = (moduleId: string, locale: string, t: Acco
             newAttemptId,
             setNewAttemptId,
             model: routineModel,
-            isCommitting: routineCommand.isMutating,
+            isCommitting:
+                routineCommand.isMutating ||
+                workbenchCommand.isPending(`routine-${intentId}`) ||
+                workbenchCommand.isPending(`routine-retry-${intentId}`),
             onCommitRoutine,
             onRetryRoutine,
             reload: () => void routine.mutate(),
@@ -568,7 +522,13 @@ export const useAccountingWorkbench = (moduleId: string, locale: string, t: Acco
                 exceptionCommand.data?.ok === true
                     ? parseAccountingExceptionReading(exceptionCommand.data.data.payload)
                     : null,
-            isAnswering: exceptionCommand.isMutating,
+            isAnswering:
+                exceptionCommand.isMutating ||
+                workbenchCommand.isPending(`exception-answer-${exceptionId}`) ||
+                workbenchCommand.isPending(`exception-defer-${exceptionId}`) ||
+                workbenchCommand.isPending(`exception-reopen-${exceptionId}`) ||
+                workbenchCommand.isPending(`exception-escalate-${exceptionId}`) ||
+                workbenchCommand.isPending(`exception-dismiss-${exceptionId}`),
             onAnswer: onAnswerQuestion,
             onDefer: () => exceptionAction("defer"),
             onReopen: () => exceptionAction("reopen"),
@@ -616,7 +576,10 @@ export const useAccountingWorkbench = (moduleId: string, locale: string, t: Acco
             setAppendAttemptId,
             model: correctionModel,
             predecessor: detailModel?.resultId === predecessorResultId ? detailModel : null,
-            isCorrecting: correction.isMutating,
+            isCorrecting:
+                correction.isMutating ||
+                workbenchCommand.isPending(`correct-${correctionId}`) ||
+                workbenchCommand.isPending(`correct-append-${correctionId}`),
             onPropose: onProposeCorrection,
             onAppend: onAppendCorrection,
             reload: () => void detail.mutate(),
