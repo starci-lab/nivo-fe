@@ -1,15 +1,5 @@
 import { describe, expect, it } from "vitest"
-import { failed, failedWith, failureKindOfCode, failureKindOfStatus } from "./outcome"
-
-describe("failureKindOfStatus", () => {
-    it("names the kind each HTTP status states, and never folds one into another", () => {
-        expect(failureKindOfStatus(401)).toBe("refused")
-        expect(failureKindOfStatus(403)).toBe("forbidden")
-        expect(failureKindOfStatus(404)).toBe("not-found")
-        for (const status of [400, 409, 410, 422]) expect(failureKindOfStatus(status)).toBe("invalid")
-        for (const status of [408, 429, 500, 502, 503, 504]) expect(failureKindOfStatus(status)).toBe("unavailable")
-    })
-})
+import { failed, failedWith, failureKindOfCode } from "./outcome"
 
 describe("failureKindOfCode", () => {
     it("reads the kind from the words the operation code is built from", () => {

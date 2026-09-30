@@ -191,7 +191,6 @@ export { usePathname } from "./i18n/usePathname"
 export { useRouter } from "./i18n/useRouter"
 export { useNow } from "./time/useNow"
 
-export { useCollabTransportFrom } from "./api/useCollabTransportFrom"
 
 export { OverviewDataProvider, useOverviewData } from "./overview/useOverviewData"
 export type { OverviewAnswer, OverviewDataProviderData, OverviewDataProviderProps } from "./overview/useOverviewData"

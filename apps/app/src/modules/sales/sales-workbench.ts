@@ -1,5 +1,5 @@
 import { type Outcome } from "@nivo/api"
-import type { SalesActionValue, SalesPipelineItem, SalesRequestedAction } from "@/modules/api/sales"
+import type { SalesActionValue, SalesRequestedAction } from "@/modules/api/sales"
 import type { Formatter } from "@/modules/i18n/formatter"
 
 /** The values one Sales copy key interpolates; the surface passes only already-worded text. */
@@ -11,17 +11,6 @@ type TranslationValues = Readonly<Record<string, string | number | undefined>>
  * opens. Nothing here reads the wire - each function takes what a read already disclosed and answers
  * a question the render half asks.
  */
-
-/** The Sales surfaces this route draws: the operatable surface and the six detail regions it discloses. */
-const SALES_SURFACES = [
-    "opportunity-attention",
-    "boss-command-history",
-    "autonomous-routine-history",
-    "customer-wait-detail",
-    "failure-recovery-detail",
-    "ambiguity-clarification",
-    "won-lost-closure-detail",
-] as const
 
 /** What one surface's read settled into, in the terms the block renders. */
 export type SalesSurfaceStanding = "loading" | "denied" | "unavailable" | "empty" | "ready"

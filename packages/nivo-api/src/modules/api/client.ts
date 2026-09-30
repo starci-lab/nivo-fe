@@ -12,7 +12,7 @@
  * ONE CALL IS ONE REQUEST. Nothing here retries. A caller whose operation is idempotent by identity
  * decides to send it again.
  */
-import { failed, failureKindOfStatus, type Failure, type Outcome } from "./outcome"
+import { failed, type Failure, type FailureKind, type Outcome } from "../../outcome"
 
 /** How long one request may take before it is abandoned as unavailable. */
 export const DEFAULT_TIMEOUT_MS = 30_000
@@ -55,6 +55,20 @@ export type WireFailureDetail = {
 /** The answer of one exchange. */
 export type WireOutcome = Outcome<WireReply, WireFailureDetail>
 
+/**
+ * Which kind an HTTP status is. 2xx is not a failure and never reaches here.
+ *
+ * @param status - The reply status.
+ * @returns The failure kind that status states.
+ */
+export const failureKindOfStatus = (status: number): FailureKind => {
+    if (status === 401) return "refused"
+    if (status === 403) return "forbidden"
+    if (status === 404) return "not-found"
+    if (status >= 400 && status < 500 && status !== 408 && status !== 429) return "invalid"
+    return "unavailable"
+}
+
 const failure = (
     kind: Parameters<typeof failed>[0],
     status: number | null,
@@ -77,7 +91,8 @@ const readJson = async (
     response: Response,
 ): Promise<{ readonly parsed: true; readonly body: unknown } | { readonly parsed: false }> => {
     try {
-        return { parsed: true, body: (await response.json()) as unknown }
+        const body: unknown = await response.json()
+        return { parsed: true, body }
     } catch {
         return { parsed: false }
     }
@@ -90,46 +105,36 @@ const readJson = async (
  * @returns The reply of a 2xx answer, or the typed failure of anything else.
  */
 export const send = async (request: WireRequest): Promise<WireOutcome> => {
-    const controller = new AbortController()
-    let timedOut = false
-    const timer = setTimeout(() => {
-        timedOut = true
-        controller.abort()
-    }, request.timeoutMs ?? DEFAULT_TIMEOUT_MS)
-    const forwardAbort = () => controller.abort()
-    request.signal?.addEventListener("abort", forwardAbort)
-    if (request.signal?.aborted === true) controller.abort()
+    // The deadline is the platform's own timeout signal, so nothing here holds a timer that must be
+    // cleared; the caller's signal (an unmounted page, a superseded read) races it.
+    const deadline = AbortSignal.timeout(request.timeoutMs ?? DEFAULT_TIMEOUT_MS)
+    const signal = request.signal === undefined ? deadline : AbortSignal.any([request.signal, deadline])
+    let response: Response
     try {
-        let response: Response
-        try {
-            response = await fetch(request.url, {
-                method: request.method,
-                credentials: request.credentials,
-                headers: headersOf(request),
-                body: request.json === undefined ? request.body : JSON.stringify(request.json),
-                signal: controller.signal,
-                ...(request.revalidate === undefined ? {} : { next: { revalidate: request.revalidate } }),
-            })
-        } catch {
-            if (timedOut) return failure("unavailable", null, "TIMEOUT", "timeout", null)
-            if (request.signal?.aborted === true) return failure("unavailable", null, "ABORTED", "aborted", null)
-            return failure("unavailable", null, "NETWORK", "network", null)
-        }
-        const parsed = request.reply === "none" ? { parsed: true as const, body: null } : await readJson(response)
-        const body = parsed.parsed ? parsed.body : null
-        if (response.status < 200 || response.status >= 300) {
-            return failure(
-                failureKindOfStatus(response.status),
-                response.status,
-                `HTTP_${response.status}`,
-                `http:${response.status}`,
-                body,
-            )
-        }
-        if (!parsed.parsed) return failure("unavailable", response.status, "MALFORMED", "malformed", null)
-        return { ok: true, data: { status: response.status, body } }
-    } finally {
-        clearTimeout(timer)
-        request.signal?.removeEventListener("abort", forwardAbort)
+        response = await fetch(request.url, {
+            method: request.method,
+            credentials: request.credentials,
+            headers: headersOf(request),
+            body: request.json === undefined ? request.body : JSON.stringify(request.json),
+            signal,
+            ...(request.revalidate === undefined ? {} : { next: { revalidate: request.revalidate } }),
+        })
+    } catch {
+        if (deadline.aborted) return failure("unavailable", null, "TIMEOUT", "timeout", null)
+        if (request.signal?.aborted === true) return failure("unavailable", null, "ABORTED", "aborted", null)
+        return failure("unavailable", null, "NETWORK", "network", null)
     }
+    const parsed = request.reply === "none" ? { parsed: true as const, body: null } : await readJson(response)
+    const body = parsed.parsed ? parsed.body : null
+    if (response.status < 200 || response.status >= 300) {
+        return failure(
+            failureKindOfStatus(response.status),
+            response.status,
+            `HTTP_${response.status}`,
+            `http:${response.status}`,
+            body,
+        )
+    }
+    if (!parsed.parsed) return failure("unavailable", response.status, "MALFORMED", "malformed", null)
+    return { ok: true, data: { status: response.status, body } }
 }

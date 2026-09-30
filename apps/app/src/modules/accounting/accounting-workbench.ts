@@ -12,8 +12,6 @@ import type { Formatter } from "@/modules/i18n/formatter"
 type AccountingClassification = "income" | "expense" | "receivable" | "payable"
 /** The two distinguishable Accounting viewer roles. */
 type AccountingViewerRole = "owner" | "approver"
-/** The ledger row facts the correction tips are chosen from. */
-type AccountingLedgerEntry = { readonly id: string; readonly correctionOfId: string | null }
 /** The correction proposal facts the advisory controls are chosen from. */
 type AccountingCorrection = {
     readonly status: string
@@ -241,15 +239,6 @@ export const maskParticipantId = (userId: string): string =>
  * already named unknown, and a state arrives already closed.
  */
 
-/** The accepted Accounting workbench surfaces, in the order the page reads them. */
-const ACCOUNTING_SURFACES = [
-    "overview",
-    "source-intake",
-    "routine-progress",
-    "material-question",
-    "result-detail",
-    "forward-correction",
-] as const
 /** What one surface's read settled into, in the terms the block renders. */
 export type AccountingSurfaceStanding = "loading" | "denied" | "unavailable" | "empty" | "ready"
 /** One Accounting read's answer, as much of it as a standing depends on. */

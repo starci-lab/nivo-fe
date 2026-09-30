@@ -16,7 +16,7 @@ import {
     workspace,
     workspaceModules,
     workspaces,
-} from "./index"
+} from "./routes"
 
 describe("routes", () => {
     it("builds every console destination without a locale prefix", () => {

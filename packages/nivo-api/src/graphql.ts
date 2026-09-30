@@ -16,7 +16,7 @@
  */
 
 import { failed, failureKindOfCode, type Failure, type Outcome } from "./outcome"
-import { send } from "./transport"
+import { send } from "./modules/api/client"
 import { isRecord } from "./wire"
 
 /**

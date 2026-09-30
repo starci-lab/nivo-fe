@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
-import { DEFAULT_TIMEOUT_MS, send } from "./transport"
+import { DEFAULT_TIMEOUT_MS, failureKindOfStatus, send } from "./client"
 
 let fetchMock: ReturnType<typeof vi.fn>
 
@@ -22,7 +22,6 @@ beforeEach(() => {
 })
 
 afterEach(() => {
-    vi.useRealTimers()
     vi.unstubAllGlobals()
 })
 
@@ -115,10 +114,8 @@ describe("send", () => {
     })
 
     it("abandons a request that outlasts its deadline", async () => {
-        vi.useFakeTimers()
         fetchMock.mockImplementation(abortWhenSignalled)
-        const pending = send({ ...request, timeoutMs: 50 })
-        await vi.advanceTimersByTimeAsync(50)
+        const pending = send({ ...request, timeoutMs: 20 })
         expect(await pending).toMatchObject({ ok: false, kind: "unavailable", code: "TIMEOUT", status: null })
     })
 
@@ -143,5 +140,15 @@ describe("send", () => {
                 : Promise.resolve(reply(200, {})),
         )
         expect(await send({ ...request, signal: controller.signal })).toMatchObject({ ok: false, code: "ABORTED" })
+    })
+})
+
+describe("failureKindOfStatus", () => {
+    it("names the kind each HTTP status states, and never folds one into another", () => {
+        expect(failureKindOfStatus(401)).toBe("refused")
+        expect(failureKindOfStatus(403)).toBe("forbidden")
+        expect(failureKindOfStatus(404)).toBe("not-found")
+        for (const status of [400, 409, 410, 422]) expect(failureKindOfStatus(status)).toBe("invalid")
+        for (const status of [408, 429, 500, 502, 503, 504]) expect(failureKindOfStatus(status)).toBe("unavailable")
     })
 })

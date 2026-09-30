@@ -76,20 +76,6 @@ export const failedWith = <X extends object>(kind: FailureKind, input: FailureIn
     Object.assign(failed(kind, input), detail)
 
 /**
- * Which kind an HTTP status is. 2xx is not a failure and never reaches here.
- *
- * @param status - The reply status.
- * @returns The failure kind that status states.
- */
-export const failureKindOfStatus = (status: number): FailureKind => {
-    if (status === 401) return "refused"
-    if (status === 403) return "forbidden"
-    if (status === 404) return "not-found"
-    if (status >= 400 && status < 500 && status !== 408 && status !== 429) return "invalid"
-    return "unavailable"
-}
-
-/**
  * Which kind an operation's own refusal code states.
  *
  * The core API names a refusal by a code (`unauthenticated`, `offer-version-stale`,

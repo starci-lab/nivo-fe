@@ -1,10 +1,8 @@
-"use client"
-
 import useSWRMutation from "swr/mutation"
 import { useSWRConfig } from "swr"
 import { useAccessToken } from "../auth/useAccessToken"
 import type { MutationTrigger } from "./useAuthMutation"
-import { nivoViewerQueryKeyFor, viewerCacheKeyFor, type NivoQueryKey } from "./useNivoQuery"
+import { nivoViewerQueryKeyFor, viewerCacheKeyFor, type NivoQueryKey } from "./swr.shared"
 
 /** Product mutation identity before the signed-in viewer scope is attached. */
 export type NivoMutationKey = readonly [name: string, ...parts: ReadonlyArray<string | number | boolean | null>]

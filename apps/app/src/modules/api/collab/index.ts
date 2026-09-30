@@ -3,7 +3,7 @@ export type { CollabPostMessageOutcome } from "./commands"
 
 export { COLLAB_GATEWAY_COMMAND_FIELD, COLLAB_GATEWAY_READ_FIELD } from "./fields"
 export { collabOutcomeOfReply } from "./payload"
-export { collabGatewayTransport, setCollabTransport } from "./transport"
+export { collabGatewayTransport } from "./transport"
 export {
     openCollabOffice,
     readCollabGroup,

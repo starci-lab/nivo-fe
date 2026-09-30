@@ -1,4 +1,4 @@
-import { isRecord, type Outcome } from "@nivo/api"
+import type { Outcome } from "@nivo/api"
 import { graphqlFields } from "../graphql"
 import { collabGatewayDocument } from "./documents"
 import { collabFailure, collabOutcomeOfReply, readReply } from "./payload"
@@ -23,21 +23,6 @@ export const collabGatewayTransport: CollabTransport = async ({ accessToken, req
     }
     return collabOutcomeOfReply(reply)
 }
-let transport: CollabTransport = collabGatewayTransport
-
-/**
- * Bind the transport every Collab call travels on.
- *
- * THE MODULE-SIDE DOOR, beside {@link setCollabLocaleReader}: a component binds through the
- * `useCollabTransportFrom` hook (`@/hooks`), while a `modules/` owner calls this setter
- * directly.
- *
- * @param next - The transport in force from here on.
- */
-export const setCollabTransport = (next: CollabTransport) => {
-    transport = next
-}
-
 /** Send one tagged member request and preserve the boundary's own failure vocabulary. */
 export const collabRequest = async <T>(
     accessToken: string,
@@ -54,7 +39,7 @@ export const collabRequest = async <T>(
     }
     let served: Outcome<CollabServed>
     try {
-        served = await transport({ accessToken, request: { workspaceId, op, input } })
+        served = await collabGatewayTransport({ accessToken, request: { workspaceId, op, input } })
     } catch {
         return collabFailure("unknown", "COLLAB_UNKNOWN", "transport threw", true)
     }

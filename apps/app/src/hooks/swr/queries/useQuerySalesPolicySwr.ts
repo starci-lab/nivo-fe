@@ -3,7 +3,8 @@
 import { readSalesPolicy, type SalesInstallationScope, type SalesPolicyRequest } from "@/modules/api/sales"
 import { operationReadIdentity } from "@/modules/api/operation-route"
 import { useAccessToken } from "../../auth/useAccessToken"
-import { useNivoQuery, type NivoQueryKey } from "../useNivoQuery"
+import { useNivoQuery } from "../useNivoQuery"
+import { type NivoQueryKey } from "../swr.shared"
 
 /*
  * One hook per file, one registered read per hook: this file names exactly one Sales operation, its

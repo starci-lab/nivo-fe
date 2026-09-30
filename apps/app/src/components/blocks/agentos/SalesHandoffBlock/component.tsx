@@ -67,28 +67,7 @@ const HANDOFF_STATUS_TONES: Readonly<Record<string, "success" | "warning" | "neu
 /** The statuses whose attempt may already have started; after them only the same identity is looked up. */
 const HANDOFF_LOOKUP_ONLY_STATUSES: ReadonlySet<string> = new Set(["possible-start", "outcome-unknown"])
 
-/** The handoff region: one read, its own selector, and the facts it disclosed. */
-type HandoffRegion = {
-    readonly standing: SalesSurfaceStanding
-    readonly model: SalesHandoffValue | null
-    readonly handoffId: string
-    readonly setHandoffId: (value: string) => void
-    readonly isLoading: boolean
-    readonly reload: () => void
-}
 
-/** The submission region: the exact content claimed, its revision guard, and whether it may leave. */
-type SubmissionRegion = {
-    readonly standing: SalesSurfaceStanding
-    readonly fingerprint: string
-    readonly setFingerprint: (value: string) => void
-    readonly expectedRevision: string
-    readonly setExpectedRevision: (value: string) => void
-    readonly isSubmitting: boolean
-    readonly addressable: boolean
-    readonly lookupOnly: boolean
-    readonly onSubmit: () => void
-}
 
 
 /** The settled view the drawing half receives; opaque so actions stay out of the atom check. */

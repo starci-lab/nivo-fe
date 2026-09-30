@@ -15,7 +15,6 @@ export {
     failed,
     failedWith,
     failureKindOfCode,
-    failureKindOfStatus,
     type Failure,
     type FailureInput,
     type FailureKind,
@@ -24,10 +23,11 @@ export {
 export { settle } from "./settle"
 export {
     DEFAULT_TIMEOUT_MS,
+    failureKindOfStatus,
     send,
     type WireFailureDetail,
     type WireOutcome,
     type WireReply,
     type WireRequest,
-} from "./transport"
+} from "./modules/api/client"
 export * from "./wire"

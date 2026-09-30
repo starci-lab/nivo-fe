@@ -1,8 +1,12 @@
 import { afterEach, describe, expect, it, vi } from "vitest"
+
+const gateway = vi.hoisted(() => ({ graphqlFields: vi.fn() }))
+vi.mock("../graphql", () => gateway)
+
+import { collabGatewayDocument } from "./documents"
 import * as collabApi from "./index"
 import {
     acceptCollabInvitation,
-    collabGatewayTransport,
     collabOutcomeOfReply,
     inviteCollabMemberByEmail,
     listCollabTasks,
@@ -15,7 +19,6 @@ import {
     readCollabNotices,
     readCollabTask,
     reconcileCollabRequest,
-    setCollabTransport,
     type CollabGatewayReply,
     type CollabGatewayRequest,
     type CollabOfficeView,
@@ -23,18 +26,26 @@ import {
 
 type SeenCall = { readonly accessToken: string; readonly request: CollabGatewayRequest }
 
+/** Answer every gateway call with one bare reply and record what each call carried. */
 const transportSpy = (reply: CollabGatewayReply) => {
     const calls: Array<SeenCall> = []
-    const spy = vi.fn(async (call: SeenCall) => {
-        calls.push(call)
-        return collabOutcomeOfReply(reply)
-    })
+    const spy = gateway.graphqlFields
+    spy.mockImplementation(
+        async (
+            _document: string,
+            variables: { readonly request: CollabGatewayRequest },
+            options: { readonly accessToken: string },
+        ) => {
+            calls.push({ accessToken: options.accessToken, request: variables.request })
+            return { ok: true, data: { [collabGatewayDocument(variables.request.op).field]: reply } }
+        },
+    )
     return { calls, spy }
 }
 
 describe("modules/api/collab", () => {
     afterEach(() => {
-        setCollabTransport(collabGatewayTransport)
+        gateway.graphqlFields.mockReset()
         vi.unstubAllGlobals()
     })
 
@@ -44,7 +55,6 @@ describe("modules/api/collab", () => {
             op: "postMessage",
             result: { op: "postMessage", route: { kind: "not-addressed", message: { messageId: "m-1" } } },
         })
-        setCollabTransport(spy)
         const answer = await postCollabMessage({
             workspaceId: "ws-1",
             accessToken: "tok",
@@ -77,7 +87,6 @@ describe("modules/api/collab", () => {
             op: "postMessage",
             result: { op: "postMessage", route: { kind: "not-addressed", message: { messageId: "m-1" } } },
         })
-        setCollabTransport(spy)
         const result = await postCollabMessage(Object.assign({
             workspaceId: "ws-1",
             accessToken: "tok",
@@ -100,7 +109,6 @@ describe("modules/api/collab", () => {
             op: "listTasks",
             result: { op: "listTasks", page: { tasks: [] } },
         })
-        setCollabTransport(spy)
         await listCollabTasks({ workspaceId: "ws-1", accessToken: "tok" })
         expect(calls[0]!.request.input).toEqual({})
         await listCollabTasks({
@@ -120,7 +128,6 @@ describe("modules/api/collab", () => {
             op: "openOffice",
             result: { op: "openOffice", office: { group: { groupId: "g" }, participants: [] } },
         })
-        setCollabTransport(spy)
         await openCollabOffice({ workspaceId: "ws-1", accessToken: "tok" })
         await readCollabGroup({ workspaceId: "ws-1", accessToken: "tok", cursor: "c" })
         await readCollabTask({ workspaceId: "ws-1", accessToken: "tok", taskId: "t-1" })
@@ -180,7 +187,6 @@ describe("modules/api/collab", () => {
             viewer: { memberId: "mem-lan", role: "owner" },
         }
         const { spy } = transportSpy({ ok: true, op: "openOffice", result: { op: "openOffice", office } })
-        setCollabTransport(spy)
         const answer = await openCollabOffice({ workspaceId: "ws-1", accessToken: "tok" })
         expect(answer).toEqual({ ok: true, data: office })
         if (!answer.ok) throw new Error("expected an ok office result")
@@ -197,7 +203,6 @@ describe("modules/api/collab", () => {
             op: "inviteByEmail",
             result: { op: "inviteByEmail", membership: { outcome: "created", member: { memberId: "mem-1" } } },
         })
-        setCollabTransport(spy)
         const answer = await inviteCollabMemberByEmail({
             workspaceId: "ws-1",
             accessToken: "tok",
@@ -219,7 +224,6 @@ describe("modules/api/collab", () => {
                 membership: { outcome: "accepted", member: { memberId: "mem-2", role: "staff" } },
             },
         })
-        setCollabTransport(spy)
         const accepted = await acceptCollabInvitation({
             workspaceId: "ws-1",
             accessToken: "tok",
@@ -239,7 +243,6 @@ describe("modules/api/collab", () => {
             op: "acceptInvitation",
             result: { op: "acceptInvitation", membership: { outcome: "accepted" } },
         })
-        setCollabTransport(spy)
         await acceptCollabInvitation({ workspaceId: "ws-1", accessToken: "tok", invitationId: "inv-1" })
         expect(calls[0]!.request.input).toEqual({ invitationId: "inv-1" })
         await acceptCollabInvitation({
@@ -258,7 +261,6 @@ describe("modules/api/collab", () => {
             op: "acceptInvitation",
             result: { op: "acceptInvitation", membership: { outcome: "accepted" } },
         })
-        setCollabTransport(spy)
         for (const claim of [
             { email: "a@b.c" },
             { verifiedEmail: "a@b.c" },
@@ -285,7 +287,6 @@ describe("modules/api/collab", () => {
             op: "inviteByEmail",
             result: { op: "inviteByEmail", membership: { outcome: "existing" } },
         })
-        setCollabTransport(spy)
         const smuggled = await inviteCollabMemberByEmail(Object.assign({
             workspaceId: "ws-1",
             accessToken: "tok",
@@ -320,7 +321,6 @@ describe("modules/api/collab", () => {
                 page: { group: { groupId: "g-1" }, messages: [{ messageId: "m-1" }], cards: [], nextCursor: "c-2" },
             },
         })
-        setCollabTransport(spy)
         const page = await readCollabGroup({ workspaceId: "ws-1", accessToken: "tok" })
         expect(page).toEqual({
             ok: true,
@@ -333,7 +333,6 @@ describe("modules/api/collab", () => {
             ok: false,
             failure: { op: "readTask", kind: "denied", reason: "membership", retryable: false },
         })
-        setCollabTransport(spy)
         const denied = await readCollabTask({ workspaceId: "ws-1", accessToken: "tok", taskId: "t-1" })
         expect(denied).toMatchObject({
             ok: false,
@@ -349,17 +348,12 @@ describe("modules/api/collab", () => {
             ok: false,
             failure: { op: null, kind: "unavailable", reason: "dependency", retryable: true },
         })
-        setCollabTransport(spy)
         const unavailable = await openCollabOffice({ workspaceId: "ws-1", accessToken: "tok" })
         expect(unavailable).toMatchObject({ ok: false, kind: "unavailable", retryable: true })
     })
 
     it("turns a throwing transport into a retryable unknown, never an exception", async () => {
-        setCollabTransport(
-            vi.fn(async () => {
-                throw new Error("socket dropped")
-            }),
-        )
+        gateway.graphqlFields.mockRejectedValue(new Error("socket dropped"))
         const answer = await openCollabOffice({ workspaceId: "ws-1", accessToken: "tok" })
         expect(answer).toMatchObject({
             ok: false,
@@ -372,7 +366,6 @@ describe("modules/api/collab", () => {
 
     it("refuses unsigned and unscoped calls before any transport runs", async () => {
         const { calls, spy } = transportSpy({ ok: true, op: "openOffice", result: { op: "openOffice", office: {} } })
-        setCollabTransport(spy)
         const unsigned = await openCollabOffice({ workspaceId: "ws-1", accessToken: "" })
         const unscoped = await openCollabOffice({ workspaceId: "", accessToken: "tok" })
         expect(unsigned).toMatchObject({ ok: false, code: "COLLAB_UNAUTHENTICATED", kind: "refused", retryable: false })

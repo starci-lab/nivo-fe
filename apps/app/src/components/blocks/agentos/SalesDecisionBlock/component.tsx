@@ -56,28 +56,7 @@ const DECISION_STATUS_TONES: Readonly<Record<string, "success" | "warning" | "ne
     superseded: "neutral",
 }
 
-/** The proposal region: one read, its own selector, and the facts it disclosed. */
-type ProposalRegion = {
-    readonly standing: SalesSurfaceStanding
-    readonly model: SalesDecisionValue | null
-    readonly decisionRequestId: string
-    readonly setDecisionRequestId: (value: string) => void
-    readonly isLoading: boolean
-    readonly reload: () => void
-}
 
-/** The answer region: one choice, its revision guard, and whether this surface may press at all. */
-type AnswerRegion = {
-    readonly standing: SalesSurfaceStanding
-    readonly choice: SalesDecideProposalRequest["answer"]
-    readonly setChoice: (choice: SalesDecideProposalRequest["answer"]) => void
-    readonly expectedRevision: string
-    readonly setExpectedRevision: (value: string) => void
-    readonly isAnswering: boolean
-    readonly addressable: boolean
-    readonly stale: boolean
-    readonly onSubmit: () => void
-}
 
 
 /** The settled view the drawing half receives; opaque so actions stay out of the atom check. */

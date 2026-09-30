@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import { resolveAcademyApiUrl } from "."
+import { resolveAcademyApiUrl } from "./academy-api"
 
 describe("resolveAcademyApiUrl", () => {
     it("uses the configured endpoint", () => {

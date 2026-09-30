@@ -1,7 +1,8 @@
 "use client"
 
 import { readWorkspaceCheckoutOffers } from "@/modules/api/workspace-controlplane"
-import { useNivoQuery, type NivoQueryKey } from "../useNivoQuery"
+import { useNivoQuery } from "../useNivoQuery"
+import { type NivoQueryKey } from "../swr.shared"
 
 /*
  * One hook per file, one registered read per hook: the file's basename is the hook it exports, which
