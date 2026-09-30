@@ -47,9 +47,7 @@ for (const app of APPS_WITH_CONTRACTS) {
         if (backendRoot !== undefined) {
             const source = join(backendRoot, name.replace(/\.graphql$/u, ""), "schema.graphql")
             if (!existsSync(source)) die(`backend schema ${source} does not exist`)
-            if (readFileSync(source, "utf8").replaceAll("
-", "
-") !== copy.toString("utf8")) {
+            if (readFileSync(source, "utf8").replaceAll("\r\n", "\n") !== copy.toString("utf8")) {
                 die(`${copyPath} is not the same text as ${source} (line endings aside) - refresh it with npm run contract:emit in nivo-backend, then copy it here`)
             }
         }
