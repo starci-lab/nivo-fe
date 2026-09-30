@@ -2,7 +2,8 @@
 
 import { useState } from "react"
 import { useTranslations } from "next-intl"
-import { useRouter, useMutateStartAgentosCustomModuleIntakeSwr } from "@/hooks"
+import { useRouter } from "@/hooks/i18n"
+import { useMutateStartAgentosCustomModuleIntakeSwr } from "@/hooks/swr"
 import { moduleStudio } from "@/modules/routes"
 import { AgentOSModuleIntakeBase } from "./component"
 type AgentOSModuleIntakeProps = {

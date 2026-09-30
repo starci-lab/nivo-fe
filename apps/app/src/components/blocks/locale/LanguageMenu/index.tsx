@@ -2,7 +2,7 @@
 
 import { useLocale, useTranslations } from "next-intl"
 import { LOCALES, toLocale } from "@/modules/i18n"
-import { usePathname, useRouter } from "@/hooks"
+import { usePathname, useRouter } from "@/hooks/i18n"
 import { LanguageMenuBase } from "./component"
 
 /** Connected locale owner for the global navbar. */

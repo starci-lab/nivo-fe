@@ -7,7 +7,7 @@ import { setAccessTokenReader } from "@/modules/api/graphql"
  *
  * The transport owns the reader because it is the thing that puts the token on the wire, but only a
  * component knows where the session keeps the token. This hook is how the two are bound from a
- * component, reached as `useAccessTokenFrom` from `@/hooks` - a component may not import the
+ * component, reached as `useAccessTokenFrom` from `@/hooks/auth` - a component may not import the
  * transport's setter itself. A `modules/` owner such as the session store calls
  * {@link setAccessTokenReader} directly instead, because a module may not reach the hooks root.
  *

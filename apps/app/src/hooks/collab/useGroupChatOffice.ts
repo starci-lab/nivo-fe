@@ -1,14 +1,12 @@
 
 import { useEffect, useState } from "react"
 import type { CollabHumanRole, CollabTurnNoticeItem } from "../../modules/api/collab"
-import {
-    useCollabLive,
-    useMutateCollabInviteByEmailSwr,
-    useQueryCollabGroupSwr,
-    useQueryCollabNoticeSwr,
-    useQueryCollabNoticesSwr,
-    useQueryCollabOfficeSwr,
-} from "@/hooks"
+import { useCollabLive } from "../collab-live/useCollabLive"
+import { useMutateCollabInviteByEmailSwr } from "../swr/mutations/useMutateCollabInviteByEmailSwr"
+import { useQueryCollabGroupSwr } from "../swr/queries/useQueryCollabGroupSwr"
+import { useQueryCollabNoticeSwr } from "../swr/queries/useQueryCollabNoticeSwr"
+import { useQueryCollabNoticesSwr } from "../swr/queries/useQueryCollabNoticesSwr"
+import { useQueryCollabOfficeSwr } from "../swr/queries/useQueryCollabOfficeSwr"
 import { collabFallbackInterval } from "../../modules/collab"
 import { readCollabInviteOutcome, readCollabOpenNotice } from "../../modules/collab/group-chat/model.guards"
 import type { GroupChatTab } from "../../modules/collab/group-chat/model"

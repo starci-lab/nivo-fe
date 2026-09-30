@@ -5,8 +5,8 @@ import {
     useMutateFinalizeAgentosModuleAttachmentSwr,
     useMutateRemoveAgentosModuleAttachmentSwr,
     useQueryMyAgentosCustomModuleStudioSwr,
-    useQueryNoticeData,
-} from "@/hooks"
+} from "@/hooks/swr"
+import { useQueryNoticeData } from "@/hooks/query"
 import { AgentOSModuleStudioProjectionContext } from "@/modules/agentos/module-studio-projection"
 import { nivoQueryReading } from "@/modules/query"
 import { AgentOSModuleAttachmentsBase, type AgentOSModuleAttachmentsBaseProps } from "./component"

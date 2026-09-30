@@ -1,13 +1,19 @@
 import { useCallback, useEffect, useState } from "react"
+import { useAgentOSShell } from "./useAgentOSShell"
 import {
-    useAgentOSShell,
     useMutateRenewAgentWorkspaceAppLaunchSwr,
+} from "../swr/mutations/useMutateRenewAgentWorkspaceAppLaunchSwr"
+import {
     useMutateRevokeAgentWorkspaceAppLaunchSwr,
-    useProvisioningRealtime,
+} from "../swr/mutations/useMutateRevokeAgentWorkspaceAppLaunchSwr"
+import { useProvisioningRealtime } from "../realtime/useProvisioningRealtime"
+import {
     useQueryMyAgentosModuleInstallationsSwr,
+} from "../swr/queries/useQueryMyAgentosModuleInstallationsSwr"
+import {
     useQueryMyAgentWorkspaceControlCenterSwr,
-    useAccessToken,
-} from "@/hooks"
+} from "../swr/queries/useQueryMyAgentWorkspaceControlCenterSwr"
+import { useAccessToken } from "../auth/useAccessToken"
 import { projectAgentOSShellView } from "@/modules/agentos/workspace-control-center/shell-projection"
 import { settle } from "@nivo/api"
 import type { AgentOSShellConfigurationDigests } from "@/modules/agentos/workspace-control-center/shell-types"

@@ -10,9 +10,9 @@ import { OAUTH_PROVIDER_KEY, readStored, removeStored, writeStored } from "@/mod
  * remembered provider, and that one shared constant dragged two plain functions across a boundary
  * they never needed.
  *
- * A CONNECTED COMPONENT REACHES DATA THROUGH ONE DOOR, `@/hooks`, and that barrel names hooks only.
- * So a page that both starts a provider journey and consumes its result imports the hook from
- * `@/hooks` and these two from here, rather than reaching into the transport folder for a helper
+ * A connected component imports hooks from their domain indexes, such as `@/hooks/auth` or
+ * `@/hooks/swr`. So a page that both starts a provider journey and consumes its result imports each
+ * hook from its owning index and these two from here, rather than reaching into the transport folder for a helper
  * that happened to be filed beside a hook.
  *
  * THE VERIFIER IS NEVER HERE. The backend mints and holds the PKCE pair for the whole round trip;

@@ -6,12 +6,12 @@ import {
     type AgentOSShellView,
     type AgentOSWorkspaceControlCenterShellLabels,
 } from "@/components/blocks/agentos/AgentOSWorkspaceControlCenter"
+import { useAgentOSShell } from "@/hooks/agentos"
 import {
-    useAgentOSShell,
     useQueryMyAgentosModuleInstallationsSwr,
     useQueryMyAgentWorkspaceControlCenterSwr,
-    useRouter,
-} from "@/hooks"
+} from "@/hooks/swr"
+import { useRouter } from "@/hooks/i18n"
 import { getPathname, toLocale } from "@/modules/i18n"
 import { moduleCreate, workspace } from "@/modules/routes"
 import { useFormatter, useLocale, useTranslations } from "next-intl"

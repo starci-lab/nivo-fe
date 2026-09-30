@@ -1,7 +1,7 @@
 "use client"
 
 import { useFormatter, useLocale, useTranslations } from "next-intl"
-import { useSalesWorkbench } from "@/hooks"
+import { useSalesWorkbench } from "@/hooks/agentos"
 import type { Formatter } from "@/modules/i18n/formatter"
 import { translationValuesForNextIntl } from "../translation-values"
 import { SalesWorkbenchBlockBase } from "./component"

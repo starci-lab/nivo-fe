@@ -1,5 +1,5 @@
 import type { SalesCloseRequest } from "@/modules/api/sales"
-import type { useSalesWorkbench } from "@/hooks"
+import type { useSalesWorkbench } from "@/hooks/agentos"
 import type { Formatter } from "@/modules/i18n/formatter"
 import type { WorkbenchSharedCopy } from "../WorkbenchRail"
 

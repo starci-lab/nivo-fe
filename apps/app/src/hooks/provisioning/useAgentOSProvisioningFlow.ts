@@ -1,12 +1,10 @@
 
 import { useCallback, useEffect } from "react"
 import { useTranslations } from "next-intl"
-import {
-    useAccessToken,
-    useProvisioningRealtime,
-    useQueryWorkspaceCheckoutOffersSwr,
-    useQueryWorkspaceCheckoutStatusSwr,
-} from "@/hooks"
+import { useAccessToken } from "../auth/useAccessToken"
+import { useProvisioningRealtime } from "../realtime/useProvisioningRealtime"
+import { useQueryWorkspaceCheckoutOffersSwr } from "../swr/queries/useQueryWorkspaceCheckoutOffersSwr"
+import { useQueryWorkspaceCheckoutStatusSwr } from "../swr/queries/useQueryWorkspaceCheckoutStatusSwr"
 import { settle } from "@nivo/api"
 import {
     agentOSFlowFromAnswers,

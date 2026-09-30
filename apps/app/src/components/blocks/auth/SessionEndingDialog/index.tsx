@@ -2,7 +2,9 @@
 
 import { useEffect, useState } from "react"
 import { useTranslations } from "next-intl"
-import { useRouter, useSession } from "@/hooks"
+import { useRouter } from "@/hooks/i18n"
+import { useSession } from "@/hooks/auth"
+
 import { SessionEndingDialogBase } from "./component"
 
 /**
@@ -72,7 +74,7 @@ export const SessionEndingDialog = (props: SessionEndingDialogProps) => {
         }
         setIsPending(true)
         void session
-            .end("everywhere")
+            .end(SignOutScope.Everywhere)
             .then(
                 (report) => (report.authorityEnding === "unconfirmed" ? UNCONFIRMED_VALUE : APPLIED_VALUE),
                 () => UNCONFIRMED_VALUE,

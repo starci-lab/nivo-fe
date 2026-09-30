@@ -1,14 +1,6 @@
 ﻿import type { AuthDetails, AuthMode, AuthPendingAction } from "@/components/blocks/auth/AuthenticationPanel"
-import type { AuthPhase, BrokeredAnswer } from "@/modules/auth/authentication"
-import type {
-    ContinueBrokeredSignInInput,
-    ContinueBrokeredSignInPayload,
-    ForgotPasswordInitInput,
-    OtpChallenge,
-    SignInInput,
-    SignInPayload,
-    SignUpInitInput,
-} from "@/modules/api/auth"
+import type { AuthPhase } from "@/modules/auth/authentication"
+
 import { type Outcome } from "@nivo/api"
 import type { Session } from "@/modules/auth/session"
 import { continuationReference, UNAVAILABLE_RETURN_LANDING } from "@/modules/auth/authentication"
@@ -186,7 +178,7 @@ type BrokeredSettlementOptions = {
 
 /** Read brokered answers in contract order, continuing an undecided held proof once. */
 export const settleBrokeredAnswer = async (
-    answer: BrokeredAnswer,
+    answer: ExchangeOauthCodePayload | ContinueBrokeredSignInPayload,
     options: BrokeredSettlementOptions,
 ): Promise<void> => {
     const {

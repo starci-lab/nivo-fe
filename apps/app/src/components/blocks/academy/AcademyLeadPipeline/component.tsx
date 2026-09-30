@@ -1,6 +1,5 @@
 import { Avatar, type AvatarData, QueryNoticeView, type QueryNoticeViewData } from "@nivo/ui"
 import { SurfaceCard, Button, Button as CoreButton, Heading, Text, TextAction, Badge } from "@starci/grammar/common"
-import type { ExpertSiteLead } from "@/modules/api/academy"
 
 /** Resolved copy for the lead pipeline. */
 export type AcademyLeadPipelineProps = AcademyLeadPipelineViewProps
@@ -18,8 +17,8 @@ type AcademyLeadPipelineLabels = {
 
 /** Atoms the pure lead pipeline draws; the connected half owns the lead request. */
 type AcademyLeadPipelineData = {
-    readonly leads: ReadonlyArray<ExpertSiteLead>
-    readonly selected?: ExpertSiteLead
+    readonly leads: ReadonlyArray<ExpertSiteLeadFieldsFragment>
+    readonly selected?: ExpertSiteLeadFieldsFragment
     readonly draft?: string
     readonly pendingAction?: "advance" | "draft"
     readonly message?: string
@@ -52,7 +51,7 @@ const AcademyLeadPipelineContent = (input: AcademyLeadPipelineViewProps) => {
     const { state } = input
     const { leads, selected, draft, pendingAction, message, notice, labels } = input.props
     const { openLead, advance, draftReply, retryNotice } = input.on
-    const leadRows: ReadonlyArray<{ lead: ExpertSiteLead; avatar: AvatarData }> = leads.map((lead) => ({
+    const leadRows: ReadonlyArray<{ lead: ExpertSiteLeadFieldsFragment; avatar: AvatarData }> = leads.map((lead) => ({
         lead,
         avatar: { name: lead.name, size: "md" },
     }))
@@ -83,7 +82,7 @@ const AcademyLeadPipelineContent = (input: AcademyLeadPipelineViewProps) => {
                           </Text>
                       </div>
 
-                      <Badge tone={lead.status === "converted" ? "success" : "neutral"}>{lead.status}</Badge>
+                      <Badge tone={lead.status === ExpertSiteLeadStatus.Won ? "success" : "neutral"}>{lead.status}</Badge>
                       <CoreButton size="sm" onPress={() => openLead(lead.id)}>
                           {labels.open}
                       </CoreButton>

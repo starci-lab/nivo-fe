@@ -2,14 +2,14 @@
 import { useEffect, useState } from "react"
 import { useTranslations } from "next-intl"
 import { app, appProvisioning, apps } from "@/modules/routes"
+import { useAccessToken } from "../auth/useAccessToken"
 import {
-    useAccessToken,
     useMutateCreateAndPublishExpertSiteSwr,
-    useProvisioningRealtime,
-    useQueryCatalogItemsSwr,
-    useQueryMyExpertSiteDeploymentSwr,
-    useRouter,
-} from "@/hooks"
+} from "../swr/mutations/useMutateCreateAndPublishExpertSiteSwr"
+import { useProvisioningRealtime } from "../realtime/useProvisioningRealtime"
+import { useQueryCatalogItemsSwr } from "../swr/queries/useQueryCatalogItemsSwr"
+import { useQueryMyExpertSiteDeploymentSwr } from "../swr/queries/useQueryMyExpertSiteDeploymentSwr"
+import { useRouter } from "../i18n/useRouter"
 import {
     templateFlowFromAnswers,
     templateFlowWithDeploymentEvent,

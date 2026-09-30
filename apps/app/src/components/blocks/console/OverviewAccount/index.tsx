@@ -1,7 +1,9 @@
 "use client"
 
 import { useFormatter, useTranslations } from "next-intl"
-import { useNow, useOverviewData, useRouter } from "@/hooks"
+import { useNow } from "@/hooks/time"
+import { useOverviewData } from "@/hooks/overview"
+import { useRouter } from "@/hooks/i18n"
 import { BILLING_CURRENCY } from "@/modules/config"
 import { OverviewAccountBase, type OverviewAccountFact, type OverviewAccountInvoiceRow } from "./component"
 /** Public API role for OverviewAccountProps. */

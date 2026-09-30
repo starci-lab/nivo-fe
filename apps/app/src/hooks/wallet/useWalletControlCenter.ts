@@ -2,14 +2,12 @@
 import { useState, useSyncExternalStore } from "react"
 import { useFormatter, useLocale, useTranslations } from "next-intl"
 import { useSearchParams } from "next/navigation"
-import {
-    useMutateCreateWalletTopUpPayLinkSwr,
-    useMutatePayInvoiceSwr,
-    usePathname,
-    useQueryMyInvoicesSwr,
-    useQueryMyWalletSwr,
-    useQueryMyWalletTransactionsSwr,
-} from "@/hooks"
+import { useMutateCreateWalletTopUpPayLinkSwr } from "../swr/mutations/useMutateCreateWalletTopUpPayLinkSwr"
+import { useMutatePayInvoiceSwr } from "../swr/mutations/useMutatePayInvoiceSwr"
+import { usePathname } from "../i18n/usePathname"
+import { useQueryMyInvoicesSwr } from "../swr/queries/useQueryMyInvoicesSwr"
+import { useQueryMyWalletSwr } from "../swr/queries/useQueryMyWalletSwr"
+import { useQueryMyWalletTransactionsSwr } from "../swr/queries/useQueryMyWalletTransactionsSwr"
 import { createWalletOverlayViews } from "@/modules/wallet/wallet-center/overlay-views"
 import { createWalletSectionViews } from "@/modules/wallet/wallet-center/views"
 import { readStored, removeStored, TOP_UP_SESSION_KEY, writeStored } from "@/modules/browser-storage"

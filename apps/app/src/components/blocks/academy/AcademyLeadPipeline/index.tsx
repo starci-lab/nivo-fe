@@ -6,9 +6,9 @@ import {
     useMutateDraftLeadReplySwr,
     useMutateUpdateExpertSiteLeadSwr,
     useQueryMyExpertSiteLeadsSwr,
-    useQueryNoticeData,
-} from "@/hooks"
-import type { ExpertSiteLead } from "@/modules/api/academy"
+} from "@/hooks/swr"
+import { useQueryNoticeData } from "@/hooks/query"
+
 import { nivoQueryReading, type NivoQueryReading } from "@/modules/query"
 import { AcademyLeadPipelineBase } from "./component"
 
@@ -20,17 +20,17 @@ export type AcademyLeadPipelineProps = {
 /**
  * Where a lead moves next when the operator advances it.
  *
- * A TABLE RATHER THAN A CHAIN: the pipeline order is a fact about the vocabulary, and any status
- * the wire holds that is not a step before the end - including `converted` itself - stays at
- * `converted`, which is what the chain it replaces did.
+ * A TABLE RATHER THAN A CHAIN: the pipeline order is a fact about the backend vocabulary
+ * (`new`, `contacted`, `won`, `lost`), and any status that is not a step before the end - `won` and
+ * `lost` included - stays at `won`, which is what the chain it replaces did.
  */
-const NEXT_STATUS: Readonly<Record<string, string | undefined>> = {
-    new: "contacted",
-    contacted: "qualified",
+const NEXT_STATUS: Readonly<Partial<Record<ExpertSiteLeadStatus, ExpertSiteLeadStatus>>> = {
+    [ExpertSiteLeadStatus.New]: ExpertSiteLeadStatus.Contacted,
+    [ExpertSiteLeadStatus.Contacted]: ExpertSiteLeadStatus.Won,
 }
 
 /** Settle which state the pipeline surface is in from how the load settled. */
-const pipelineState = (reading: NivoQueryReading<ReadonlyArray<ExpertSiteLead>>) => {
+const pipelineState = (reading: NivoQueryReading<ReadonlyArray<ExpertSiteLeadFieldsFragment>>) => {
     if (reading.status === "resting") return "resting" as const
     if (reading.status === "failed") return "failed" as const
     return reading.data.length === 0 ? ("empty" as const) : ("answered" as const)
@@ -66,7 +66,7 @@ export const AcademyLeadPipeline = (props: AcademyLeadPipelineProps) => {
     const advance = async () => {
         if (selected === undefined) return
         setPendingAction("advance")
-        const status = NEXT_STATUS[selected.status] ?? "converted"
+        const status = NEXT_STATUS[selected.status] ?? ExpertSiteLeadStatus.Won
         const result = await updateMutation.trigger({
             leadId: selected.id,
             status,

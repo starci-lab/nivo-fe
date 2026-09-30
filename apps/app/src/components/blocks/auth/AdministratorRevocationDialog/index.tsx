@@ -7,7 +7,7 @@ import {
     useMutateEndPrincipalSessionsSwr,
     useQueryCollabOfficeSwr,
     useQueryMyAgentWorkspaceControlCenterSwr,
-} from "@/hooks"
+} from "@/hooks/swr"
 import { nivoQueryPayload } from "@/modules/query"
 import {
     AdministratorRevocationDialogBase,

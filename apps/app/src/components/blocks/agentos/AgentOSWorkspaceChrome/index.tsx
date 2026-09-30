@@ -3,7 +3,8 @@
 import type { ReactNode } from "react"
 import { useParams } from "next/navigation"
 import { useTranslations } from "next-intl"
-import { usePathname, useQueryMyAgentWorkspaceControlCenterSwr, useRouter } from "@/hooks"
+import { usePathname, useRouter } from "@/hooks/i18n"
+import { useQueryMyAgentWorkspaceControlCenterSwr } from "@/hooks/swr"
 import { nivoQueryPayload } from "@/modules/query"
 import { AgentOSWorkspaceChromeBase, type AgentOSWorkspaceChromeBaseProps } from "./component"
 

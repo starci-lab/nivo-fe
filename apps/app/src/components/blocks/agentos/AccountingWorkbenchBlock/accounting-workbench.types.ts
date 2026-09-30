@@ -1,4 +1,4 @@
-import type { useAccountingWorkbench } from "@/hooks"
+import type { useAccountingWorkbench } from "@/hooks/agentos"
 import type { WorkbenchSharedCopy } from "../WorkbenchRail"
 
 /** The complete settled workbench view shared by its named presentation units. */

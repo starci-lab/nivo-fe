@@ -1,7 +1,7 @@
 "use client"
 
 import { useFormatter, useTranslations } from "next-intl"
-import { useOverviewData } from "@/hooks"
+import { useOverviewData } from "@/hooks/overview"
 import { OverviewRuntimeBase, type OverviewRuntimeFact } from "./component"
 /** Public API role for OverviewRuntimeProps. */
 export type OverviewRuntimeProps = Record<string, never>

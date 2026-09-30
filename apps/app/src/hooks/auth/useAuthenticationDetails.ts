@@ -8,7 +8,7 @@ import { useMutateContinueBrokeredSignInSwr } from "@/hooks/swr/mutations/useMut
 import { useRouter } from "@/hooks/i18n/useRouter"
 import { useSession } from "@/hooks/auth/useSession"
 import type { AuthDetails, AuthMode, AuthProvider } from "@/components/blocks/auth/AuthenticationPanel"
-import type { OtpChallenge } from "@/modules/api/auth"
+
 import {
     authenticationDestination,
     readAuthenticationArrival,

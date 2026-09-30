@@ -1,6 +1,6 @@
 "use client"
 
-import { useQueryNoticeData } from "@/hooks"
+import { useQueryNoticeData } from "@/hooks/query"
 import type { NivoQueryFailure } from "@/modules/query"
 import { QueryNoticeBase, type QueryNoticeActions } from "./component"
 

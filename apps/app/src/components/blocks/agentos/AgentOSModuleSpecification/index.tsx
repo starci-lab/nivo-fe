@@ -2,7 +2,9 @@
 
 import { useState } from "react"
 import { useTranslations } from "next-intl"
-import { useAgentOSModuleStudioProjection, useRouter, useMutatePublishAgentosCustomModuleSwr } from "@/hooks"
+import { useAgentOSModuleStudioProjection } from "@/hooks/agentos"
+import { useRouter } from "@/hooks/i18n"
+import { useMutatePublishAgentosCustomModuleSwr } from "@/hooks/swr"
 import { installation } from "@/modules/routes"
 import { AgentOSModuleSpecificationBase } from "./component"
 type AgentOSModuleSpecificationProps = {

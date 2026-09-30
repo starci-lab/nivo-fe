@@ -1,6 +1,8 @@
 
 import { useFormatter, useTranslations } from "next-intl"
-import { useQueryMyAgentosAiKnowledgeReadinessSwr } from "@/hooks"
+import {
+    useQueryMyAgentosAiKnowledgeReadinessSwr,
+} from "../swr/queries/useQueryMyAgentosAiKnowledgeReadinessSwr"
 import { nivoQueryReading } from "@/modules/query"
 import {
     phaseIndexOf,

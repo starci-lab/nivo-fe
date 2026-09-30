@@ -1,8 +1,8 @@
 "use client"
 
 import { useTranslations } from "next-intl"
-import { useQueryMyAgentWorkspacesSwr } from "@/hooks"
-import { useRouter } from "@/hooks"
+import { useQueryMyAgentWorkspacesSwr } from "@/hooks/swr"
+import { useRouter } from "@/hooks/i18n"
 import { newWorkspace } from "@/modules/routes"
 import {
     BusinessModulesDashboardBase,

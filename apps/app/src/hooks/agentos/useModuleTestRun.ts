@@ -1,8 +1,11 @@
+import type { AgentosModuleTestSurfaceView } from "@/modules/api/agentos-module-tests"
+import type { AgentosModuleTestContractView } from "@/modules/api/agentos-module-tests"
+
+
 import { useCallback, useRef, useState } from "react"
 import type { SWRResponse } from "swr"
 import { useMutateRunAgentosModuleTestSwr } from "../swr/mutations/useMutateRunAgentosModuleTestSwr"
 import { useQueryMyAgentosModuleTestRunSwr } from "../swr/queries/useQueryMyAgentosModuleTestRunSwr"
-import type { AgentosModuleTestContract, AgentosModuleTestSurface } from "../../modules/api/agentos-module-tests"
 import type { AgentosRuntimeValue } from "../../modules/api/agentos-runtime-tree"
 import { type Outcome } from "@nivo/api"
 import type { TestSurfaceProps } from "../../modules/agentos/module-page/surface-types"
@@ -16,8 +19,8 @@ type AgentosModuleTestTarget = {
 /** The test contract and shared command surface the run state machine connects. */
 interface ModuleTestRunInput {
     readonly installationId: string
-    readonly testContract: AgentosModuleTestContract | undefined
-    readonly testSurfaceQuery: Pick<SWRResponse<Outcome<AgentosModuleTestSurface>, Error>, "mutate">
+    readonly testContract: AgentosModuleTestContractView | undefined
+    readonly testSurfaceQuery: Pick<SWRResponse<Outcome<AgentosModuleTestSurfaceView>, Error>, "mutate">
     readonly setPending: (pending: boolean) => void
     readonly setActionRefused: (refused: boolean) => void
 }

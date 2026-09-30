@@ -1,7 +1,8 @@
 import { useTranslations } from "next-intl"
 import type { SidebarGroup } from "@starci/grammar/common"
 import { IconSource } from "@nivo/ui"
-import { usePathname, usePersistedFlag, useRouter } from "@/hooks"
+import { usePathname, useRouter } from "@/hooks/i18n"
+import { usePersistedFlag } from "@/hooks/session"
 import { NAVIGATION_COLLAPSED_KEY } from "@/modules/browser-storage"
 import { SidebarBase } from "./component"
 

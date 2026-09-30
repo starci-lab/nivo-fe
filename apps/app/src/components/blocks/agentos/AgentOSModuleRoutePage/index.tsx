@@ -8,8 +8,8 @@ import {
     useModuleSettings,
     useModuleSetupSession,
     useModuleTestRun,
-    useRouter,
-} from "@/hooks"
+} from "@/hooks/agentos"
+import { useRouter } from "@/hooks/i18n"
 import type { AgentOSModuleView } from "@/components/blocks/agentos/ModuleRouteShellBlock"
 import { AgentOSModuleAttachments } from "@/components/blocks/agentos/AgentOSModuleAttachments"
 import type { DiagnosticsSurfaceProps, SetupSurfaceProps } from "@/modules/agentos/module-page/surface-types"

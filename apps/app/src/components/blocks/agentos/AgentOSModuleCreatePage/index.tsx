@@ -1,7 +1,7 @@
 "use client"
 
 import { useTranslations } from "next-intl"
-import { useRouter } from "@/hooks"
+import { useRouter } from "@/hooks/i18n"
 import { workspaceModules } from "@/modules/routes"
 import { AgentOSModuleCreatePageBase } from "./component"
 

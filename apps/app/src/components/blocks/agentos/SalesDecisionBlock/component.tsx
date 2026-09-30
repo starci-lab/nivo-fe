@@ -1,7 +1,7 @@
 import type { ReactNode } from "react"
 import { PrimaryRailLayout, SectionHeader, Text } from "@starci/grammar/common"
 import type { SalesDecideProposalRequest } from "@/modules/api/sales"
-import type { useSalesDecision } from "@/hooks"
+import type { useSalesDecision } from "@/hooks/agentos"
 import { salesNoticeLive, type SalesNotice, type SalesSurfaceStanding, type SalesTranslation } from "@/modules/sales/sales-workbench"
 import { WorkbenchRail } from "../WorkbenchRail"
 import { SalesDecisionAnswerCard, SalesDecisionProposalCard } from "./SalesDecisionCards"

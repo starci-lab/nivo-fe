@@ -14,7 +14,7 @@ export type ExecuteSessionRailBlockCopy = {
 
 import { Button, Icon } from "@starci/grammar/common"
 
-import { usePersistedFlag } from "@/hooks"
+import { usePersistedFlag } from "@/hooks/session"
 import { EXECUTE_SESSIONS_COLLAPSED_KEY } from "@/modules/browser-storage"
 import { ChoiceTabs, CollapsibleRail, SelectionList, type SelectionListGroup, IconSource } from "@nivo/ui"
 

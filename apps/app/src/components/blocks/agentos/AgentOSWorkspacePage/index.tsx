@@ -1,7 +1,7 @@
 "use client"
 
 import { useSearchParams } from "next/navigation"
-import { usePathname, useRouter } from "@/hooks"
+import { usePathname, useRouter } from "@/hooks/i18n"
 import { isAgentOSWorkspacePageState } from "@/modules/agentos/workspace-page-state"
 import { AgentOSWorkspacePageBase, type AgentOSWorkspacePageState } from "./component"
 

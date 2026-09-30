@@ -1,7 +1,7 @@
 "use client"
 
 import { useTranslations } from "next-intl"
-import { useSalesDecision } from "@/hooks"
+import { useSalesDecision } from "@/hooks/agentos"
 import type { SalesTranslation } from "@/modules/sales/sales-workbench"
 import { translationValuesForNextIntl } from "../translation-values"
 import { SalesDecisionBlockBase, answerOf } from "./component"

@@ -7,7 +7,7 @@ import { purchaserClaimsOf, purchaserDetailOf, purchaserNameOf } from "@/modules
 import { purchaseOf } from "@/modules/agentos/purchase-source"
 import { createPurchaseStatusCopy } from "@/modules/agentos/purchase-status/copy"
 import { purchaseStatusViewOf } from "@/modules/agentos/purchase-status/view"
-import { usePurchaseStatusActions, usePurchaseStatusPhase, usePurchaseStatusQueries } from "@/hooks"
+import { usePurchaseStatusActions, usePurchaseStatusPhase, usePurchaseStatusQueries } from "@/hooks/agentos"
 import { PurchaseStatusFlowBase } from "./component"
 
 /** Route identity owned by the purchase-status block: one stable purchase identity. */

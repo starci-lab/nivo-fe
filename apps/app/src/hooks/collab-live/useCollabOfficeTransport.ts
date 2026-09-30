@@ -8,7 +8,7 @@ import { type Outcome } from "@nivo/api"
  *
  * It exposes the same-intent reconciliation read a resend consults before it
  * sends anything (`contract.collab.chat`: an intent that already committed is
- * never resent). It stays behind `@/hooks` so a component never imports runtime
+ * never resent). It stays behind the `@/hooks/collab-live` index so a component never imports runtime
  * values from `@/modules/api/collab`. The reader's language for refusal copy is the
  * one the session binds for every call.
  */

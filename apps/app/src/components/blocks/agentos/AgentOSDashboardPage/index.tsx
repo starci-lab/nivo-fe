@@ -1,7 +1,7 @@
 "use client"
 
 import { useTranslations } from "next-intl"
-import { useRouter } from "@/hooks"
+import { useRouter } from "@/hooks/i18n"
 import { agentosHome, newWorkspace } from "@/modules/routes"
 import { AgentOSPageBase } from "./component"
 import type { AgentOSPageBaseState, AgentOSPageLabels } from "./component"

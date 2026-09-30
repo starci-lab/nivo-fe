@@ -6,7 +6,7 @@ import CheckoutReviewFlow from "@/components/blocks/agentos/CheckoutReviewFlow"
  * THE ROUTE IS A ROUTE AGAIN. `app/.../workspaces/new/checkout/page.tsx` names which page renders
  * at which URL and mounts exactly this entry; the checkout-review surface itself - the frozen
  * offer, the purchaser admission and the payment start - is the block's world, resolved through
- * `@/hooks` like every other connected unit.
+ * the hook domain index that owns it.
  *
  * @returns The page.
  */

@@ -1,7 +1,8 @@
 "use client"
 
 import { useTranslations } from "next-intl"
-import { OverviewDataProvider, useRouter } from "@/hooks"
+import { OverviewDataProvider } from "@/hooks/overview"
+import { useRouter } from "@/hooks/i18n"
 import { newWorkspace } from "@/modules/routes"
 import { OverviewPageBase, type OverviewPageBaseProps } from "./component"
 /** Public API role for OverviewPageProps. */

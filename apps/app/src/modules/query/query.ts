@@ -1,44 +1,31 @@
-import { type FailureKind } from "@nivo/api"
+import { type FailureKind, type Outcome } from "@nivo/api"
 
 /**
  * How a caller reads one settled query answer.
  *
  * The transport under `@/modules/api` produces the answer and the hooks under
- * `@/hooks` deliver it; neither owns the reading of it. Keeping that reading
+ * Hooks under their domain indexes, `@/hooks/<domain>`, deliver it; neither owns the reading of it. Keeping that reading
  * here gives a connected component one import that is not a hook and not the
- * transport, which is what both boundaries require: the hooks barrel names
- * hooks only, and a component may not import a runtime value from the transport
+ * transport, while domain hook indexes expose hooks only and a component may
+ * not import a runtime value from the transport
  * folder (`component-runtime-transport-import`).
  */
 
 export type { FailureKind } from "@nivo/api"
 
-/**
- * The narrowest answer shape the settlement helpers accept; every `Outcome<T>` satisfies it.
- *
- * A failure is required to name its `kind` only; the narrower shape still admits an answer that
- * knows its code, reason and retryability and a settled reading keeps all of them.
- */
-export type NivoQueryAnswer<T> =
-    | {
-          readonly ok: true
-          readonly data: T
-      }
-    | {
-          readonly ok: false
-          readonly kind: FailureKind
-          readonly code?: string
-          readonly reason?: string
-          readonly retryable?: boolean
-      }
+/** Optional detail retained when an API failure becomes a query reading. */
+type NivoQueryFailureDetail = {
+    readonly responseStatus?: number | null
+}
+
+/** One core API outcome accepted by the query settlement helpers. */
+export type NivoQueryAnswer<T> = Outcome<T, NivoQueryFailureDetail>
 
 /** What a settled failure states: its kind, and the code, reason and retryability it carries. */
-export type NivoQueryFailure = {
-    readonly kind: FailureKind
-    readonly code: string
-    readonly reason: string
-    readonly retryable: boolean
-}
+export type NivoQueryFailure = Omit<
+    Extract<NivoQueryAnswer<unknown>, { readonly ok: false }>,
+    "status"
+>
 
 /**
  * How one answer stands once it is read: still in flight, accepted data, or a failed settlement
@@ -69,6 +56,7 @@ export const nivoQueryReading = <T>(answer: NivoQueryAnswer<T> | undefined): Niv
     return {
         status: "failed",
         kind: answer.kind,
+        responseStatus: answer.status,
         code: answer.code ?? "",
         reason: answer.reason ?? "",
         retryable: retryableOf(answer),

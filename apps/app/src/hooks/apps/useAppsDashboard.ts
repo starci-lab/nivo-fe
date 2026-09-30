@@ -1,13 +1,11 @@
 
 import { useFormatter, useTranslations } from "next-intl"
 import { fleetResourceHref } from "../../components/blocks/provisioning/FleetRow"
-import {
-    useQueryCatalogItemsSwr,
-    useQueryMyCatalogOrdersSwr,
-    useQueryMyExpertSitesSwr,
-    useQueryMyInstancesSwr,
-    useRouter,
-} from ".."
+import { useQueryCatalogItemsSwr } from "../swr/queries/useQueryCatalogItemsSwr"
+import { useQueryMyCatalogOrdersSwr } from "../swr/queries/useQueryMyCatalogOrdersSwr"
+import { useQueryMyExpertSitesSwr } from "../swr/queries/useQueryMyExpertSitesSwr"
+import { useQueryMyInstancesSwr } from "../swr/queries/useQueryMyInstancesSwr"
+import { useRouter } from "../i18n/useRouter"
 import {
     catalogueSectionFor,
     ownedSectionFor,

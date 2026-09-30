@@ -1,6 +1,7 @@
 import type { SWRConfiguration } from "swr"
-import { myAgentosModuleTestRun, type AgentosModuleTestSurface } from "../../../modules/api/agentos-module-tests"
-import { type Outcome } from "@nivo/api"
+import type { AgentosModuleTestSurfaceView } from "@/modules/api/agentos-module-tests"
+import { myAgentosModuleTestRun } from "../../../modules/api/agentos-module-tests"
+import type { Outcome } from "@nivo/api"
 import { useNivoQuery } from "../useNivoQuery"
 import { QUERY_AGENTOS_MODULE_TEST_RUN_SWR_KEY } from "../swr.shared"
 
@@ -8,7 +9,7 @@ import { QUERY_AGENTOS_MODULE_TEST_RUN_SWR_KEY } from "../swr.shared"
 export const useQueryMyAgentosModuleTestRunSwr = (
     installationId: string,
     runId?: string,
-    config?: SWRConfiguration<Outcome<AgentosModuleTestSurface>, Error>,
+    config?: SWRConfiguration<Outcome<AgentosModuleTestSurfaceView>, Error>,
 ) =>
     useNivoQuery(
         runId === undefined ? null : QUERY_AGENTOS_MODULE_TEST_RUN_SWR_KEY(installationId, runId),

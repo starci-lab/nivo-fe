@@ -1,5 +1,7 @@
+import type { AgentosRuntimeMessageTreeView } from "@/modules/api/agentos-module-runtime"
+
 import type { ComponentType } from "react"
-import type { AgentosRuntimeMessageTree } from "../api/agentos-module-runtime"
+
 import type { AgentosRuntimeValue, AgentosRuntimeWidgetNode } from "../api/agentos-runtime-tree"
 
 type RuntimeExecuteChatAttachmentValues = { readonly label: string; readonly mediaType: string }
@@ -79,7 +81,7 @@ export type ExecuteMessage = {
     readonly id: string
     readonly role: "user" | "assistant" | "system"
     readonly content: string
-    readonly messageTree?: AgentosRuntimeMessageTree | null
+    readonly messageTree?: AgentosRuntimeMessageTreeView | null
     readonly contextLabel: string
     readonly widget?: ChatWidgetPayload
 }

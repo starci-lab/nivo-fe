@@ -1,13 +1,13 @@
 import { createElement } from "react"
 import { useTranslations } from "next-intl"
+import { useMutateCreateAcademyStudentSwr } from "../swr/mutations/useMutateCreateAcademyStudentSwr"
+import { useMutateGrantAcademyCourseAccessSwr } from "../swr/mutations/useMutateGrantAcademyCourseAccessSwr"
 import {
-    useMutateCreateAcademyStudentSwr,
-    useMutateGrantAcademyCourseAccessSwr,
     useMutateRevokeAcademyCourseAccessSwr,
-    useMutateSetAcademyStudentStatusSwr,
-    useQueryMyAcademyStudentDetailSwr,
-    useQueryMyAcademyStudentsSwr,
-} from ".."
+} from "../swr/mutations/useMutateRevokeAcademyCourseAccessSwr"
+import { useMutateSetAcademyStudentStatusSwr } from "../swr/mutations/useMutateSetAcademyStudentStatusSwr"
+import { useQueryMyAcademyStudentDetailSwr } from "../swr/queries/useQueryMyAcademyStudentDetailSwr"
+import { useQueryMyAcademyStudentsSwr } from "../swr/queries/useQueryMyAcademyStudentsSwr"
 import { nivoQueryReading } from "../../modules/query"
 import { QueryNotice } from "../../components/blocks/query/QueryNotice"
 import type { AcademyStudentCrmViewProps } from "../../modules/academy/student-crm"

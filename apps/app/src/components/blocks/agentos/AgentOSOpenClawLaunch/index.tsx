@@ -1,7 +1,10 @@
 "use client"
-import { useMutateIssueAgentWorkspaceAppLaunchSwr, useMutateRevokeAgentWorkspaceAppLaunchSwr } from "@/hooks"
-import { useRouter } from "@/hooks"
-import { useSession } from "@/hooks"
+import {
+    useMutateIssueAgentWorkspaceAppLaunchSwr,
+    useMutateRevokeAgentWorkspaceAppLaunchSwr,
+} from "@/hooks/swr"
+import { useRouter } from "@/hooks/i18n"
+import { useSession } from "@/hooks/auth"
 import {
     followWorkspaceAppRedirect,
     safeWorkspaceAppRedirect,

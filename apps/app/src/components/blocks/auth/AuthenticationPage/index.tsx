@@ -9,10 +9,9 @@ import {
     useAuthenticationNotice,
     useAuthenticationPhase,
     useAuthenticationTwoFactor,
-    usePathname,
-    useRouter,
     useSession,
-} from "@/hooks"
+} from "@/hooks/auth"
+import { usePathname, useRouter } from "@/hooks/i18n"
 import type { AuthActions, AuthMode, AuthenticationPanelProps } from "@/components/blocks/auth/AuthenticationPanel"
 import { SessionEndingQuery } from "@/components/blocks/auth/SessionEndingQuery"
 import type { SessionEndingArrival } from "@/modules/auth/authentication"

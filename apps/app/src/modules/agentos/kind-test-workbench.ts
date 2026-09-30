@@ -1,5 +1,9 @@
+import type { AgentosModuleTestContractView } from "@/modules/api/agentos-module-tests"
+import type { AgentosModuleTestScenarioContractView } from "@/modules/api/agentos-module-tests"
+
+
 import type { ComponentType } from "react"
-import type { AgentosModuleTestContract, AgentosModuleTestScenarioContract } from "../api/agentos-module-tests"
+
 import type { AgentosRuntimeValue } from "../api/agentos-runtime-tree"
 import { isAgentosRuntimeRecord, isAgentosRuntimeValue } from "../api/agentos-runtime-tree.guards"
 
@@ -45,8 +49,8 @@ export type KindTestWorkbenchBlockCopy = {
 /** Shared runtime input for one registered kind-owned Test workbench. */
 export type TestWorkbenchComponentProps = {
     readonly copy: KindTestWorkbenchBlockCopy
-    readonly contract: AgentosModuleTestContract
-    readonly scenario: AgentosModuleTestScenarioContract
+    readonly contract: AgentosModuleTestContractView
+    readonly scenario: AgentosModuleTestScenarioContractView
     readonly contextLabel: string
     readonly pending: boolean
     readonly showScenarioPicker: boolean
@@ -62,7 +66,7 @@ export type TestWorkbenchRegistry = Readonly<Record<string, ComponentType<TestWo
 /** Exact block boundary for resolving a registered Test workbench. */
 export type KindTestWorkbenchBlockProps = {
     readonly copy: KindTestWorkbenchBlockCopy
-    readonly contract: AgentosModuleTestContract
+    readonly contract: AgentosModuleTestContractView
     readonly contextLabel: string
     readonly targetReady: boolean
     readonly pending: boolean

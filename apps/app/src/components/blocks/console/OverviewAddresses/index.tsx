@@ -1,7 +1,7 @@
 "use client"
 
 import { useFormatter, useTranslations } from "next-intl"
-import { useOverviewData } from "@/hooks"
+import { useOverviewData } from "@/hooks/overview"
 import { OverviewAddressesBase, type OverviewAddressesState } from "./component"
 /** Public API role for OverviewAddressesProps. */
 export type OverviewAddressesProps = Record<string, never>

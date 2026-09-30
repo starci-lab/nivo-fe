@@ -10,7 +10,7 @@ import {
     GROUP_CHAT_TASK_STATEMENT_CLASS_NAME,
 } from "./classNames"
 import { Badge, Button, EmptyNotice, Select, SurfaceListCard, Text } from "@starci/grammar/common"
-import type { CollabTasksFilter } from "../../../../hooks"
+import type { CollabTasksFilter } from "@/hooks/swr"
 import { COLLAB_TASK_STATUSES, isCollabTaskStatus } from "../../../../modules/collab/group-chat/model.guards"
 import {
     invalidTasksFilter,

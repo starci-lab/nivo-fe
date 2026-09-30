@@ -1,10 +1,8 @@
 
 import { useState } from "react"
-import {
-    useAccessToken,
-    useCollabOfficeTransport,
-    useMutateCollabPostMessageSwr,
-} from "@/hooks"
+import { useAccessToken } from "../auth/useAccessToken"
+import { useCollabOfficeTransport } from "../collab-live/useCollabOfficeTransport"
+import { useMutateCollabPostMessageSwr } from "../swr/mutations/useMutateCollabPostMessageSwr"
 import { parseAddressedModule } from "../../modules/collab/group-chat/model"
 import type { GroupChatPageView } from "../../modules/collab/group-chat/types"
 import { newIntentId } from "./collab.shared"

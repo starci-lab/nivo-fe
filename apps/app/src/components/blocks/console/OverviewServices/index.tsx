@@ -1,7 +1,8 @@
 "use client"
 
 import { useTranslations } from "next-intl"
-import { useOverviewData, useRouter } from "@/hooks"
+import { useOverviewData } from "@/hooks/overview"
+import { useRouter } from "@/hooks/i18n"
 import type { BadgeTone } from "@starci/grammar/common"
 import { ACADEMY_HOST_SUFFIX } from "@/modules/config"
 import { OverviewServicesBase, type OverviewServicesRow } from "./component"

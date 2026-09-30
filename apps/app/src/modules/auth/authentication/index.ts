@@ -1,4 +1,5 @@
-import type { AuthConclusionReason, ContinueBrokeredSignInPayload, ExchangeOauthCodePayload } from "@/modules/api/auth"
+
+
 import { DEFAULT_AUTHENTICATED_LANDING } from "@/modules/auth"
 
 /** The visible stage of the authentication journey. */
@@ -6,9 +7,6 @@ export type AuthPhase = "details" | "code" | "done" | "twoFactor" | "notice"
 
 /** A settled ending that leaves no session or further field to complete. */
 export type AuthNoticeKind = "heldAddress" | "createdNoSession" | "sessionEndingApplied" | "sessionEndingUnconfirmed"
-
-/** Answers from either step of a brokered sign-in. */
-export type BrokeredAnswer = ExchangeOauthCodePayload | ContinueBrokeredSignInPayload
 
 /** A session-ending value read from the live address. */
 export type SessionEndingArrival = {
@@ -39,14 +37,16 @@ export const sessionEndingNotice = (arrival: SessionEndingArrival | null): AuthN
 export const UNAVAILABLE_RETURN_LANDING = `${DEFAULT_AUTHENTICATED_LANDING}?returnNotice=unavailable`
 
 /** The only brokered answer that can carry a continuation reference. */
-export const continuationReference = (answer: BrokeredAnswer): string | null => {
+export const continuationReference = (
+    answer: ExchangeOauthCodePayload | ContinueBrokeredSignInPayload,
+): string | null => {
     if (answer.undecided === null || !("continuationReference" in answer.undecided)) return null
     return answer.undecided.continuationReference
 }
 
 /** Reasons that finish registration without issuing a session. */
 export const noticeForConclusion = (reason: AuthConclusionReason): "heldAddress" | "createdNoSession" | null => {
-    if (reason === "heldAddress") return "heldAddress"
-    if (reason === "registeredSignInRequired") return "createdNoSession"
+    if (reason === AuthConclusionReason.HeldAddress) return "heldAddress"
+    if (reason === AuthConclusionReason.RegisteredSignInRequired) return "createdNoSession"
     return null
 }

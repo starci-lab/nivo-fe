@@ -2,7 +2,8 @@
 
 import { useState } from "react"
 import { useTranslations } from "next-intl"
-import { useAgentOSModuleStudioProjection, useMutateAnswerAgentosCustomModuleIntakeSwr } from "@/hooks"
+import { useAgentOSModuleStudioProjection } from "@/hooks/agentos"
+import { useMutateAnswerAgentosCustomModuleIntakeSwr } from "@/hooks/swr"
 import { AgentOSModuleInterviewBase } from "./component"
 type AgentOSModuleInterviewProps = {
     readonly workspaceId: string

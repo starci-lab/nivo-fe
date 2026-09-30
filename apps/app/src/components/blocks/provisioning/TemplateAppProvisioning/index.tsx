@@ -1,6 +1,7 @@
 "use client"
 
-import { useRouter, useTemplateAppProvisioning, type TemplateAppProvisioningContext } from "@/hooks"
+import { useRouter } from "@/hooks/i18n"
+import { useTemplateAppProvisioning, type TemplateAppProvisioningContext } from "@/hooks/provisioning"
 import { useTranslations } from "next-intl"
 import { apps } from "@/modules/routes"
 import { templateStepState, TEMPLATE_PHASE_INDEX } from "@/modules/provisioning/template-app"

@@ -1,4 +1,5 @@
-import { useAccessToken, useSession } from "@/hooks"
+import { useAccessToken } from "../auth/useAccessToken"
+import { useSession } from "../auth/useSession"
 import { readWorkspaceCheckoutStatus, type WorkspaceCheckoutAnswer } from "@/modules/api/workspace-controlplane"
 import { HOLD_PHASES, phaseOf, POLLING_PHASES } from "@/modules/agentos/purchase-status/phase"
 import { purchaseOf } from "@/modules/agentos/purchase-source"

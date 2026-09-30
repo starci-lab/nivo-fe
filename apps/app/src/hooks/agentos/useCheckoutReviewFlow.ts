@@ -1,6 +1,9 @@
 import { useFormatter, useLocale, useTranslations } from "next-intl"
 import { useSearchParams } from "next/navigation"
-import { useAccessToken, useQueryWorkspaceCheckoutOffersSwr, useRouter, useSession } from ".."
+import { useAccessToken } from "../auth/useAccessToken"
+import { useQueryWorkspaceCheckoutOffersSwr } from "../swr/queries/useQueryWorkspaceCheckoutOffersSwr"
+import { useRouter } from "../i18n/useRouter"
+import { useSession } from "../auth/useSession"
 import { getPathname } from "@/modules/i18n"
 import {
     checkoutFactsFor,

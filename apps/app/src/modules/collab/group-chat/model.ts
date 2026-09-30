@@ -9,7 +9,7 @@
     CollabTaskQuestionView,
     CollabTaskView,
 } from "../../api/collab"
-import type { CollabTasksFilter } from "../../../hooks"
+import type { CollabTasksFilter } from "@/hooks/swr"
 import { isCollabHumanRole } from "./model.guards"
 
 const GROUP_CHAT_AVATAR_TINT_CLASS_NAMES = [

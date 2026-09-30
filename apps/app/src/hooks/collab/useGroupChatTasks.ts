@@ -1,7 +1,9 @@
 
 import { useState } from "react"
 import type { CollabApprovalCardView, CollabApprovalDecision, CollabTaskView, CollabTaskQuestionView } from "../../modules/api/collab"
-import { useMutateCollabPressApprovalSwr, useQueryCollabTasksSwr, type CollabTasksFilter } from "@/hooks"
+import { useMutateCollabPressApprovalSwr } from "../swr/mutations/useMutateCollabPressApprovalSwr"
+import { useQueryCollabTasksSwr } from "../swr/queries/useQueryCollabTasksSwr"
+import { type CollabTasksFilter } from "../swr/swr.shared"
 import type { GroupChatTab } from "../../modules/collab/group-chat/model"
 import type { GroupChatPageView } from "../../modules/collab/group-chat/types"
 import { nivoAnswerDenied } from "../../modules/query"

@@ -8,7 +8,7 @@ import {
     useGroupChatOffice,
     useGroupChatTab,
     useGroupChatTasks,
-} from "@/hooks"
+} from "@/hooks/collab"
 import { nivoAnswerDenied } from "@/modules/query"
 import { overview } from "@/modules/routes"
 import { buildGroupChatLabels } from "@/modules/collab/group-chat/labels"

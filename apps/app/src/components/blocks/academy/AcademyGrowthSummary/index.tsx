@@ -1,7 +1,8 @@
 "use client"
 
 import { useFormatter, useTranslations } from "next-intl"
-import { useQueryMyAcademyGrowthSnapshotSwr, useQueryNoticeData } from "@/hooks"
+import { useQueryMyAcademyGrowthSnapshotSwr } from "@/hooks/swr"
+import { useQueryNoticeData } from "@/hooks/query"
 import { nivoQueryReading } from "@/modules/query"
 import { BILLING_CURRENCY } from "@/modules/config"
 import { AcademyGrowthSummaryBase } from "./component"

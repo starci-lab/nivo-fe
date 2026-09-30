@@ -7,7 +7,7 @@ import { setLocaleReader } from "@/modules/api/graphql"
  *
  * Every refusal sentence the API sends is localised, so the transport has to be told which language
  * to ask in - and only the routing-aware component knows the active locale. This hook is how a
- * component binds it, reached as `useLocaleFrom` from `@/hooks`; a `modules/` owner calls
+ * component binds it, reached as `useLocaleFrom` from `@/hooks/auth`; a `modules/` owner calls
  * {@link setLocaleReader} directly, because a module may not reach the hooks root.
  *
  * @param reader - Answers with the active locale.

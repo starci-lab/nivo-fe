@@ -2,7 +2,7 @@ import { LoadingRegion } from "@/components/blocks/loading/LoadingRegion"
 import type { ReactNode } from "react"
 import { Badge, Button, EmptyNotice, Input, SurfaceCard, Text } from "@starci/grammar/common"
 import type { SalesHandoffValue } from "@/modules/api/sales"
-import type { useSalesHandoff } from "@/hooks"
+import type { useSalesHandoff } from "@/hooks/agentos"
 import { salesWording, type SalesSurfaceStanding } from "@/modules/sales/sales-workbench"
 import {
     SALES_HANDOFF_ACTION_ROW_CLASS_NAME,

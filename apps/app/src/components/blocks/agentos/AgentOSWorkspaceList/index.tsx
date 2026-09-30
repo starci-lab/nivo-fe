@@ -1,6 +1,7 @@
 "use client"
 import type { FleetStatus } from "@/components/blocks/provisioning/FleetRow"
-import { useQueryMyAgentWorkspacesSwr, useRouter } from "@/hooks"
+import { useQueryMyAgentWorkspacesSwr } from "@/hooks/swr"
+import { useRouter } from "@/hooks/i18n"
 import { getPathname, toLocale } from "@/modules/i18n"
 import { newWorkspace, workspace as workspaceRoute } from "@/modules/routes"
 import { useLocale, useTranslations } from "next-intl"

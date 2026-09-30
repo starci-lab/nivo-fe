@@ -5,7 +5,7 @@ import { useMutateForgotPasswordVerifyOtpSwr } from "@/hooks/swr/mutations/useMu
 import { useMutateSignUpResendSwr } from "@/hooks/swr/mutations/useMutateSignUpResendSwr"
 import { useMutateSignUpVerifyOtpSwr } from "@/hooks/swr/mutations/useMutateSignUpVerifyOtpSwr"
 import type { AuthCode, AuthMode } from "@/components/blocks/auth/AuthenticationPanel"
-import type { OtpChallenge } from "@/modules/api/auth"
+
 import { noticeForConclusion } from "@/modules/auth/authentication"
 import type { Session } from "@/modules/auth/session"
 import type { AuthenticationFlowControl, AuthenticationTranslate } from "./auth.shared"

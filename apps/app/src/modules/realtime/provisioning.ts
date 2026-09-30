@@ -1,7 +1,7 @@
 /**
  * Transport layer of one provisioning realtime subscription: the
  * wire-message shapes each room emits and the pure folds that read them. The React binding
- * that subscribes lives in `@/hooks/realtime/useProvisioningRealtime`.
+ * that subscribes lives in the `@/hooks/realtime` domain index.
  */
 
 /** One `workspace.status` wire message from the provisioning room. */

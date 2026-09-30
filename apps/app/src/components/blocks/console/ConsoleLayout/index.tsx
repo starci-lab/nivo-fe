@@ -3,7 +3,8 @@
 import { useEffect } from "react"
 import type { ReactNode } from "react"
 import { useTranslations } from "next-intl"
-import { usePathname, useRouter, useSession } from "@/hooks"
+import { usePathname, useRouter } from "@/hooks/i18n"
+import { useSession } from "@/hooks/auth"
 
 import { ConsoleLayoutBase } from "./component"
 

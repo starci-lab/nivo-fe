@@ -1,7 +1,8 @@
 "use client"
 
 import { useTranslations } from "next-intl"
-import { useQueryMyAgentosCustomModuleStudioSwr, useRouter } from "@/hooks"
+import { useQueryMyAgentosCustomModuleStudioSwr } from "@/hooks/swr"
+import { useRouter } from "@/hooks/i18n"
 import { AgentOSModuleStudioProjectionProvider } from "@/modules/agentos/module-studio-projection"
 import { workspaceModules } from "@/modules/routes"
 import { nivoQueryReading } from "@/modules/query"
