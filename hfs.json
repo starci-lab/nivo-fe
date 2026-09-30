@@ -1,0 +1,12 @@
+{
+  "hfs": 1,
+  "profile": "fe",
+  "project": "nivo",
+  "stacks": "../nivo-backend",
+  "apps": [
+    { "name": "app", "kind": "next" },
+    { "name": "expert", "kind": "next" },
+    { "name": "landing", "kind": "next" }
+  ],
+  "optionalSlots": ["repo.packages", "fe.package.ui", "fe.package.api", "fe.package.i18n"]
+}
