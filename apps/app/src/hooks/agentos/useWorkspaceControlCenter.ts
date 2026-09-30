@@ -11,6 +11,7 @@ import {
     useAccessToken,
 } from "@/hooks"
 import { projectAgentOSShellView } from "@/modules/agentos/workspace-control-center/shell-projection"
+import type { AgentOSShellConfigurationDigests } from "@/modules/agentos/workspace-control-center/shell-types"
 import type { AgentOSWorkspaceControlCenterStatus } from "@/modules/agentos/workspace-control-center/contracts"
 import { createAgentOSWorkspaceControlCenterLabels } from "@/modules/agentos/workspace-control-center/labels"
 import { workspaceAppLaunchChannelName, type WorkspaceAppLaunchMessage } from "@/modules/window/workspace-app-launch"
@@ -142,6 +143,6 @@ export const useWorkspaceControlCenter = (workspaceId: string) => {
                 dateStyle: "medium",
                 timeStyle: "short",
             }),
-        formatConfiguration: (digests) => s("configuration.current", digests),
+        formatConfiguration: (digests: AgentOSShellConfigurationDigests) => s("configuration.current", digests),
     }
 }
