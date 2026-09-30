@@ -1,6 +1,7 @@
 import { Badge, SectionHeader, Tabs, Text } from "@starci/grammar/common"
 import { SHELL_SOURCE_TIME_CLASS_NAME } from "./classNames"
 import type { AgentOSWorkspacePageState } from "@/modules/agentos/workspace-control-center/contracts"
+import { isAgentOSWorkspacePageState } from "@/modules/agentos/workspace-page-state"
 
 type AgentOSWorkspaceControlCenterHeaderProps = {
     readonly eyebrow: string
@@ -42,7 +43,9 @@ export const AgentOSWorkspaceControlCenterHeader = (props: AgentOSWorkspaceContr
                 label={props.tabsLabel}
                 selectedKey={props.pageState}
                 items={props.tabs}
-                onSelect={(key) => props.onSelectPageState?.(key as AgentOSWorkspacePageState)}
+                onSelect={(key) => {
+                    if (isAgentOSWorkspacePageState(key)) props.onSelectPageState?.(key)
+                }}
                 panelId={(key) => "workspace-panel-" + key}
                 labelVisibility="always"
                 inset="none"

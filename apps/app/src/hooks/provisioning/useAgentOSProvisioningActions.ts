@@ -2,6 +2,7 @@
 
 import { useState, type Dispatch, type SetStateAction } from "react"
 import { useTranslations } from "next-intl"
+import { agentosHome, newWorkspaceCheckout, purchase as purchaseRoute } from "@/modules/routes"
 import {
     resolveWorkspaceCheckoutEntry,
     type WorkspaceCheckoutStatusView,
@@ -63,7 +64,7 @@ export const useAgentOSProvisioningActions = (input: UseAgentOSProvisioningActio
         const flow = flowState.flow
         if (flow.phase !== "request" || flow.offer === null || flow.verdict !== "current") return
         const query = new URLSearchParams({ offer: flow.offer.offerId, offerVersion: flow.offer.offerVersion })
-        router.push(`/agentos/workspaces/new/checkout?${query.toString()}`)
+        router.push(newWorkspaceCheckout(query))
     }
 
     const selectOffer = (id: string): void => {
@@ -168,8 +169,8 @@ export const useAgentOSProvisioningActions = (input: UseAgentOSProvisioningActio
         await phaseState.refreshReadiness()
     }
 
-    const backToAgentOS = (): void => router.push("/agentos")
-    const watchPurchase = (orderId: string): void => router.push(`/agentos/workspaces/purchases/${orderId}`)
+    const backToAgentOS = (): void => router.push(agentosHome())
+    const watchPurchase = (orderId: string): void => router.push(purchaseRoute(orderId))
 
     return {
         submit,

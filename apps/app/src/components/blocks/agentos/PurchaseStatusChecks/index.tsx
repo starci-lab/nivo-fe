@@ -112,6 +112,16 @@ const operationBand = (operation: PurchaseStatusOperation) => (
     </div>
 )
 
+/** Pair each banner part with a key built once from its text and its occurrence, since parts can repeat. */
+const keyedBannerParts = (parts: ReadonlyArray<string>) => {
+    const seen = new Map<string, number>()
+    return parts.map((text) => {
+        const occurrence = seen.get(text) ?? 0
+        seen.set(text, occurrence + 1)
+        return { key: `${text}:${occurrence}`, text }
+    })
+}
+
 const primaryCard = (
     primary: PurchaseStatusPrimary,
     view: Exclude<PurchaseStatusFlowViewProps, { state: "loading" } | { state: "denied" }>,
@@ -120,14 +130,14 @@ const primaryCard = (
         {primary.banner === undefined ? null : (
             <div className={BAND_CLASS_NAME}>
                 <div className={BANNER_CLASS_NAME}>
-                    {primary.banner.map((part, index) =>
+                    {keyedBannerParts(primary.banner).map((part, index) =>
                         index === 0 ? (
-                            <Text key={index} weight="semibold">
-                                {part}
+                            <Text key={part.key} weight="semibold">
+                                {part.text}
                             </Text>
                         ) : (
-                            <Text key={index} size="sm" tone="muted">
-                                · {part}
+                            <Text key={part.key} size="sm" tone="muted">
+                                · {part.text}
                             </Text>
                         ),
                     )}

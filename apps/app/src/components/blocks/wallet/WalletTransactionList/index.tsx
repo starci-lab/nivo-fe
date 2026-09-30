@@ -71,15 +71,23 @@ const ledgerRow = (row: WalletLedgerRow | undefined, isLoading: boolean, closeLa
     )
 }
 
+/** Three skeleton rows stand in for a ledger that has not answered yet. */
+const RESTING_LEDGER_ROWS: ReadonlyArray<null> = [null, null, null]
+
 const walletLedgerContent = (ledger: LedgerSectionView, closeLabel: string) => {
-    const isLoading = ledger.phase === "resting"
+    if (ledger.phase === "resting")
+        return (
+            <div>
+                {RESTING_LEDGER_ROWS.map((_, index) => (
+                    <div key={index}>{ledgerRow(undefined, true, closeLabel)}</div>
+                ))}
+            </div>
+        )
     const rows: ReadonlyArray<WalletLedgerRow> = ledger.phase === "answered" ? ledger.rows : []
-    const entries: ReadonlyArray<WalletLedgerRow | undefined> =
-        ledger.phase === "resting" ? [undefined, undefined, undefined] : rows
     return (
         <div>
-            {entries.map((row, index) => (
-                <div key={row?.id ?? `resting-${index}`}>{ledgerRow(row, isLoading, closeLabel)}</div>
+            {rows.map((row) => (
+                <div key={row.id}>{ledgerRow(row, false, closeLabel)}</div>
             ))}
         </div>
     )

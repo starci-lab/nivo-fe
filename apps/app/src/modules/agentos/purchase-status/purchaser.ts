@@ -1,3 +1,5 @@
+import { isRecord } from "@/modules/api/wire"
+
 /** The owner-identity claims the signed-in session's access token may carry. */
 export type PurchaserClaims = {
     readonly name?: unknown
@@ -12,7 +14,8 @@ export const purchaserClaimsOf = (accessToken: string): PurchaserClaims => {
     try {
         const normalised = payload.replaceAll("-", "+").replaceAll("_", "/")
         const padded = normalised.padEnd(Math.ceil(normalised.length / 4) * 4, "=")
-        return JSON.parse(globalThis.atob(padded)) as PurchaserClaims
+        const claims: unknown = JSON.parse(globalThis.atob(padded))
+        return isRecord(claims) ? claims : {}
     } catch {
         return {}
     }

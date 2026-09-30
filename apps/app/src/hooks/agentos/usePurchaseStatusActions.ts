@@ -8,8 +8,10 @@ import {
 } from "@/hooks"
 import type { WorkspaceCheckoutAnswer, WorkspaceCheckoutEntryRequest, WorkspaceCheckoutStatusView } from "@/modules/api/workspace-controlplane"
 import type { Outcome } from "@/modules/api/outcome"
+import { settle } from "@/modules/api/settle"
 import type { PurchaseStatusCopy } from "@/modules/agentos/purchase-status/copy"
 import { entryPathOf, observedIdentitiesOf, purchaseOf } from "@/modules/agentos/purchase-status/phase"
+import { newWorkspace, newWorkspaceCheckout, purchaseProvisioning, workspaces } from "@/modules/routes"
 
 type UsePurchaseStatusActionsInput = {
     readonly purchaseId: string
@@ -101,11 +103,8 @@ export const usePurchaseStatusActions = ({
     const entryPending = entryEnabled && (entryQuery.isValidating || entryQuery.data === undefined)
 
     const reconcile = useCallback(async (): Promise<void> => {
-        try {
-            await refreshStatus()
-        } catch {
-            // The last confirmed purchase remains the view's source of truth.
-        }
+        // The last confirmed purchase remains the view's source of truth, so the outcome is not read.
+        await settle(refreshStatus)
     }, [refreshStatus])
     const recover = useCallback(async (): Promise<void> => {
         if (purchase === null || recoverPurchase.isMutating) return
@@ -138,11 +137,11 @@ export const usePurchaseStatusActions = ({
         setFeedback({ answer: statusAnswer, recoverRefusal: copy.unavailableNotice })
     }, [copy, purchase, purchaseId, recoverPurchase, statusAnswer])
 
-    const returnToList = useCallback(() => router.push("/agentos/workspaces"), [router])
-    const changeOffer = useCallback(() => router.push("/agentos/workspaces/new"), [router])
+    const returnToList = useCallback(() => router.push(workspaces()), [router])
+    const changeOffer = useCallback(() => router.push(newWorkspace()), [router])
     const viewProvisioning = useCallback(() => {
         setPinnedSurface({ purchaseId, surface: "provisioning" })
-        router.push(`/agentos/workspaces/purchases/${purchaseId}/provisioning`)
+        router.push(purchaseProvisioning(purchaseId))
     }, [purchaseId, router])
     const enterWorkspace = useCallback(() => {
         if (readyWorkspaceId === null || entryPending) return
@@ -163,7 +162,7 @@ export const usePurchaseStatusActions = ({
         const query = new URLSearchParams({ offer: renewal.offerId, offerVersion: renewal.offerVersion })
         if (eligibility?.reference !== null && eligibility?.reference !== undefined)
             query.set("entitlement", eligibility.reference)
-        router.push(`/agentos/workspaces/new/checkout?${query.toString()}`)
+        router.push(newWorkspaceCheckout(query))
     }, [purchase, router])
 
     return {

@@ -4,6 +4,7 @@ import { useCallback, useEffect } from "react"
 import { useProvisioningRealtime, type ProvisioningTarget } from "@/hooks"
 import type { WorkspaceCheckoutAnswer, WorkspaceCheckoutStatusView } from "@/modules/api/workspace-controlplane"
 import type { Outcome } from "@/modules/api/outcome"
+import { settle } from "@/modules/api/settle"
 import { HOLD_PHASES, phaseOf, POLLING_PHASES, PROVISIONING_PHASES, purchaseOf, type PurchasePhase } from "@/modules/agentos/purchase-status/phase"
 
 type UsePurchaseStatusPhaseInput = {
@@ -57,11 +58,8 @@ export const usePurchaseStatusPhase = ({
               : null
     const realtime = useProvisioningRealtime({ accessToken, target })
     const reconcile = useCallback(async (): Promise<void> => {
-        try {
-            await refreshStatus()
-        } catch {
-            // A failed re-read keeps the last confirmed purchase truth on screen.
-        }
+        // A failed re-read keeps the last confirmed purchase truth on screen, so its outcome is not read.
+        await settle(refreshStatus)
     }, [refreshStatus])
     const event = realtime.status === "event" ? realtime.event : undefined
     const eventKey =

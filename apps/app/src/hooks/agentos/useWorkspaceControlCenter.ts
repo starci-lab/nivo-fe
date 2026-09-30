@@ -11,6 +11,7 @@ import {
     useAccessToken,
 } from "@/hooks"
 import { projectAgentOSShellView } from "@/modules/agentos/workspace-control-center/shell-projection"
+import { settle } from "@/modules/api/settle"
 import type { AgentOSShellConfigurationDigests } from "@/modules/agentos/workspace-control-center/shell-types"
 import type { AgentOSWorkspaceControlCenterStatus } from "@/modules/agentos/workspace-control-center/contracts"
 import { createAgentOSWorkspaceControlCenterLabels } from "@/modules/agentos/workspace-control-center/labels"
@@ -62,21 +63,22 @@ export const useWorkspaceControlCenter = (workspaceId: string) => {
     useEffect(() => {
         const channel = new BroadcastChannel(workspaceAppLaunchChannelName(workspaceId))
         let activeLaunchId: string | null = null
+        // Revocation is best effort: its outcome is deliberately not read.
+        const revoke = (launchId: string): void => void settle(() => revokeLaunch(launchId))
         channel.addEventListener("message", (event: MessageEvent<WorkspaceAppLaunchMessage>) => {
             if (event.data.workspaceId !== workspaceId) return
             if (event.data.status === "failed") {
                 setLaunchState("blocked")
                 return
             }
-            if (activeLaunchId !== null && activeLaunchId !== event.data.launchId)
-                void revokeLaunch(activeLaunchId).catch(() => undefined)
+            if (activeLaunchId !== null && activeLaunchId !== event.data.launchId) revoke(activeLaunchId)
             activeLaunchId = event.data.launchId
             setLaunchId(event.data.launchId)
             setLaunchState("connected")
         })
         return () => {
             channel.close()
-            if (activeLaunchId !== null) void revokeLaunch(activeLaunchId).catch(() => undefined)
+            if (activeLaunchId !== null) revoke(activeLaunchId)
         }
     }, [revokeLaunch, workspaceId])
     useEffect(() => {

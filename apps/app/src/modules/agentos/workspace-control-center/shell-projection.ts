@@ -1,6 +1,10 @@
+import { isRecord } from "@/modules/api/wire"
 import type { ShellSourceIdentity } from "@/modules/api/agentos-shell"
 import type { ShellSourceObservation, ShellSourceStanding } from "@/modules/agentos/shell-observation-store"
 import type { AgentOSShellFacetStanding, AgentOSShellInstallationView, AgentOSShellOperationStanding, AgentOSShellOperationView, AgentOSShellReading, AgentOSShellView, AgentOSShellViewStatus, AgentOSWorkspaceControlCenterShellLabels } from "./shell-types"
+
+/** The operation list of a view that shows none. */
+const NO_OPERATIONS: ReadonlyArray<AgentOSShellOperationView> = []
 
 /** One string field of a source payload, or null when the payload does not carry it. */
 const payloadText = (payload: Readonly<Record<string, unknown>> | null, key: string): string | null => {
@@ -22,10 +26,9 @@ const payloadRows = (
 /** The three-way configuration identity one configuration payload reports, digests kept separate. */
 const configurationOf = (payload: Readonly<Record<string, unknown>> | null) => {
     const identity = payload === null ? null : payload.configurationIdentity
-    if (typeof identity !== "object" || identity === null) return null
-    const digests = identity as Readonly<Record<string, unknown>>
+    if (!isRecord(identity)) return null
     const digestOf = (key: string): string | null => {
-        const value = digests[key]
+        const value = identity[key]
         return typeof value === "string" && value.length > 0 ? value : null
     }
     return {
@@ -70,9 +73,7 @@ const operationStandingOf = (observation: ShellSourceObservation): AgentOSShellO
     const payload = observation.payload
     const queueState = payloadText(payload, "queueState")
     const entries = payload === null || !Array.isArray(payload.observations) ? [] : payload.observations
-    const kinds = entries.map((entry) =>
-        typeof entry === "object" && entry !== null ? (entry as Readonly<Record<string, unknown>>).kind : null,
-    )
+    const kinds = entries.map((entry: unknown) => (isRecord(entry) ? entry.kind : null))
     // The receiver's own unknown beats every hopeful reading; an ambiguous queue state is never
     // presented as a confirmed outcome.
     if (
@@ -155,7 +156,7 @@ export const projectAgentOSShellView = (
         installations,
         attentionStanding,
         attentionObservedAt: attention === null ? null : attention.observedAt,
-        operations: [] as ReadonlyArray<AgentOSShellOperationView>,
+        operations: NO_OPERATIONS,
     }
     // 1. No session, or a session nobody has settled yet: nothing about this scope is disclosed.
     if (reading.session === "sign-in-required" || reading.sessionStatus === "anonymous")

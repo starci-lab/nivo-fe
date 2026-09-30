@@ -1,5 +1,6 @@
 import { DEFAULT_LOCALE } from "@/modules/i18n/config"
 import type { InvoiceRow } from "@/modules/api/commerce"
+import { isTopUpSession } from "./waypoint.guards"
 import type { PaymentResultView, WalletLedgerRow } from "./types"
 
 /** Payment evidence retained while the provider round trip is in progress. */
@@ -86,7 +87,9 @@ export const readWalletWaypoint = (search: string, locale: string): WalletWaypoi
 /** Parse one stored provider response while treating absent or malformed evidence as unknown. */
 export const parseTopUpSession = (raw: string | null): TopUpSession | null => {
     try {
-        return raw === null ? null : (JSON.parse(raw) as TopUpSession)
+        if (raw === null) return null
+        const stored: unknown = JSON.parse(raw)
+        return isTopUpSession(stored) ? stored : null
     } catch {
         return null
     }

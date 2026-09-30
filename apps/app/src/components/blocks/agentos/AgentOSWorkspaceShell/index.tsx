@@ -1,3 +1,4 @@
+import { useMemo } from "react"
 import { facetLimitOf, runtimeValueOf } from "@/modules/agentos/workspace-control-center/shell-display"
 import type {
     AgentOSShellConfigurationDigests,
@@ -36,23 +37,25 @@ export const AgentOSWorkspaceShell = (props: AgentOSWorkspaceShellProps) => {
         view.inventoryStanding === "current" && view.inventoryObservedAt !== null
             ? formatDate(view.inventoryObservedAt)
             : undefined
+    const inventoryItems = useMemo(
+        () =>
+            view.installations.map((installation) => ({
+                id: installation.installationId,
+                label: installation.displayName,
+                description: [installation.moduleKey, installation.status, installation.installationId]
+                    .filter((part): part is string => part !== null)
+                    .join(" · "),
+            })),
+        [view.installations],
+    )
     return (
         <>
             <SurfaceListCard
                 label={labels.inventorySection}
                 {...(inventoryFact === undefined ? {} : { fact: inventoryFact })}
             >
-                {view.installations.map((installation) => (
-                    <StaticStateRow
-                        key={installation.installationId}
-                        item={{
-                            id: installation.installationId,
-                            label: installation.displayName,
-                            description: [installation.moduleKey, installation.status, installation.installationId]
-                                .filter((part): part is string => part !== null)
-                                .join(" · "),
-                        }}
-                    />
+                {inventoryItems.map((item) => (
+                    <StaticStateRow key={item.id} item={item} />
                 ))}
             </SurfaceListCard>
             {view.state === "installed-empty" ? (

@@ -15,6 +15,7 @@ import { createWalletOverlayViews } from "@/modules/wallet/wallet-center/overlay
 import { createWalletSectionViews } from "@/modules/wallet/wallet-center/views"
 import { readStored, removeStored, TOP_UP_SESSION_KEY, writeStored } from "@/modules/browser-storage"
 import { parseTopUpSession, readWalletWaypoint } from "@/modules/wallet/wallet-center/waypoint"
+import { parseCheckoutFields } from "@/modules/wallet/wallet-center/waypoint.guards"
 import { initialTopUpInteractionState, type InvoicePaymentState, type TopUpInteractionState } from "@/modules/wallet/wallet-center/interaction"
 import type { WalletControlCenterViewProps, WalletPageState } from "@/modules/wallet/wallet-center/types"
 import { BILLING_CURRENCY } from "@/modules/config"
@@ -129,20 +130,18 @@ export const useWalletControlCenter = (pageState: WalletPageState): WalletContro
         const form = document.createElement("form")
         form.method = "POST"
         form.action = answer.data.checkoutUrl
-        try {
-            const fields =
-                answer.data.checkoutFields === null ? {} : (JSON.parse(answer.data.checkoutFields) as Record<string, string>)
-            Object.entries(fields).forEach(([name, value]) => {
-                const input = document.createElement("input")
-                input.type = "hidden"
-                input.name = name
-                input.value = value
-                form.append(input)
-            })
-        } catch {
+        const fields = parseCheckoutFields(answer.data.checkoutFields)
+        if (fields === null) {
             setTopUp((current) => ({ ...current, error: t("wallet.checkoutInvalid"), pending: false }))
             return
         }
+        Object.entries(fields).forEach(([name, value]) => {
+            const input = document.createElement("input")
+            input.type = "hidden"
+            input.name = name
+            input.value = value
+            form.append(input)
+        })
         document.body.append(form)
         form.submit()
     }

@@ -12,8 +12,8 @@ export type AgentOSProvisioningStepsProps = {
 /** Draw the current purchase or readiness milestones. */
 export const AgentOSProvisioningSteps = (props: AgentOSProvisioningStepsProps) => (
     <SurfaceListCard label={props.label}>
-        {props.steps.map((step, index) => (
-            <div key={index} className={ROW_CLASS_NAME} data-contract="BOUNDARY-2 PADDING-4 PADDING-3">
+        {props.steps.map((step) => (
+            <div key={step.ordinal} className={ROW_CLASS_NAME} data-contract="BOUNDARY-2 PADDING-4 PADDING-3">
                 <LifecycleStep props={step} isLoading={props.isLoading} />
             </div>
         ))}

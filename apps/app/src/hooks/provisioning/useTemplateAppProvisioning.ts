@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { useTranslations } from "next-intl"
+import { app, appProvisioning, apps } from "@/modules/routes"
 import {
     useAccessToken,
     useMutateCreateAndPublishExpertSiteSwr,
@@ -82,14 +83,14 @@ export const useTemplateAppProvisioning = (context: TemplateAppProvisioningConte
                 return
             }
             setSubmitted({ phase: "accepted", siteId: published.data.id, subject: published.data.slug })
-            router.replace(`/apps/${published.data.id}/provisioning`)
+            router.replace(appProvisioning(published.data.id))
         } catch {
             setSubmitted({ phase: "failed", subject: siteSlug, reason: t("failedLoad") })
         }
     }
     const act = (actionFlow: TemplateFlow): void => {
-        if (actionFlow.phase === "ready") router.push(`/apps/${actionFlow.siteId}`)
-        else router.push("/apps")
+        if (actionFlow.phase === "ready") router.push(app(actionFlow.siteId))
+        else router.push(apps())
     }
     return { flow, t, realtime, changeSlug, submit, act }
 }

@@ -12,8 +12,8 @@ export const TemplateAppProvisioningBase = (props: TemplateAppProvisioningProps)
     const isRequest = state === "request" || state === "submitting"
     const journey = (
         <div>
-            {viewProps.steps.map((step, index) => (
-                <LifecycleStep key={index} props={step} isLoading={state === "catalog_loading"} />
+            {viewProps.steps.map((step) => (
+                <LifecycleStep key={step.ordinal} props={step} isLoading={state === "catalog_loading"} />
             ))}
         </div>
     )

@@ -8,6 +8,7 @@ import {
     useQueryWorkspaceCheckoutOffersSwr,
     useQueryWorkspaceCheckoutStatusSwr,
 } from "@/hooks"
+import { settle } from "@/modules/api/settle"
 import {
     agentOSFlowFromAnswers,
     realtimeTarget,
@@ -53,11 +54,8 @@ export const useAgentOSProvisioningFlow = (input: UseAgentOSProvisioningFlowInpu
     const refreshStatus = statusQuery.mutate
     const reconcile = useCallback(async (): Promise<void> => {
         if (!isResume) return
-        try {
-            await refreshStatus()
-        } catch {
-            // The last confirmed purchase remains the visible truth until a read answers.
-        }
+        // The last confirmed purchase remains the visible truth until a read answers, so the outcome is not read.
+        await settle(refreshStatus)
     }, [isResume, refreshStatus])
     const event = realtime.status === "event" ? realtime.event : null
     const eventKind = event?.kind
