@@ -26,7 +26,7 @@ const LeadFieldRow = ({ id, label, kind, locked }: LeadFieldRowProps) => (
         id={id}
         name={id}
         label={label}
-        kind={kind === "tel" ? "text" : kind}
+        kind={kind}
         placeholder={label}
         isRequired
         isDisabled={locked}

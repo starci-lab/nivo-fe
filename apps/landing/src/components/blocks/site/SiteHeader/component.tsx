@@ -156,6 +156,8 @@ export const SiteHeaderBase = (props: SiteHeaderProps) => {
                         source={IconSource("sidebar", "leading")}
                         label={data.open ? data.copy.closeNavigationLabel : data.copy.openNavigationLabel}
                         isActive={data.open}
+                        aria-controls={panelId}
+                        aria-expanded={data.open}
                         onPress={on.toggle}
                     />
                 </div>
