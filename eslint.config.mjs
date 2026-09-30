@@ -110,6 +110,14 @@ export default defineConfig([
             "jsx-a11y/no-static-element-interactions": "error",
             "jsx-a11y/label-has-associated-control": "error",
             "jsx-a11y/no-redundant-roles": "error",
+            "jsx-a11y/control-has-associated-label": "error",
+            "jsx-a11y/heading-has-content": "error",
+            "jsx-a11y/no-autofocus": "error",
+            "jsx-a11y/interactive-supports-focus": "error",
+            // The plugin's own recommended options: an image's load and error events report a fact about
+            // the resource and give the image no interaction, so `img` keeps `onError` and `onLoad`.
+            "jsx-a11y/no-noninteractive-element-interactions":
+                jsxA11y.flatConfigs.recommended.rules["jsx-a11y/no-noninteractive-element-interactions"],
         },
     },
     {

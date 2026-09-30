@@ -29,6 +29,7 @@ const LeadFieldRow = ({ id, label, kind, locked }: LeadFieldRowProps) => (
         <input
             id={id}
             name={id}
+            aria-label={label}
             type={kind}
             placeholder={label}
             required

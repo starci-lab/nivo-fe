@@ -7,7 +7,7 @@ describe("Label", () => {
         render(
             <>
                 <Label props={{ htmlFor: "email", content: "Email", icon: "email" }} />
-                <input id="email" />
+                <input id="email" aria-label="Email" />
             </>,
         )
         expect(screen.getByRole("textbox", { name: "Email" })).toBeInTheDocument()
