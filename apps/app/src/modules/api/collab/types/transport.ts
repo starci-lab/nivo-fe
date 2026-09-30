@@ -1,4 +1,4 @@
-import type { Outcome } from '../../outcome'
+import type { Outcome } from "@nivo/api"
 import type { CollabGatewayRequest } from './gateway'
 import type { CollabOperation } from './operation'
 

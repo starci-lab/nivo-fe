@@ -18,7 +18,7 @@ describe("useWorkbenchCommand", () => {
         const { result } = renderHook(useCommand)
 
         await act(async () => {
-            await result.current.settle({
+            await result.current.settle<Answer>({
                 key: "submit",
                 value: { id: "one" },
                 press: async () => ({ ok: false, code: "denied" }),
@@ -66,7 +66,7 @@ describe("useWorkbenchCommand", () => {
         expect(result.current.isPending("submit")).toBe(false)
 
         await act(async () => {
-            await result.current.settle({
+            await result.current.settle<Answer>({
                 ...command,
                 readback: async () => ({ ok: true, data: "confirmed" }),
             })
@@ -76,7 +76,7 @@ describe("useWorkbenchCommand", () => {
         expect(result.current.notice).toEqual({ kind: "success", message: "confirmed" })
 
         await act(async () => {
-            await result.current.settle({
+            await result.current.settle<Answer>({
                 ...command,
                 readback: async () => ({ ok: true, data: "confirmed again" }),
             })

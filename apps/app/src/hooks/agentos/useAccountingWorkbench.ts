@@ -239,7 +239,7 @@ export const useAccountingWorkbench = (moduleId: string, locale: string, t: Acco
             expectedRevision: Number(intakeRevision),
         }
         const key = `admit-${evidenceId}`
-        void workbenchCommand.settle({
+        void workbenchCommand.settle<CommandAnswer>({
             key,
             value,
             press: (requestId) => admit.trigger({ requestId, input: value }),
@@ -261,7 +261,7 @@ export const useAccountingWorkbench = (moduleId: string, locale: string, t: Acco
             expectedItemRevision: Number(itemRevision),
         }
         const key = `routine-${intentId}`
-        void workbenchCommand.settle({
+        void workbenchCommand.settle<CommandAnswer>({
             key,
             value,
             press: (requestId) => routineCommand.trigger({ requestId, input: value }),
@@ -280,7 +280,7 @@ export const useAccountingWorkbench = (moduleId: string, locale: string, t: Acco
             return
         const value = { action: "retry" as const, intentId, oldAttemptId, notStartedProofRef, newAttemptId }
         const key = `routine-retry-${intentId}`
-        void workbenchCommand.settle({
+        void workbenchCommand.settle<CommandAnswer>({
             key,
             value,
             press: (requestId) => routineCommand.trigger({ requestId, input: value }),
@@ -301,7 +301,7 @@ export const useAccountingWorkbench = (moduleId: string, locale: string, t: Acco
             expectedRevision: Number(exceptionRevision),
         }
         const key = `exception-${action}-${exceptionId}`
-        void workbenchCommand.settle({
+        void workbenchCommand.settle<CommandAnswer>({
             key,
             value,
             press: (requestId) => exceptionCommand.trigger({ requestId, input: value }),
@@ -323,7 +323,7 @@ export const useAccountingWorkbench = (moduleId: string, locale: string, t: Acco
             expectedRevision: Number(exceptionRevision),
         }
         const key = `exception-answer-${exceptionId}`
-        void workbenchCommand.settle({
+        void workbenchCommand.settle<CommandAnswer>({
             key,
             value,
             press: (requestId) => exceptionCommand.trigger({ requestId, input: value }),
@@ -396,7 +396,7 @@ export const useAccountingWorkbench = (moduleId: string, locale: string, t: Acco
             expectedResultRevision: Number(correctionRevision),
         }
         const key = `correct-${correctionId}`
-        void workbenchCommand.settle({
+        void workbenchCommand.settle<CommandAnswer>({
             key,
             value,
             press: (requestId) => correction.trigger({ requestId, input: value }),
@@ -413,7 +413,7 @@ export const useAccountingWorkbench = (moduleId: string, locale: string, t: Acco
             expectedRevision: Number(correctionRevision),
         }
         const key = `correct-append-${correctionId}`
-        void workbenchCommand.settle({
+        void workbenchCommand.settle<CommandAnswer>({
             key,
             value,
             press: (requestId) => correction.trigger({ requestId, input: value }),
