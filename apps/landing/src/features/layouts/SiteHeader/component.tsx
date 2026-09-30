@@ -5,7 +5,7 @@ import { Button, PageContainer, TextAction } from "@starci/grammar/common"
 import { SITE_CLASS_NAMES } from "../SiteShell"
 
 /** One resolved destination: its words and the address for the language being rendered. */
-export type SiteHeaderLink = {
+type SiteHeaderLink = {
     readonly id: string
     readonly label: string
     readonly href: string
@@ -21,7 +21,7 @@ export type SiteHeaderEntry =
       }
 
 /** The sentences the header draws, resolved from the catalog by the connected half. */
-export type SiteHeaderCopy = {
+type SiteHeaderCopy = {
     readonly homeLabel: string
     readonly primaryNavigationLabel: string
     readonly mobileNavigationLabel: string
@@ -33,7 +33,7 @@ export type SiteHeaderCopy = {
 }
 
 /** The addresses the header links to, localised by the connected half. */
-export type SiteHeaderHrefs = {
+type SiteHeaderHrefs = {
     readonly home: string
     readonly login: string
     readonly contact: string
@@ -90,7 +90,7 @@ const NavigationList = ({ navigation, variant, onFollow }: NavigationListProps) 
 )
 
 /** The disclosure's settled situation: whether the compact navigation is open. */
-export type SiteHeaderBaseData = {
+type SiteHeaderBaseData = {
     readonly open: boolean
     readonly copy: SiteHeaderCopy
     readonly hrefs: SiteHeaderHrefs
@@ -101,18 +101,18 @@ export type SiteHeaderBaseData = {
 export const SITE_MENU_TRIGGER_ID = "site-menu-trigger"
 
 /** The disclosure's commands back into the connected half. */
-export type SiteHeaderBaseActions = {
+type SiteHeaderBaseActions = {
     readonly toggle: () => void
     readonly follow: () => void
 }
 
 /** The mounted control the header hosts but does not own. */
-export type SiteHeaderBaseState = {
+type SiteHeaderBaseState = {
     readonly themeControl: ReactNode
 }
 
 /** Props for {@link SiteHeaderBase}: the hosted control, the disclosure's situation and its commands. */
-export type SiteHeaderBaseProps = {
+type SiteHeaderBaseProps = {
     readonly state: SiteHeaderBaseState
     readonly props: SiteHeaderBaseData
     readonly on: SiteHeaderBaseActions

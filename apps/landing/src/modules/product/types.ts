@@ -5,7 +5,7 @@ import type { useTranslations } from "next-intl"
 export type ProductPageId = "nivoOs" | "systemOfResponsibility" | "applications" | "pricing"
 
 /** A destination: a site path, a fragment, or (activation) the destination that is published later. */
-export type ActionStructure = {
+type ActionStructure = {
     readonly key: string
     readonly appearance: "primary" | "secondary" | "tertiary" | "link"
     readonly href?: string
@@ -13,7 +13,7 @@ export type ActionStructure = {
 }
 
 /** One card of a cards block: its catalog key, an optional in-page anchor and its emphasis. */
-export type CardStructure = {
+type CardStructure = {
     readonly key: string
     readonly anchor?: string
     readonly labelled?: true
@@ -21,10 +21,10 @@ export type CardStructure = {
 }
 
 /** One next-path card: its catalog key and where it leads (a site path, or the activation destination). */
-export type PathStructure = { readonly key: string; readonly href?: string; readonly activation?: true }
+type PathStructure = { readonly key: string; readonly href?: string; readonly activation?: true }
 
 /** One commercial offer card: its catalog key, its bullet ids and its call to action. */
-export type OfferStructure = {
+type OfferStructure = {
     readonly key: string
     readonly featured?: true
     readonly bullets: ReadonlyArray<string>

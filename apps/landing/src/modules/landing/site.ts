@@ -1,12 +1,12 @@
 /** One public destination owned by the NIVO information architecture. */
-export type SiteLink = {
+type SiteLink = {
     readonly id: string
     readonly href: string
     readonly external?: boolean
 }
 
 /** A first-level navigation item with at most one discovery layer. */
-export type SiteNavigationItem =
+type SiteNavigationItem =
     | SiteLink
     | {
           readonly id: string

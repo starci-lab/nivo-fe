@@ -12,7 +12,7 @@ import { CLASS_NAMES } from "./classNames"
 export const CONTACT_INTENT_IDS = ["product", "partnership", "institution", "media", "talent", "general"] as const
 
 /** One canonical relationship-routing intent. */
-export type ContactIntentId = (typeof CONTACT_INTENT_IDS)[number]
+type ContactIntentId = (typeof CONTACT_INTENT_IDS)[number]
 
 /** The direct paths a visitor can take; the catalog labels them under `contact.paths`. */
 const PATH_HREFS = {

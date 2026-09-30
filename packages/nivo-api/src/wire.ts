@@ -33,14 +33,6 @@ export const isNullableBoolean = (value: unknown): value is boolean | null => va
 export const isStringArray = (value: unknown): value is ReadonlyArray<string> =>
     Array.isArray(value) && value.every(isString)
 
-/** An array whose every element is a finite number. */
-export const isNumberArray = (value: unknown): value is ReadonlyArray<number> =>
-    Array.isArray(value) && value.every(isNumber)
-
-/** An array whose every element is a record. */
-export const isRecordArray = (value: unknown): value is ReadonlyArray<Record<string, unknown>> =>
-    Array.isArray(value) && value.every(isRecord)
-
 /** Membership in a closed string vocabulary, as a narrowing the compiler can follow. */
 export const isOneOf = <Value extends string>(value: unknown, choices: ReadonlyArray<Value>): value is Value =>
     isString(value) && choices.some((choice) => choice === value)
@@ -53,21 +45,6 @@ export const parseEach = <T>(value: unknown, parse: (input: unknown) => T | null
         const item = parse(entry)
         if (item === null) return null
         parsed.push(item)
-    }
-    return parsed
-}
-
-/** A record of wire values whose every entry parses, or null for the first that is not. */
-export const parseRecordOf = <T>(
-    value: unknown,
-    parse: (input: unknown) => T | null,
-): Record<string, T> | null => {
-    if (!isRecord(value)) return null
-    const parsed: Record<string, T> = {}
-    for (const key of Object.keys(value)) {
-        const item = parse(value[key])
-        if (item === null) return null
-        parsed[key] = item
     }
     return parsed
 }

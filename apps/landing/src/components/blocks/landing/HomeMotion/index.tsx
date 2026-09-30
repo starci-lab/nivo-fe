@@ -7,15 +7,15 @@ import { CLASS_NAMES } from "./classNames"
 type RevealDirection = "up" | "left" | "right"
 
 /** Content revealed as the homepage hero enters the viewport. */
-export type HomeMotionHeroRevealProps = { readonly children: ReactNode }
+type HomeMotionHeroRevealProps = { readonly children: ReactNode }
 /** Content revealed as one narrative section enters the viewport. */
-export type HomeMotionSectionRevealProps = {
+type HomeMotionSectionRevealProps = {
     readonly children: ReactNode
     readonly delay?: number
     readonly direction?: RevealDirection
 }
 /** One operating-role card and its stagger position. */
-export type HomeMotionRoleCardProps = { readonly children: ReactNode; readonly index: number }
+type HomeMotionRoleCardProps = { readonly children: ReactNode; readonly index: number }
 
 /** Motion-safe reveal for the public homepage hero. */
 export const HomeMotionHeroReveal = (props: HomeMotionHeroRevealProps) => {

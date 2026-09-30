@@ -16,13 +16,13 @@ import type { Course } from "@/modules/api/academy"
  */
 
 /** The atoms the landing screen draws. */
-export type AcademyPageBaseData = {
+type AcademyPageBaseData = {
     /** The catalog this academy sells, already resolved. */
     readonly courses: ReadonlyArray<Course>
 }
 
 /** Props for {@link AcademyPageBase}. */
-export type AcademyPageBaseProps = {
+type AcademyPageBaseProps = {
     readonly props: AcademyPageBaseData
 }
 const AcademyRoutedContent = ({ courses }: AcademyPageBaseData) => (

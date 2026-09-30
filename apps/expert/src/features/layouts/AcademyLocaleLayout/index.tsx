@@ -11,7 +11,7 @@ import { routing, toLocale } from "@/modules/i18n"
 import type { ComponentProps } from "react"
 
 /** The routed locale segment, awaited by every handler in this file. */
-export type LocaleSegment = {
+type LocaleSegment = {
     /** Next hands the dynamic segment over as a promise. */
     readonly params: Promise<{
         readonly locale: string

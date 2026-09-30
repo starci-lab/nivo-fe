@@ -100,7 +100,7 @@ export const inLocale = <T>(value: Localized<T> | undefined, locale: Locale): T 
 export type ThemeVariables = Record<string, string>
 
 /** A template's overrides for both colour schemes. `dark` may be omitted entirely. */
-export type AcademyTheme = {
+type AcademyTheme = {
     readonly light?: ThemeVariables
     readonly dark?: ThemeVariables
 }
@@ -122,34 +122,6 @@ export const isSafeThemeValue = (value: string): boolean =>
     !/[;{}<>]/.test(value) &&
     !/url\s*\(|expression\s*\(|@import/i.test(value)
 
-/**
- * Every section this app knows how to draw, in catalog order.
- *
- * This list must stay identical to the backend's `LANDING_SECTION_KEYS`. A key the backend sends
- * that is missing here is skipped rather than rendered, which is how an older build survives a
- * newer catalog; the cost is a section the expert configured and cannot see, so the two lists
- * drifting is a real defect and not a tolerance.
- */
-export const SYSTEM_SECTION_KEYS = [
-    "hero",
-    "problems",
-    "outcomes",
-    "roadmap",
-    "instructor",
-    "stats",
-    "testimonials",
-    "gallery",
-    "courses",
-    "community",
-    "offer",
-    "faq",
-    "magnet",
-    "lead",
-] as const
-
-/** One of the fixed sections. */
-export type SystemSectionKey = (typeof SYSTEM_SECTION_KEYS)[number]
-
 /** What marks a section the expert wrote rather than one the product ships. */
 export const CUSTOM_SECTION_PREFIX = "custom:"
 
@@ -163,16 +135,16 @@ export const CUSTOM_SECTION_PREFIX = "custom:"
  * that reads as a system notice, which is the deception BR-B07 exists to prevent, reached through
  * layout instead of through an input field.
  */
-export type CustomVariant = "stack" | "image-left" | "image-right" | "quote" | "columns" | "cta"
+type CustomVariant = "stack" | "image-left" | "image-right" | "quote" | "columns" | "cta"
 
 /** The single onward link an expert-authored section may carry. Never a field. */
-export type CustomAction = {
+type CustomAction = {
     readonly label: string
     readonly href: string
 }
 
 /** One item inside the `columns` shape. */
-export type CustomColumn = {
+type CustomColumn = {
     readonly title: string
     readonly text?: string
 }
@@ -199,7 +171,7 @@ export type CustomContent = {
 }
 
 /** One row of the stored layout. Position in the array IS render order. */
-export type LayoutSection = {
+type LayoutSection = {
     /** A catalog key, or `custom:<id>` for one the expert wrote. */
     readonly key: string
     readonly visible: boolean
@@ -254,7 +226,7 @@ export type Magnet = {
 }
 
 /** Everything provisioning writes into this instance. */
-export type AcademyIdentity = {
+type AcademyIdentity = {
     /** The academy's own name, shown in the header and the document title. */
     readonly name: Localized<string>
     readonly tagline: Localized<string>
@@ -268,7 +240,7 @@ export type AcademyIdentity = {
  * and three English ones is a normal thing for a real academy, and a per-leaf `{ vi, en }` would
  * have forbidden it while making every value harder to read and to diff.
  */
-export type AcademyContent = {
+type AcademyContent = {
     readonly instructor?: Localized<Instructor>
     readonly testimonials: Localized<ReadonlyArray<Testimonial>>
     readonly stats: Localized<ReadonlyArray<Stat>>
@@ -280,7 +252,7 @@ export type AcademyContent = {
 }
 
 /** Which sections render, and in what order. */
-export type AcademyLayout = {
+type AcademyLayout = {
     /** The full ordered section list, exactly as `TenantBrandEntity.layoutConfig` stores it. */
     readonly sections: ReadonlyArray<LayoutSection>
 }
@@ -306,7 +278,7 @@ export type AcademyLayout = {
  * the backend says the same thing about the `courses` section, which "carries no content here
  * because it already knows its own". That absence is what makes re-applying a template safe.
  */
-export type AcademyTemplate = {
+type AcademyTemplate = {
     readonly identity: AcademyIdentity
     /** HeroUI variable overrides, per colour scheme. Emitted as the vendor's own theming block. */
     readonly theme: AcademyTheme

@@ -31,7 +31,7 @@ export const HOMEPAGE_TRUST_TITLE = ["evidence", "trust", "permission"] as const
 export const HOMEPAGE_FOCUS = ["lead", "revenue"] as const
 
 /** The language of the page and the name of the homepage in that language. */
-export type HomepageStructuredDataInput = {
+type HomepageStructuredDataInput = {
     readonly locale: string
     readonly name: string
 }

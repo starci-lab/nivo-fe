@@ -2,7 +2,7 @@ import type { ReactNode } from "react"
 import { ACADEMY_MAIN_ID, ACADEMY_SKIP_LINK_CLASS_NAME, ACADEMY_TOOLBAR_CLASS_NAME } from "./classNames"
 
 /** The rendered tree the chrome wraps: state, never an atom. */
-export type AcademyChromeBaseState = {
+type AcademyChromeBaseState = {
     /**
      * The routed page to wrap. Opaque on purpose -- this component styles a document, not a tree.
      *
@@ -18,7 +18,7 @@ export type AcademyChromeBaseState = {
 }
 
 /** The atoms the chrome draws: both stylesheets, already rendered as text one file away. */
-export type AcademyChromeBaseData = {
+type AcademyChromeBaseData = {
     /**
      * The academy's theme and ground, already rendered as CSS text by the connected half.
      *
@@ -34,7 +34,7 @@ export type AcademyChromeBaseData = {
 }
 
 /** Props for {@link AcademyChromeBase}. */
-export type AcademyChromeBaseProps = {
+type AcademyChromeBaseProps = {
     readonly state: AcademyChromeBaseState
     readonly props: AcademyChromeBaseData
 }

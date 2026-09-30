@@ -9,7 +9,7 @@ export type LocaleParams = { readonly params: Promise<{ readonly locale: string 
 const OPEN_GRAPH_LOCALE = { vi: "vi_VN", en: "en_US" } as const satisfies Record<Locale, string>
 
 /** Which page's metadata to build: its catalog namespace, its site path, and whether its title stands alone. */
-export type PageMetadataInput = LocaleParams & {
+type PageMetadataInput = LocaleParams & {
     readonly page: string
     readonly path: string
     readonly absolute?: boolean

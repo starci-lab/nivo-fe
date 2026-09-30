@@ -41,8 +41,3 @@ export const productSelectorLinkClassName = (context: ProductBlockContext, index
         needSelector && index % 2 === 1 && "max-[769px]:translate-y-0",
     )
 }
-
-/** Accessible-only utility roles shared by product selectors. */
-export const PRODUCT_SELECTOR_CLASS_NAMES = {
-    screenReaderOnly: cn("sr-only"),
-} as const

@@ -5,7 +5,7 @@ import type { ReactNode } from "react"
 import { HomeMotionHeroParallaxBase } from "./component"
 
 /** Hero artwork connected to native scroll progress. */
-export type HomeMotionHeroParallaxProps = { readonly children: ReactNode; readonly distance?: number }
+type HomeMotionHeroParallaxProps = { readonly children: ReactNode; readonly distance?: number }
 
 /** Resolve the active locale's formatter, then hand the artwork to the pure parallax. */
 export const HomeMotionHeroParallax = (props: HomeMotionHeroParallaxProps) => {

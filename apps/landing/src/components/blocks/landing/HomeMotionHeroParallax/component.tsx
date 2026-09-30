@@ -3,22 +3,22 @@ import { useRef, useState, type PointerEvent as ReactPointerEvent, type ReactNod
 import { CLASS_NAMES, homeSpotlightClassName } from "./classNames"
 
 /** The hero artwork the parallax carries. */
-export type HomeMotionHeroParallaxBaseState = {
+type HomeMotionHeroParallaxBaseState = {
     readonly artwork: ReactNode
 }
 
 /** How far the scroll moves the artwork. */
-export type HomeMotionHeroParallaxBaseData = {
+type HomeMotionHeroParallaxBaseData = {
     readonly distance: number
 }
 
 /** The locale's percent formatting, resolved by the connected half. */
-export type HomeMotionHeroParallaxBaseActions = {
+type HomeMotionHeroParallaxBaseActions = {
     readonly formatPercent: (value: number) => string
 }
 
 /** Props for {@link HomeMotionHeroParallaxBase}: the carried artwork and the locale formatter. */
-export type HomeMotionHeroParallaxBaseProps = {
+type HomeMotionHeroParallaxBaseProps = {
     readonly state: HomeMotionHeroParallaxBaseState
     readonly props: HomeMotionHeroParallaxBaseData
     readonly on: HomeMotionHeroParallaxBaseActions
