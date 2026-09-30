@@ -28,12 +28,12 @@ const ENDING_COPY: ReadonlyArray<string> = [
     VI_ENDING.title,
     VI_ENDING.description,
     VI_ENDING.scopeNote,
-    VI_ENDING.confirm,
+    viMessages.console.account.signOutEverywhere,
     VI_ENDING.pending,
     EN_ENDING.title,
     EN_ENDING.description,
     EN_ENDING.scopeNote,
-    EN_ENDING.confirm,
+    enMessages.console.account.signOutEverywhere,
     EN_ENDING.pending,
 ]
 

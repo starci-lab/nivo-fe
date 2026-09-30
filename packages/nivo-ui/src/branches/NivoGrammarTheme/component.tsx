@@ -1,6 +1,6 @@
 import type { ReactNode } from "react"
 import { NivoGrammarRoot } from "../../leaves/NivoGrammar"
-import type { ThemeMode } from "../ThemeMenu"
+import type { ThemeMode } from "../../composites/ThemeMenu"
 
 type NivoGrammarThemeViewProps = {
     readonly props: { readonly theme: ThemeMode }

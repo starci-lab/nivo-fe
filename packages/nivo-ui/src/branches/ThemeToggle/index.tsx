@@ -3,7 +3,7 @@
 import { useTranslations } from "next-intl"
 import { useTheme } from "next-themes"
 import { useIsHydrated } from "../../hooks/hydration/useIsHydrated"
-import { THEME_MODES, type ThemeMode } from "../ThemeMenu"
+import { THEME_MODES, type ThemeMode } from "../../composites/ThemeMenu"
 import ThemeToggleView from "./component"
 
 /** Props for {@link ThemeToggle}. */

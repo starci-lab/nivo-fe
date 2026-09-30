@@ -3,7 +3,7 @@
 import { useTheme } from "next-themes"
 import type { ReactNode } from "react"
 import { useIsHydrated } from "../../hooks/hydration/useIsHydrated"
-import type { ThemeMode } from "../ThemeMenu"
+import type { ThemeMode } from "../../composites/ThemeMenu"
 import NivoGrammarThemeView from "./component"
 
 /** Props for {@link NivoGrammarTheme}: the routed stream the palette scopes. */

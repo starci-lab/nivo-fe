@@ -13,6 +13,7 @@ import enMessages from "../../../../messages/en.json"
 /** The view contract resolves copy through the locale catalogs; tests bind the real English strings. */
 const copy: PurchaseStatusCopy = {
     ...enMessages.console.agentos.purchaseStatus,
+    realtimeReconnect: enMessages.console.provisioningFlows.connecting,
     renewalAutoAt: (date) => `Auto-renews ${date}`,
     renewalManualAt: (date) => `Manual re-authorization by ${date}`,
     rechecksOnly: (attempt) => `Rechecks ${attempt} only`,

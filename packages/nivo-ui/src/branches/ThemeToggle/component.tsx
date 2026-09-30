@@ -1,5 +1,5 @@
-import type { ThemeMenuActions, ThemeMenuData } from "../ThemeMenu"
-import { ThemeMenu } from "../ThemeMenu"
+import type { ThemeMenuActions, ThemeMenuData } from "../../composites/ThemeMenu"
+import { ThemeMenu } from "../../composites/ThemeMenu"
 
 type ThemeToggleViewProps = {
     readonly props: ThemeMenuData
