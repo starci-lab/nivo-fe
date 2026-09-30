@@ -15,29 +15,17 @@ type ProductFlowProps = {
 /** Product flows show ordered operating steps with a responsive timeline. */
 export const ProductFlow = (props: ProductFlowProps) => {
     const { block, context } = props
+    const t = context.t
     const steps = block.steps.map((step) => ({
         key: step,
-        label: context.t(
-            context.page + ".sections." + context.section.key + "." + block.key + ".steps." + step + ".label",
-        ),
-        description: context.t(
-            context.page +
-                ".sections." +
-                context.section.key +
-                "." +
-                block.key +
-                ".steps." +
-                step +
-                ".description",
-        ),
+        label: t(`${context.page}.sections.${context.section.key}.${block.key}.steps.${step}.label`),
+        description: t(`${context.page}.sections.${context.section.key}.${block.key}.steps.${step}.description`),
     }))
     return (
         <figure>
             <ol
                 className={productFlowClassName(context, block.steps.length)}
-                aria-label={context.t(
-                    context.page + ".sections." + context.section.key + "." + block.key + ".label",
-                )}
+                aria-label={t(`${context.page}.sections.${context.section.key}.${block.key}.label`)}
             >
                 {steps.map((step) => (
                     <li className={productFlowStepClassName(context)} key={step.key}>

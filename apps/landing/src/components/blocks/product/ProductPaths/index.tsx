@@ -15,47 +15,21 @@ type ProductPathsProps = {
 /** Directional product paths keep the route choices separate from the current offer. */
 export const ProductPaths = (props: ProductPathsProps) => {
     const { block, context, renderAction } = props
+    const t = context.t
     return (
         <div className={styles.grid}>
         {block.items.map((path, index) => (
             <article className={productPathClassName(context)} key={path.key}>
                 <span className={styles.pathIndex}>0{index + 1}</span>
                 <Text as="p" size="xs" tone="accent" weight="semibold">
-                    {context.t(
-                        context.page +
-                            ".sections." +
-                            context.section.key +
-                            "." +
-                            block.key +
-                            ".items." +
-                            path.key +
-                            ".label",
-                    )}
+                    {t(`${context.page}.sections.${context.section.key}.${block.key}.items.${path.key}.label`)}
                 </Text>
                 <Heading level={3}>
-                    {context.t(
-                        context.page +
-                            ".sections." +
-                            context.section.key +
-                            "." +
-                            block.key +
-                            ".items." +
-                            path.key +
-                            ".title",
-                    )}
+                    {t(`${context.page}.sections.${context.section.key}.${block.key}.items.${path.key}.title`)}
                 </Heading>
                 <div className={styles.body}>
                     <Text as="p" size="sm" tone="muted">
-                        {context.t(
-                            context.page +
-                                ".sections." +
-                                context.section.key +
-                                "." +
-                                block.key +
-                                ".items." +
-                                path.key +
-                                ".body",
-                        )}
+                        {t(`${context.page}.sections.${context.section.key}.${block.key}.items.${path.key}.body`)}
                     </Text>
                 </div>
                 <div className={styles.action}>
@@ -66,16 +40,7 @@ export const ProductPaths = (props: ProductPathsProps) => {
                             activation: path.activation,
                             appearance: "link",
                         },
-                        context.t(
-                            context.page +
-                                ".sections." +
-                                context.section.key +
-                                "." +
-                                block.key +
-                                ".items." +
-                                path.key +
-                                ".action",
-                        ),
+                        t(`${context.page}.sections.${context.section.key}.${block.key}.items.${path.key}.action`),
                         context.href,
                     )}
                 </div>

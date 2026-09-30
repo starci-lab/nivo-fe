@@ -15,13 +15,14 @@ const badgeTone = (tone: string): "neutral" | "accent" | "warning" | "success" =
 /** Product status pairs a concise state badge with its supporting detail. */
 export const ProductStatus = (props: ProductStatusProps) => {
     const { block, context } = props
+    const t = context.t
     return (
     <div className={productStatusClassName(context)}>
         <Badge tone={badgeTone(block.tone)}>
-            {context.t(context.page + ".sections." + context.section.key + "." + block.key + ".label")}
+            {t(`${context.page}.sections.${context.section.key}.${block.key}.label`)}
         </Badge>
         <Text as="span" size="xs" tone="muted">
-            {context.t(context.page + ".sections." + context.section.key + "." + block.key + ".detail")}
+            {t(`${context.page}.sections.${context.section.key}.${block.key}.detail`)}
         </Text>
     </div>
     )

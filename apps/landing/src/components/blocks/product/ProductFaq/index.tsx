@@ -9,33 +9,16 @@ type ProductFaqProps = {
 /** Product FAQs keep each answer available through native disclosure controls. */
 export const ProductFaq = (props: ProductFaqProps) => {
     const { block, context } = props
+    const t = context.t
     return (
     <div className={styles.list}>
         {block.items.map((item) => (
             <details className={styles.item} key={item}>
                 <summary className={styles.summary}>
-                    {context.t(
-                        context.page +
-                            ".sections." +
-                            context.section.key +
-                            "." +
-                            block.key +
-                            ".items." +
-                            item +
-                            ".question",
-                    )}
+                    {t(`${context.page}.sections.${context.section.key}.${block.key}.items.${item}.question`)}
                 </summary>
                 <div className={styles.answer}>
-                    {context.t(
-                        context.page +
-                            ".sections." +
-                            context.section.key +
-                            "." +
-                            block.key +
-                            ".items." +
-                            item +
-                            ".answer",
-                    )}
+                    {t(`${context.page}.sections.${context.section.key}.${block.key}.items.${item}.answer`)}
                 </div>
             </details>
         ))}

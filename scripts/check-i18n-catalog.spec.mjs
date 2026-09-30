@@ -1,6 +1,9 @@
 import assert from "node:assert/strict"
+import { mkdtempSync, mkdirSync, rmSync, writeFileSync } from "node:fs"
+import { tmpdir } from "node:os"
+import { join } from "node:path"
 import { test } from "node:test"
-import { checkApp, flattenCatalog, scanSource } from "./check-i18n-catalog.mjs"
+import { checkApp, checkRepository, flattenCatalog, scanSource } from "./check-i18n-catalog.mjs"
 
 const run = ({ en, vi = en, files }) =>
     checkApp({
@@ -56,6 +59,62 @@ test("a computed key reads only the leaves it can match", () => {
         findings.map((finding) => finding.message),
         ['fixture: key "home.other" is never read'],
     )
+})
+
+test("a template namespace matches leaves for each dynamic page", () => {
+    const findings = run({
+        en: {
+            product: {
+                pricing: { metadata: { title: "Pricing", description: "Pricing details" } },
+                applications: { metadata: { title: "Applications", description: "Applications details" } },
+            },
+        },
+        files: {
+            "a.ts":
+                'const t = getTranslations({ namespace: `${page}.metadata` }); t("title"); t("description")',
+        },
+    })
+    assert.deepEqual(findings, [])
+})
+
+test("a shared package translator uses the namespace passed by its app component", () => {
+    const root = mkdtempSync(join(tmpdir(), "i18n-package-consumer-"))
+    const appSource = join(root, "apps", "landing", "src")
+    const appMessages = join(appSource, "messages")
+    const packageSource = join(root, "packages", "nivo-ui", "src")
+    const catalog = {
+        site: {
+            theme: {
+                label: "Theme",
+                options: { system: "System", light: "Light", dark: "Dark" },
+            },
+        },
+    }
+
+    try {
+        mkdirSync(appMessages, { recursive: true })
+        mkdirSync(packageSource, { recursive: true })
+        writeFileSync(join(root, "packages", "nivo-ui", "package.json"), JSON.stringify({ name: "@nivo/ui" }))
+        writeFileSync(join(appMessages, "en.json"), JSON.stringify(catalog))
+        writeFileSync(join(appMessages, "vi.json"), JSON.stringify(catalog))
+        writeFileSync(
+            join(appSource, "header.tsx"),
+            'import { ThemeToggle as ThemeControl } from "@nivo/ui"\n' +
+                'export const Header = () => <ThemeControl namespace="site.theme" />\n',
+        )
+        writeFileSync(
+            join(packageSource, "ThemeToggle.tsx"),
+            'import { useTranslations } from "next-intl"\n' +
+                'export const ThemeToggle = ({ namespace }: { readonly namespace: string }) => {\n' +
+                '    const t = useTranslations(namespace)\n' +
+                '    return <button>{t("label")}{t(`options.${mode}`)}</button>\n' +
+                '}\n',
+        )
+
+        assert.deepEqual(checkRepository(root), [])
+    } finally {
+        rmSync(root, { recursive: true, force: true })
+    }
 })
 
 test("a leaf nothing reads is dead", () => {

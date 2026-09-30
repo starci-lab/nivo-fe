@@ -81,6 +81,7 @@ const renderProductAction: ProductActionRenderer = (action, label, href) => {
 
 const ProductBlock = (props: ProductBlockProps) => {
     const { block, context, renderAction } = props
+    const t = context.t
     if (block.kind === "cards")
         return (
             <div className={PRODUCT_SECTION_CLASS_NAMES.block} key={block.key}>
@@ -119,15 +120,7 @@ const ProductBlock = (props: ProductBlockProps) => {
                 {block.items.map((action) =>
                     renderAction(
                         action,
-                        context.t(
-                            context.page +
-                                ".sections." +
-                                context.section.key +
-                                "." +
-                                block.key +
-                                ".items." +
-                                action.key,
-                        ),
+                        t(`${context.page}.sections.${context.section.key}.${block.key}.items.${action.key}`),
                         context.href,
                     ),
                 )}
@@ -148,8 +141,8 @@ export const ProductPage = (props: ProductPageProps) => {
     const structuredData = JSON.stringify({
         "@context": "https://schema.org",
         "@type": "WebPage",
-        name: t(page + ".metadata.title"),
-        description: t(page + ".metadata.description"),
+        name: t(`${page}.metadata.title`),
+        description: t(`${page}.metadata.description`),
         url: PUBLIC_SITE_URL + href(structure.path),
         inLanguage: locale,
         isPartOf: { "@id": PUBLIC_SITE_URL + "/#website" },
@@ -178,11 +171,11 @@ export const ProductPage = (props: ProductPageProps) => {
                             intro={
                                 <SectionIntro
                                     id={section.id}
-                                    eyebrow={t(page + ".sections." + section.key + ".eyebrow")}
-                                    title={t(page + ".sections." + section.key + ".title")}
+                                    eyebrow={t(`${page}.sections.${section.key}.eyebrow`)}
+                                    title={t(`${page}.sections.${section.key}.title`)}
                                     description={
                                         section.description
-                                            ? t(page + ".sections." + section.key + ".description")
+                                            ? t(`${page}.sections.${section.key}.description`)
                                             : undefined
                                     }
                                     inverse={inverse}

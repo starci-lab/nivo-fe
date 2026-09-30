@@ -97,18 +97,23 @@ const keyArgumentsOf = (argument) => {
     return [argument]
 }
 
-const namespaceOfFactoryCall = (call) => {
+const namespaceOfFactoryCall = (call, namespaceOverrides) => {
     const [first] = call.arguments
     if (first === undefined) return ""
     if (ts.isStringLiteralLike(first)) return first.text
+    if (ts.isIdentifier(first) && Object.prototype.hasOwnProperty.call(namespaceOverrides, first.text))
+        return namespaceOverrides[first.text]
     if (ts.isObjectLiteralExpression(first)) {
         for (const property of first.properties) {
+            if (!ts.isPropertyAssignment(property) || property.name.getText() !== "namespace") continue
             if (
-                ts.isPropertyAssignment(property) &&
-                property.name.getText() === "namespace" &&
-                ts.isStringLiteralLike(property.initializer)
+                ts.isIdentifier(property.initializer) &&
+                Object.prototype.hasOwnProperty.call(namespaceOverrides, property.initializer.text)
             )
-                return property.initializer.text
+                return namespaceOverrides[property.initializer.text]
+            const pattern = keyPatternOf(property.initializer)
+            if (pattern !== undefined) return pattern.text
+            return undefined
         }
         return ""
     }
@@ -118,7 +123,7 @@ const namespaceOfFactoryCall = (call) => {
 const unwrapAwait = (node) => (node !== undefined && ts.isAwaitExpression(node) ? node.expression : node)
 
 /** Read one source file: translator bindings, key calls, and every string literal that could spell a key. */
-export const scanSource = (filePath, sourceText) => {
+export const scanSource = (filePath, sourceText, { namespaceOverrides = {} } = {}) => {
     const extension = extname(filePath)
     const sourceFile = ts.createSourceFile(
         filePath,
@@ -134,8 +139,9 @@ export const scanSource = (filePath, sourceText) => {
     const secondLanguage = []
 
     const record = (name, namespace) => {
-        bindings.set(name, namespace)
-        namespaces.add(namespace)
+        const candidates = Array.isArray(namespace) ? namespace : [namespace]
+        bindings.set(name, [...(bindings.get(name) ?? []), ...candidates])
+        for (const candidate of candidates) namespaces.add(candidate)
     }
 
     const collectBindings = (node) => {
@@ -147,7 +153,7 @@ export const scanSource = (filePath, sourceText) => {
                 ts.isIdentifier(initializer.expression) &&
                 TRANSLATOR_FACTORIES.has(initializer.expression.text)
             ) {
-                const namespace = namespaceOfFactoryCall(initializer)
+                const namespace = namespaceOfFactoryCall(initializer, namespaceOverrides)
                 if (namespace !== undefined) record(node.name.text, namespace)
             }
         }
@@ -222,17 +228,18 @@ export const scanSource = (filePath, sourceText) => {
                 first !== undefined &&
                 (bindings.has(translator.name) || translator.name === "t")
             ) {
-                const namespace = bindings.get(translator.name)
+                const namespaces = bindings.get(translator.name) ?? [undefined]
                 for (const argument of keyArgumentsOf(first)) {
                     const pattern = keyPatternOf(argument)
                     if (pattern === undefined) continue
-                    calls.push({
-                        namespace,
-                        text: pattern.text,
-                        computed: pattern.computed,
-                        member: translator.member,
-                        line: sourceFile.getLineAndCharacterOfPosition(node.getStart(sourceFile)).line + 1,
-                    })
+                    for (const namespace of namespaces)
+                        calls.push({
+                            namespace,
+                            text: pattern.text,
+                            computed: pattern.computed,
+                            member: translator.member,
+                            line: sourceFile.getLineAndCharacterOfPosition(node.getStart(sourceFile)).line + 1,
+                        })
                 }
             }
         }
@@ -311,6 +318,7 @@ export const checkApp = ({ appName, catalogs, sources }) => {
             for (const locale of LOCALES) {
                 if (
                     !call.computed &&
+                    !full.includes("*") &&
                     !leaves[locale].has(full) &&
                     !allLeaves.some((leaf) => leaf.startsWith(`${full}.`))
                 )
@@ -352,10 +360,194 @@ export const checkApp = ({ appName, catalogs, sources }) => {
 
 const readJson = (filePath) => JSON.parse(readFileSync(filePath, "utf8"))
 
+const discoverPackageSources = (root) => {
+    const packagesDirectory = join(root, "packages")
+    if (!existsSync(packagesDirectory)) return []
+
+    return readdirSync(packagesDirectory, { withFileTypes: true })
+        .filter((entry) => entry.isDirectory())
+        .flatMap((entry) => {
+            const packageDirectory = join(packagesDirectory, entry.name)
+            const manifestPath = join(packageDirectory, "package.json")
+            const sourceDirectory = join(packageDirectory, "src")
+            if (!existsSync(manifestPath) || !existsSync(sourceDirectory)) return []
+            const { name } = readJson(manifestPath)
+            return typeof name === "string"
+                ? [{ name, files: walk(sourceDirectory).filter((file) => !isTestFile(file)) }]
+                : []
+        })
+}
+
+const jsxAttributeValue = (attribute) => {
+    if (!ts.isJsxAttribute(attribute) || attribute.initializer === undefined) return undefined
+    if (ts.isStringLiteralLike(attribute.initializer)) return attribute.initializer.text
+    if (
+        ts.isJsxExpression(attribute.initializer) &&
+        attribute.initializer.expression !== undefined &&
+        ts.isStringLiteralLike(attribute.initializer.expression)
+    )
+        return attribute.initializer.expression.text
+    return undefined
+}
+
+const packageComponentUses = (sourceFiles, packageNames) => {
+    const packageNamesByLength = [...packageNames].sort((left, right) => right.length - left.length)
+    const uses = new Map()
+
+    for (const { filePath, sourceText } of sourceFiles) {
+        const sourceFile = ts.createSourceFile(
+            filePath,
+            sourceText,
+            ts.ScriptTarget.Latest,
+            true,
+            extname(filePath) === ".tsx" ? ts.ScriptKind.TSX : ts.ScriptKind.TS,
+        )
+        const namedImports = new Map()
+        const namespaceImports = new Map()
+
+        for (const statement of sourceFile.statements) {
+            if (!ts.isImportDeclaration(statement) || !ts.isStringLiteralLike(statement.moduleSpecifier)) continue
+            const specifier = statement.moduleSpecifier.text
+            const packageName = packageNamesByLength.find(
+                (candidate) => specifier === candidate || specifier.startsWith(`${candidate}/`),
+            )
+            const clause = statement.importClause
+            if (packageName === undefined || clause === undefined || clause.isTypeOnly) continue
+
+            if (clause.namedBindings !== undefined && ts.isNamespaceImport(clause.namedBindings)) {
+                namespaceImports.set(clause.namedBindings.name.text, packageName)
+            } else if (clause.namedBindings !== undefined && ts.isNamedImports(clause.namedBindings)) {
+                for (const element of clause.namedBindings.elements) {
+                    if (element.isTypeOnly) continue
+                    namedImports.set(element.name.text, {
+                        packageName,
+                        exportedName: element.propertyName?.text ?? element.name.text,
+                    })
+                }
+            }
+        }
+
+        const recordUse = (packageName, exportedName, attributes) => {
+            const packageUseMap = uses.get(packageName) ?? new Map()
+            const componentUse = packageUseMap.get(exportedName) ?? { props: new Map() }
+            for (const attribute of attributes) {
+                if (!ts.isJsxAttribute(attribute) || !ts.isIdentifier(attribute.name)) continue
+                const value = jsxAttributeValue(attribute)
+                const propUse = componentUse.props.get(attribute.name.text) ?? { values: new Set(), dynamic: false }
+                if (value === undefined) propUse.dynamic = true
+                else propUse.values.add(value)
+                componentUse.props.set(attribute.name.text, propUse)
+            }
+            packageUseMap.set(exportedName, componentUse)
+            uses.set(packageName, packageUseMap)
+        }
+
+        const visit = (node) => {
+            if (ts.isJsxOpeningElement(node) || ts.isJsxSelfClosingElement(node)) {
+                const tag = node.tagName
+                const binding = ts.isIdentifier(tag)
+                    ? namedImports.get(tag.text)
+                    : ts.isPropertyAccessExpression(tag) && ts.isIdentifier(tag.expression)
+                      ? {
+                            packageName: namespaceImports.get(tag.expression.text),
+                            exportedName: tag.name.text,
+                        }
+                      : undefined
+                if (binding?.packageName !== undefined)
+                    recordUse(binding.packageName, binding.exportedName, node.attributes.properties)
+            }
+            ts.forEachChild(node, visit)
+        }
+        visit(sourceFile)
+    }
+
+    return uses
+}
+
+const exportedDeclarationsOf = (sourceFile) => {
+    const exported = new Set()
+    const hasExportModifier = (node) =>
+        node.modifiers?.some((modifier) => modifier.kind === ts.SyntaxKind.ExportKeyword) ?? false
+
+    for (const statement of sourceFile.statements) {
+        if (ts.isVariableStatement(statement) && hasExportModifier(statement)) {
+            for (const declaration of statement.declarationList.declarations)
+                if (ts.isIdentifier(declaration.name)) exported.add(declaration.name.text)
+        } else if (
+            (ts.isFunctionDeclaration(statement) || ts.isClassDeclaration(statement)) &&
+            hasExportModifier(statement) &&
+            statement.name !== undefined
+        ) {
+            exported.add(statement.name.text)
+        }
+    }
+    return exported
+}
+
+const translationNamespaceParametersOf = (sourceFile) => {
+    const parameters = new Set()
+    const visit = (node) => {
+        if (ts.isCallExpression(node) && ts.isIdentifier(node.expression) && TRANSLATOR_FACTORIES.has(node.expression.text)) {
+            const [first] = node.arguments
+            if (first !== undefined && ts.isIdentifier(first)) parameters.add(first.text)
+        }
+        ts.forEachChild(node, visit)
+    }
+    visit(sourceFile)
+    return parameters
+}
+
+const scanUsedPackageSources = (root, packageSources, appSourceFiles) => {
+    const uses = packageComponentUses(
+        appSourceFiles,
+        packageSources.map((packageSource) => packageSource.name),
+    )
+    const sources = []
+
+    for (const packageSource of packageSources) {
+        const componentUses = uses.get(packageSource.name)
+        if (componentUses === undefined || componentUses.size === 0) continue
+
+        for (const filePath of packageSource.files) {
+            const sourceText = readFileSync(filePath, "utf8")
+            const sourceFile = ts.createSourceFile(
+                filePath,
+                sourceText,
+                ts.ScriptTarget.Latest,
+                true,
+                extname(filePath) === ".tsx" ? ts.ScriptKind.TSX : ts.ScriptKind.TS,
+            )
+            const exported = exportedDeclarationsOf(sourceFile)
+            const usedComponents = [...exported].filter((name) => componentUses.has(name))
+            if (usedComponents.length === 0) continue
+
+            const namespaceOverrides = {}
+            for (const parameter of translationNamespaceParametersOf(sourceFile)) {
+                const values = []
+                let dynamic = false
+                for (const component of usedComponents) {
+                    const propUse = componentUses.get(component)?.props.get(parameter)
+                    if (propUse === undefined) continue
+                    values.push(...propUse.values)
+                    dynamic ||= propUse.dynamic
+                }
+                if (values.length > 0 || dynamic)
+                    namespaceOverrides[parameter] = [...new Set([...values, ...(dynamic ? [undefined] : [])])]
+            }
+
+            sources.push(
+                scanSource(relative(root, filePath), sourceText, { namespaceOverrides }),
+            )
+        }
+    }
+    return sources
+}
+
 /** Check every app under a repository root. */
 export const checkRepository = (root) => {
     const findings = []
     const appsRoot = join(root, "apps")
+    const packageSources = discoverPackageSources(root)
     for (const entry of readdirSync(appsRoot, { withFileTypes: true })) {
         if (!entry.isDirectory()) continue
         const appDirectory = join(appsRoot, entry.name)
@@ -370,9 +562,11 @@ export const checkRepository = (root) => {
             continue
         }
         const catalogs = Object.fromEntries(LOCALES.map((locale, index) => [locale, readJson(catalogFiles[index])]))
-        const sources = walk(join(appDirectory, "src"))
+        const appSourceFiles = walk(join(appDirectory, "src"))
             .filter((file) => !isTestFile(file))
-            .map((file) => scanSource(relative(root, file), readFileSync(file, "utf8")))
+            .map((filePath) => ({ filePath, sourceText: readFileSync(filePath, "utf8") }))
+        const sources = appSourceFiles.map(({ filePath, sourceText }) => scanSource(relative(root, filePath), sourceText))
+        sources.push(...scanUsedPackageSources(root, packageSources, appSourceFiles))
         findings.push(...checkApp({ appName: entry.name, catalogs, sources }))
     }
     return findings

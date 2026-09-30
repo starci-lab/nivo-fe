@@ -48,16 +48,16 @@ const ProductHeroSignal = ({ page, t }: Pick<ProductHeroProps, "page" | "t">) =>
     <div className={styles.signal}>
         <div className={styles.signalLabel}>
             <Text as="p" size="xs" tone="accent" weight="semibold">
-                {t(page + ".hero.signalLabel")}
+                {t(`${page}.hero.signalLabel`)}
             </Text>
         </div>
-        <span className={styles.signalValue}>{t(page + ".hero.signalValue")}</span>
-        <span className={styles.signalNote}>{t(page + ".hero.signalNote")}</span>
+        <span className={styles.signalValue}>{t(`${page}.hero.signalValue`)}</span>
+        <span className={styles.signalNote}>{t(`${page}.hero.signalNote`)}</span>
     </div>
 )
 
 const ProductHeroVisual = ({ page, t }: Pick<ProductHeroProps, "page" | "t">) => {
-    const signalLabel = t(page + ".hero.signalLabel")
+    const signalLabel = t(`${page}.hero.signalLabel`)
     const signal = <ProductHeroSignal page={page} t={t} />
 
     if (page === "nivoOs") {
@@ -78,7 +78,7 @@ const ProductHeroVisual = ({ page, t }: Pick<ProductHeroProps, "page" | "t">) =>
                                 <span className={styles.nodeIcon}>
                                     <NivoIcon props={node.iconProps} />
                                 </span>
-                                <span>{t("nivoOs.hero.visual.nodes." + node.key)}</span>
+                                <span>{t(`nivoOs.hero.visual.nodes.${node.key}`)}</span>
                             </li>
                         ))}
                     </ul>
@@ -119,7 +119,7 @@ const ProductHeroVisual = ({ page, t }: Pick<ProductHeroProps, "page" | "t">) =>
                             <li className={styles.step} key={step.key}>
                                 <span className={styles.stepIndex}>{step.index}</span>
                                 <strong className={styles.stepTitle}>
-                                    {t("systemOfResponsibility.hero.visual.steps." + step.key)}
+                                    {t(`systemOfResponsibility.hero.visual.steps.${step.key}`)}
                                 </strong>
                             </li>
                         ))}
@@ -150,7 +150,7 @@ const ProductHeroVisual = ({ page, t }: Pick<ProductHeroProps, "page" | "t">) =>
                             />
                             <figcaption className={styles.galleryCaption}>
                                 <span className={styles.galleryIndex}>0{index + 1}</span>
-                                {t("applications.hero.visual.gallery." + card.key)}
+                                {t(`applications.hero.visual.gallery.${card.key}`)}
                             </figcaption>
                         </figure>
                     ))}
@@ -176,32 +176,32 @@ export const ProductHero = (props: ProductHeroProps) => {
                 <div className={styles.copy}>
                 <div className={styles.eyebrow}>
                     <Text as="p" size="xs" tone="accent" weight="semibold">
-                        {t(page + ".hero.eyebrow")}
+                        {t(`${page}.hero.eyebrow`)}
                     </Text>
                 </div>
                 <div className={styles.title}>
                     <Heading level={1} scale="display">
-                        <span id="product-page-title">{t(page + ".hero.title")}</span>
+                        <span id="product-page-title">{t(`${page}.hero.title`)}</span>
                     </Heading>
                 </div>
                 {structure.hero.descriptor ? (
                     <Text as="p" size="sm" weight="semibold">
-                        {t(page + ".hero.descriptor")}
+                        {t(`${page}.hero.descriptor`)}
                     </Text>
                 ) : null}
                 <div className={styles.supporting}>
                     <Text as="p" size="md" tone="muted">
-                        {t(page + ".hero.supporting")}
+                        {t(`${page}.hero.supporting`)}
                     </Text>
                 </div>
                 {structure.hero.philosophy ? (
                     <Text as="p" size="sm" weight="semibold">
-                        {t(page + ".hero.philosophy")}
+                        {t(`${page}.hero.philosophy`)}
                     </Text>
                 ) : null}
                     <div className={styles.actionRow}>
                         {structure.hero.actions.map((action) =>
-                            renderAction(action, t(page + ".hero.actions." + action.key), href),
+                            renderAction(action, t(`${page}.hero.actions.${action.key}`), href),
                         )}
                     </div>
                 </div>

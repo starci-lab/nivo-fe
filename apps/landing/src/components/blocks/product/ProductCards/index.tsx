@@ -24,6 +24,7 @@ const CARD_ICON_PROPS = {
 /** Product cards present a responsive set of linked or explanatory product capabilities. */
 export const ProductCards = (props: ProductCardsProps) => {
     const { block, context } = props
+    const t = context.t
     return (
         <div className={productCardsGridClassName(block.columns, context)}>
             {block.items.map((item, index) => (
@@ -39,42 +40,15 @@ export const ProductCards = (props: ProductCardsProps) => {
                     </span>
                     {item.labelled === true ? (
                         <Text as="p" size="xs" tone="accent" weight="semibold">
-                            {context.t(
-                                context.page +
-                                    ".sections." +
-                                    context.section.key +
-                                    "." +
-                                    block.key +
-                                    ".items." +
-                                    item.key +
-                                    ".label",
-                            )}
+                            {t(`${context.page}.sections.${context.section.key}.${block.key}.items.${item.key}.label`)}
                         </Text>
                     ) : null}
                     <Heading level={3}>
-                        {context.t(
-                            context.page +
-                                ".sections." +
-                                context.section.key +
-                                "." +
-                                block.key +
-                                ".items." +
-                                item.key +
-                                ".title",
-                        )}
+                        {t(`${context.page}.sections.${context.section.key}.${block.key}.items.${item.key}.title`)}
                     </Heading>
                     <div className={styles.body}>
                         <Text as="p" size="sm" tone="muted">
-                            {context.t(
-                                context.page +
-                                    ".sections." +
-                                    context.section.key +
-                                    "." +
-                                    block.key +
-                                    ".items." +
-                                    item.key +
-                                    ".body",
-                            )}
+                            {t(`${context.page}.sections.${context.section.key}.${block.key}.items.${item.key}.body`)}
                         </Text>
                     </div>
                 </article>
