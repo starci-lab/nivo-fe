@@ -12,6 +12,10 @@
       "types": "./src/app.ts",
       "default": "./dist/app.js"
     },
+    "./request": {
+      "types": "./src/request.ts",
+      "default": "./dist/request.js"
+    },
     "./provider": {
       "types": "./src/provider.tsx",
       "default": "./dist/provider.js"

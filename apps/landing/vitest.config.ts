@@ -15,6 +15,7 @@ export default defineConfig({
             "@nivo/ui/styles.css": resolve(import.meta.dirname, "../../packages/nivo-ui/src/styles.css"),
             "@nivo/ui": resolve(import.meta.dirname, "../../packages/nivo-ui/src/index.ts"),
             "@nivo/i18n/app": resolve(import.meta.dirname, "../../packages/i18n/src/app.ts"),
+            "@nivo/i18n/request": resolve(import.meta.dirname, "../../packages/i18n/src/request.ts"),
             "@": resolve(import.meta.dirname, "src"),
         },
     },

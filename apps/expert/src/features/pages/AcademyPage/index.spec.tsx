@@ -25,7 +25,8 @@ describe("academy page server orchestration", () => {
     })
     it("has no axe violations", async () => {
         vi.mocked(fetchCourses).mockResolvedValue({
-            courses: [{ id: "1", slug: "starter", title: "Starter", summary: null, priceText: null, sortIndex: 0 }],
+            ok: true,
+            data: [{ id: "1", slug: "starter", title: "Starter", summary: null, priceText: null, sortIndex: 0 }],
         })
         const { container } = render(await AcademyPage())
         await screen.findAllByText("Starter")
