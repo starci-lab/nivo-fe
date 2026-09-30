@@ -1,7 +1,8 @@
 "use client"
 
 import { useLocale } from "next-intl"
-import { createContext, useCallback, useEffect, useMemo, useRef, useState, type ComponentProps } from "react"
+import { createContext, useCallback, useEffect, useId, useMemo, useRef, useState, type ComponentProps } from "react"
+import useSWRImmutable from "swr/immutable"
 import { refreshSession, signOut as signOutMutation, type AuthPayload, type SignOutScope } from "../api/auth"
 import { setAccessTokenReader, setLocaleReader } from "../api/graphql"
 
@@ -255,36 +256,43 @@ export const SessionProvider = (props: SessionProviderProps) => {
             status: "anonymous",
         })
     }, [])
-    useEffect(() => {
-        let cancelled = false
-        const restore = async (): Promise<void> => {
-            const epochAtStart = custodyEpoch.current
-            const result = await refreshSession()
-            if (cancelled || custodyEpoch.current !== epochAtStart) {
-                return
-            }
-            if (result.ok && !result.data.requiresTwoFactor && result.data.accessToken !== null) {
-                token.current = result.data.accessToken
+    /*
+     * RESTORE IS ONE READ OF THE SERVER, KEYED ONCE PER MOUNT. The fetcher notes the custody epoch
+     * before asking; an answer that arrives after a sign-out or discard moved the epoch is dropped,
+     * so a late success never puts a refused or ended session back.
+     */
+    const restoreAttempt = useId()
+    useSWRImmutable(
+        ["SESSION_RESTORE", restoreAttempt] as const,
+        async () => ({ epochAtStart: custodyEpoch.current, result: await refreshSession() }),
+        {
+            onSuccess: ({ epochAtStart, result }) => {
+                if (custodyEpoch.current !== epochAtStart) return
+                if (result.ok && !result.data.requiresTwoFactor && result.data.accessToken !== null) {
+                    token.current = result.data.accessToken
+                    setState({
+                        status: "signed-in",
+                        accessToken: result.data.accessToken,
+                    })
+                    return
+                }
+                /*
+                 * EVERY OTHER OUTCOME IS ANONYMOUS, including a network failure. A reader whose refresh
+                 * could not be answered is not signed in, and pretending the question is still open would
+                 * leave the app restoring forever.
+                 */
                 setState({
-                    status: "signed-in",
-                    accessToken: result.data.accessToken,
+                    status: "anonymous",
                 })
-                return
-            }
-            /*
-             * EVERY OTHER OUTCOME IS ANONYMOUS, including a network failure. A reader whose refresh
-             * could not be answered is not signed in, and pretending the question is still open would
-             * leave the app restoring forever.
-             */
-            setState({
-                status: "anonymous",
-            })
-        }
-        void restore()
-        return () => {
-            cancelled = true
-        }
-    }, [])
+            },
+            onError: () => {
+                setState({
+                    status: "anonymous",
+                })
+            },
+            shouldRetryOnError: false,
+        },
+    )
     const value = useMemo<Session>(
         () => ({
             state,

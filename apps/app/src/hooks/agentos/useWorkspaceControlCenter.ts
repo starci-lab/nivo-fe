@@ -17,6 +17,7 @@ import type { AgentOSWorkspaceControlCenterStatus } from "@/modules/agentos/work
 import { createAgentOSWorkspaceControlCenterLabels } from "@/modules/agentos/workspace-control-center/labels"
 import { workspaceAppLaunchChannelName, type WorkspaceAppLaunchMessage } from "@/modules/window/workspace-app-launch"
 import { useFormatter, useLocale, useTranslations } from "next-intl"
+import useSWR from "swr"
 
 const subscribeToHydration = () => () => undefined
 const getClientHydration = () => true
@@ -81,23 +82,29 @@ export const useWorkspaceControlCenter = (workspaceId: string) => {
             if (activeLaunchId !== null) revoke(activeLaunchId)
         }
     }, [revokeLaunch, workspaceId])
-    useEffect(() => {
-        if (launchId === null) return
-        let renewalInFlight = false
-        const timer = window.setInterval(() => {
-            if (renewalInFlight) return
-            renewalInFlight = true
-            void renewLaunch(launchId)
-                .then((renewed) => {
-                    if (!renewed.ok) setLaunchState("expired")
-                })
-                .catch(() => setLaunchState("expired"))
-                .finally(() => {
-                    renewalInFlight = false
-                })
-        }, 20000)
-        return () => window.clearInterval(timer)
-    }, [launchId, renewLaunch])
+    /*
+     * THE LEASE IS RENEWED BY POLLING. SWR owns the 20 s cadence, skips a tick while the previous
+     * renewal is still in flight, and stops when the launch id goes away. The tab keeps renewing
+     * while hidden or offline, as the lease must outlive both; a refused or failed renewal expires it.
+     */
+    useSWR(
+        launchId === null ? null : (["WORKSPACE_APP_LAUNCH_RENEWAL", workspaceId, launchId] as const),
+        ([, , renewedLaunchId]) => renewLaunch(renewedLaunchId),
+        {
+            refreshInterval: 20000,
+            refreshWhenHidden: true,
+            refreshWhenOffline: true,
+            revalidateOnMount: false,
+            revalidateOnFocus: false,
+            revalidateOnReconnect: false,
+            revalidateIfStale: false,
+            shouldRetryOnError: false,
+            onSuccess: (renewed) => {
+                if (!renewed.ok) setLaunchState("expired")
+            },
+            onError: () => setLaunchState("expired"),
+        },
+    )
     const openAgentConsole = useCallback(() => setLaunchState("opening"), [])
     const retryShell = useCallback(() => {
         const limited = shell.sources.filter(

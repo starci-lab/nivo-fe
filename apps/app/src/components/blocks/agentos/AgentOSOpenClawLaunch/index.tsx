@@ -10,7 +10,8 @@ import {
 } from "@/modules/window/workspace-app-launch"
 import { workspace } from "../../../../modules/routes"
 import { useFormatter, useTranslations } from "next-intl"
-import { useEffect, useRef, useState } from "react"
+import { useId, useState } from "react"
+import useSWRImmutable from "swr/immutable"
 import { AgentOSOpenClawLaunchBase, type AgentOSOpenClawLaunchLabels, type OpenClawLaunchBlockState } from "./component"
 /** Exact workspace identity supplied by the dedicated launch route. */
 export type AgentOSOpenClawLaunchProps = {
@@ -25,59 +26,53 @@ export const AgentOSOpenClawLaunch = (props: AgentOSOpenClawLaunchProps) => {
     const router = useRouter()
     const { trigger: issueLaunch } = useMutateIssueAgentWorkspaceAppLaunchSwr(workspaceId)
     const { trigger: revokeLaunch } = useMutateRevokeAgentWorkspaceAppLaunchSwr(workspaceId)
-    const started = useRef(false)
     const [retry, setRetry] = useState(0)
     const [launchState, setLaunchState] = useState<OpenClawLaunchBlockState>("issuing")
     const [expiresAt, setExpiresAt] = useState<string>()
     if (session.state.status === "anonymous" && launchState !== "blocked") {
         setLaunchState("blocked")
     }
-    useEffect(() => {
-        if (session.state.status !== "signed-in" || started.current) return
-        started.current = true
-        const channel = new BroadcastChannel(workspaceAppLaunchChannelName(workspaceId))
-        const publish = (message: WorkspaceAppLaunchMessage) => channel.postMessage(message)
-        const launch = async () => {
-            const issued = await issueLaunch(undefined)
-            if (!issued.ok) {
+    /*
+     * ONE ISSUANCE PER ATTEMPT. The key carries this mount's id and the attempt counter, so the
+     * command runs once when the session is signed in and once more per retry click, never on a
+     * refocus or reconnect. The fetcher settles into typed launch states itself and never throws.
+     */
+    const attemptId = useId()
+    useSWRImmutable(
+        session.state.status === "signed-in" ? (["OPENCLAW_LAUNCH", workspaceId, attemptId, retry] as const) : null,
+        async () => {
+            const channel = new BroadcastChannel(workspaceAppLaunchChannelName(workspaceId))
+            const publish = (message: WorkspaceAppLaunchMessage) => channel.postMessage(message)
+            const block = () => {
                 publish({
                     status: "failed",
                     workspaceId,
                 })
                 channel.close()
                 setLaunchState("blocked")
-                return
             }
-            const destination = safeWorkspaceAppRedirect(issued.data.redirectUrl)
-            if (destination === null) {
-                await revokeLaunch(issued.data.launchId)
+            try {
+                const issued = await issueLaunch(undefined)
+                if (!issued.ok) return block()
+                const destination = safeWorkspaceAppRedirect(issued.data.redirectUrl)
+                if (destination === null) {
+                    await revokeLaunch(issued.data.launchId)
+                    return block()
+                }
                 publish({
-                    status: "failed",
+                    status: "issued",
                     workspaceId,
+                    launchId: issued.data.launchId,
                 })
                 channel.close()
-                setLaunchState("blocked")
-                return
+                setExpiresAt(issued.data.expiresAt)
+                setLaunchState("connected")
+                window.requestAnimationFrame(() => followWorkspaceAppRedirect(destination))
+            } catch {
+                block()
             }
-            publish({
-                status: "issued",
-                workspaceId,
-                launchId: issued.data.launchId,
-            })
-            channel.close()
-            setExpiresAt(issued.data.expiresAt)
-            setLaunchState("connected")
-            window.requestAnimationFrame(() => followWorkspaceAppRedirect(destination))
-        }
-        void launch().catch(() => {
-            publish({
-                status: "failed",
-                workspaceId,
-            })
-            channel.close()
-            setLaunchState("blocked")
-        })
-    }, [issueLaunch, retry, revokeLaunch, session.state.status, workspaceId])
+        },
+    )
     const labels: AgentOSOpenClawLaunchLabels = {
         title: t("title"),
         workspaceLabel: t("workspaceLabel"),
@@ -121,7 +116,6 @@ export const AgentOSOpenClawLaunch = (props: AgentOSOpenClawLaunchProps) => {
             props={{ workspaceId, detail, labels, isRetryPending: retry > 0 && launchState === "issuing" }}
             on={{
                 onRetry: () => {
-                    started.current = false
                     setLaunchState("issuing")
                     setRetry((value) => value + 1)
                 },

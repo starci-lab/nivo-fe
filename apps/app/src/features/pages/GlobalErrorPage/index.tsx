@@ -1,7 +1,7 @@
 "use client"
 
 import { readRouteFailureKind } from "@nivo/ui"
-import { useEffect, useState } from "react"
+import useSWRImmutable from "swr/immutable"
 import type en from "@/messages/en.json"
 import { toLocaleFromPathname, type Locale } from "@/modules/i18n/config"
 import { GlobalErrorPageBase, type GlobalErrorPageBaseData } from "./component"
@@ -54,19 +54,12 @@ const readMessage = (copy: BoundaryCopy, isStaleBundle: boolean): GlobalErrorPag
  * PAGE - the answer to a failure of the root layout.
  *
  * The layout owns the translation provider, so when it fails nothing above can hand copy down: the
- * page loads the `boundary` namespace of the catalogue for the locale of the address itself.
+ * page reads (through SWR, so it is cached and cancelled with the page) the `boundary` namespace of the catalogue for the locale of the address itself.
  */
 export const GlobalErrorPage = ({ error, locale, onRetry }: GlobalErrorPageProps) => {
-    const [copy, setCopy] = useState<BoundaryCopy | undefined>(undefined)
-    useEffect(() => {
-        let isCurrent = true
-        void loadBoundaryCopy(locale).then((loaded) => {
-            if (isCurrent) setCopy(loaded)
-        })
-        return () => {
-            isCurrent = false
-        }
-    }, [locale])
+    const { data: copy } = useSWRImmutable(["GLOBAL_ERROR_BOUNDARY_COPY", locale] as const, ([, forLocale]) =>
+        loadBoundaryCopy(forLocale),
+    )
     const isStaleBundle = readRouteFailureKind(error) === "stale-bundle"
     return (
         <GlobalErrorPageBase
