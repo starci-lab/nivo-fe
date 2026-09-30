@@ -1,6 +1,5 @@
 import { useLocale } from "next-intl"
-import { toLocale } from "@/modules/i18n/config"
-import { localizeHref } from "@/modules/i18n/navigation"
+import { localizeHref, toLocale } from "@/modules/i18n"
 
 /**
  * The resolver a page uses for every internal link it draws: `href("/company")` is `/company` in

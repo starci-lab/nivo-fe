@@ -42,5 +42,4 @@ describe("createAppI18n", () => {
         expect(i18n.localizeHref("https://example.test/company", "en")).toBe("https://example.test/company")
         expect(i18n.localizeHref("mailto:help@example.test", "en")).toBe("mailto:help@example.test")
     })
-
 })

@@ -5,7 +5,7 @@
  * block that writes `/agentos/workspaces/...` by hand owns a copy that silently points at a 404 the
  * day the route moves, and nothing type-checks the difference. Each builder returns the path
  * WITHOUT a locale prefix - the `[locale]` segment belongs to next-intl, and the `Link` and
- * `useRouter` it creates through `modules/i18n/navigation` put it back. A caller that needs the
+ * `useRouter` it creates through `modules/i18n` put it back. A caller that needs the
  * localized string (a grammar primitive that renders a plain anchor) formats it with `getPathname`
  * instead of interpolating the locale itself.
  *
