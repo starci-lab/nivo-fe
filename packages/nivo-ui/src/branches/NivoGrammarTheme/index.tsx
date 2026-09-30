@@ -2,7 +2,7 @@
 
 import { useTheme } from "next-themes"
 import type { ReactNode } from "react"
-import { useIsHydrated } from "../../hooks/useIsHydrated"
+import { useIsHydrated } from "../../hooks/hydration/useIsHydrated"
 import type { ThemeMode } from "../ThemeMenu"
 import NivoGrammarThemeView from "./component"
 
