@@ -1,5 +1,5 @@
-import { Button } from "@starci/grammar/common"
-import type { SubmitEvent } from "react"
+import { Button, Form } from "@starci/grammar/common"
+import type { FormEvent } from "react"
 import type { AuthFactorCopy } from "@/modules/auth/authentication-panel/copy"
 import type { AuthenticationPanelProps } from "@/modules/auth/authentication-panel/actions"
 import type { AuthFieldErrors, AuthPanelFormState } from "@/modules/auth/authentication-panel/types"
@@ -17,7 +17,7 @@ const CODE_STATUS_ID = "authentication-code-status"
 export const AuthenticationPanelFactor = (props: AuthenticationPanelFactorProps) => {
     const copy: AuthFactorCopy = props.props
     const { values, fieldErrors, setFieldErrors, clearFieldError } = props.formState
-    const submitFactor = (event: SubmitEvent<HTMLFormElement>) => {
+    const submitFactor = (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault()
         const nextErrors: AuthFieldErrors = {}
         if (values.current.otp.trim() === "") nextErrors.otp = copy.codeRequired
@@ -29,7 +29,7 @@ export const AuthenticationPanelFactor = (props: AuthenticationPanelFactorProps)
 
     return (
         <div className={AUTH_PANEL_CLASS_NAME}>
-            <form onSubmit={submitFactor}>
+            <Form onSubmit={(_, event) => submitFactor(event)}>
                 <div className={AUTH_PANEL_FORM_CLASS_NAME}>
                     <OtpField
                         id={CODE_ID}
@@ -53,7 +53,7 @@ export const AuthenticationPanelFactor = (props: AuthenticationPanelFactorProps)
                         {copy.submitLabel}
                     </Button>
                 </div>
-            </form>
+            </Form>
         </div>
     )
 }

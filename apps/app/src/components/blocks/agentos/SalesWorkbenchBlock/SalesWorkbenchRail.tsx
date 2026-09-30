@@ -40,8 +40,10 @@ const ScopeLine = (props: ScopeLineProps) => {
     )
 }
 
+type SalesWorkbenchRailProps = SalesWorkbenchSectionProps
+
 /** Draw the Sales scope, work item, operation notice, installation, and policy rail. */
-export const SalesWorkbenchRail = (props: SalesWorkbenchSectionProps) => {
+export const SalesWorkbenchRail = (props: SalesWorkbenchRailProps) => {
     const { view } = props.props
     const { t, scopeReady, scopeStanding, notice } = view
     return (

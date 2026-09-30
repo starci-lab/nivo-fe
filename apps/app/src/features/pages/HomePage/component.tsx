@@ -1,6 +1,6 @@
-import { Heading, Text } from "@starci/grammar/common"
+import { Heading, Text, WorkspaceShell } from "@starci/grammar/common"
 import { NivoIcon } from "@nivo/ui"
-import { CONTENT_CLASS_NAME, ROOT_CLASS_NAME } from "./classNames"
+import { CONTENT_CLASS_NAME } from "./classNames"
 
 /** The settled copy the home page draws. */
 type HomePageBaseData = {
@@ -30,12 +30,17 @@ type HomePageProps = HomePageBaseProps
 export const HomePageBase = (props: HomePageProps) => {
     const { props: data }: HomePageProps = props
     return (
-        <main id="main-content" tabIndex={-1} className={ROOT_CLASS_NAME}>
-            <div className={CONTENT_CLASS_NAME}>
-                <NivoIcon props={{ name: "brand", usage: "heading" }} />
-                <Heading level={1}>{data.brandLabel}</Heading>
-                <Text size="sm">{data.description}</Text>
-            </div>
-        </main>
+        <WorkspaceShell
+            align="stretch"
+            primary={
+                <div className={CONTENT_CLASS_NAME}>
+                    <NivoIcon props={{ name: "brand", usage: "heading" }} />
+                    <Heading level={1}>{data.brandLabel}</Heading>
+                    <Text size="sm">{data.description}</Text>
+                </div>
+            }
+            primaryId="main-content"
+            primaryLabel={data.brandLabel}
+        />
     )
 }

@@ -1,5 +1,5 @@
 import { Breadcrumbs } from "@nivo/ui"
-import { PageContainer, SectionHeader, Text } from "@starci/grammar/common"
+import { PageContainer, SectionHeader, SurfaceCard, Text } from "@starci/grammar/common"
 import type {
     AgentOSShellConfigurationDigests,
     AgentOSShellView,
@@ -48,7 +48,6 @@ type AgentOSModuleCollectionPageViewActions = {
     /** The sentence phrasing a current configuration observation's three digests. */
     readonly formatConfiguration: (digests: AgentOSShellConfigurationDigests) => string
 }
-
 
 /**
  * Compose the module ledger under one route identity: a compact heading, the source statement of the
@@ -109,12 +108,7 @@ export const AgentOSModuleCollectionPageBase = (props: AgentOSModuleCollectionPa
                               ),
                           })}
                 />
-                <section
-                    className={MODULE_COLLECTION_GRID_CLASS_NAME}
-                    aria-label={labels.title}
-                    data-region="module-collection"
-                    data-contract="GAP-4"
-                >
+                <SurfaceCard label={labels.title} data-region="module-collection" data-contract="GAP-4">
                     {accessState ? (
                         <ModuleLedgerAccessNotice
                             state={shell.state}
@@ -145,7 +139,7 @@ export const AgentOSModuleCollectionPageBase = (props: AgentOSModuleCollectionPa
                             isRetrying={isShellRetrying}
                         />
                     )}
-                </section>
+                </SurfaceCard>
             </div>
         </PageContainer>
     )

@@ -1,6 +1,6 @@
 import type { ReactNode } from "react"
 import type { AccountingSurfaceStanding } from "@/modules/accounting/accounting-workbench"
-import { Badge, Button, Input, SurfaceCard, Text } from "@starci/grammar/common"
+import { Badge, Button, Form, Input, SurfaceCard, Text } from "@starci/grammar/common"
 import {
     accountingFactFieldKey,
     accountingMatchStatusKey,
@@ -24,17 +24,9 @@ export const AccountingWorkbenchDetail = (props: AccountingWorkbenchDetailProps)
     const { view, shared, scopeReady } = props.props
     const { t } = view
     const amount = view.format.amount
-    
 
-    const region = (
-        standing: AccountingSurfaceStanding,
-        empty: string,
-        emptyHint: string,
-        children: ReactNode,
-    ) => (
-        <AccountingWorkbenchRegion
-            props={{ view, shared, scopeReady, standing, empty, emptyHint }}
-        >
+    const region = (standing: AccountingSurfaceStanding, empty: string, emptyHint: string, children: ReactNode) => (
+        <AccountingWorkbenchRegion props={{ view, shared, scopeReady, standing, empty, emptyHint }}>
             {children}
         </AccountingWorkbenchRegion>
     )
@@ -43,7 +35,7 @@ export const AccountingWorkbenchDetail = (props: AccountingWorkbenchDetailProps)
             label={t("detail.label")}
             fact={view.detail.model === null ? undefined : t(`detail.${view.detail.model.state}`)}
         >
-            <form onSubmit={accountingSubmitOn(view.detail.onLoad)}>
+            <Form onSubmit={(_, event) => accountingSubmitOn(view.detail.onLoad)(event)}>
                 <div className={ACCOUNTING_FORM_GRID_CLASS_NAME}>
                     <Input
                         id="accounting-result-id"
@@ -90,7 +82,7 @@ export const AccountingWorkbenchDetail = (props: AccountingWorkbenchDetailProps)
                         </AccountingWorkbenchActionRow>
                     </div>
                 </div>
-            </form>
+            </Form>
             {region(
                 view.detail.standing,
                 t("detail.empty"),

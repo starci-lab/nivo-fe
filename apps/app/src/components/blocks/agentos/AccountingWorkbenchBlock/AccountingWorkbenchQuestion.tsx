@@ -1,6 +1,6 @@
 import type { ReactNode } from "react"
 import type { AccountingSurfaceStanding } from "@/modules/accounting/accounting-workbench"
-import { Badge, Button, Input, SurfaceCard, Text } from "@starci/grammar/common"
+import { Badge, Button, Form, Input, SurfaceCard, Text } from "@starci/grammar/common"
 import { accountingExceptionStateKey, accountingRoutineStateKey } from "@/modules/accounting/accounting-workbench"
 import { AccountingWorkbenchActionRow, AccountingWorkbenchFieldStack } from "./accounting-workbench.shared"
 import { accountingSubmitOn } from "./accounting-workbench.helpers"
@@ -15,15 +15,8 @@ export const AccountingWorkbenchQuestion = (props: AccountingWorkbenchQuestionPr
     const { view, shared, scopeReady } = props.props
     const { t } = view
 
-    const region = (
-        standing: AccountingSurfaceStanding,
-        empty: string,
-        emptyHint: string,
-        children: ReactNode,
-    ) => (
-        <AccountingWorkbenchRegion
-            props={{ view, shared, scopeReady, standing, empty, emptyHint }}
-        >
+    const region = (standing: AccountingSurfaceStanding, empty: string, emptyHint: string, children: ReactNode) => (
+        <AccountingWorkbenchRegion props={{ view, shared, scopeReady, standing, empty, emptyHint }}>
             {children}
         </AccountingWorkbenchRegion>
     )
@@ -67,7 +60,7 @@ export const AccountingWorkbenchQuestion = (props: AccountingWorkbenchQuestionPr
                         {t("question.alternatives")}
                     </Text>
                     <Text size="sm">{t("question.consequence")}</Text>
-                    <form onSubmit={accountingSubmitOn(view.question.onAnswer)}>
+                    <Form onSubmit={(_, event) => accountingSubmitOn(view.question.onAnswer)(event)}>
                         <AccountingWorkbenchFieldStack>
                             <Input
                                 id="accounting-exception-id"
@@ -164,7 +157,7 @@ export const AccountingWorkbenchQuestion = (props: AccountingWorkbenchQuestionPr
                                 </Button>
                             </AccountingWorkbenchActionRow>
                         </AccountingWorkbenchFieldStack>
-                    </form>
+                    </Form>
                     {view.question.answerState === null ? null : (
                         <AccountingWorkbenchActionRow>
                             <Text size="sm">

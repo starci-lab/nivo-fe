@@ -55,7 +55,7 @@ export const useAgentOSShellNavigation = (options: AgentOSShellNavigationOptions
             if (accessToken === null)
                 return failed("refused", {
                     code: "UNAUTHENTICATED",
-                    reason: "No access token is held, so no request left the browser.",
+                    reason: "UNAUTHENTICATED",
                 })
             return resolveAgentosShellNavigation(accessToken, {
                 workspaceId,

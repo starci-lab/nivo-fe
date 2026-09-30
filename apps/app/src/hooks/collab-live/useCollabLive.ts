@@ -1,5 +1,12 @@
-
 import { useEffect, useState } from "react"
+import {
+    COLLAB_HINT_DOMAINS,
+    collabWorkspaceKeys,
+    collabDomainKeys,
+    readHint,
+    readSubscribeAck,
+    type CollabLiveHint,
+} from "./collab-live.shared"
 import { useSWRConfig } from "swr"
 import { io, type Socket } from "socket.io-client"
 import type { CollabLiveStatus } from "@/modules/collab"
@@ -29,16 +36,6 @@ import { useAccessToken } from "../auth/useAccessToken"
 
 const COLLAB_SOCKET_URL = `${CORE_API_BASE}/collab`
 
-/** The closed set of change kinds the live namespace may announce. */
-type CollabLiveHintKind = "message" | "card" | "task" | "membership" | "notice"
-
-/** The only payload a `collab.changed` hint carries; never content, never truth. */
-type CollabLiveHint = {
-    readonly workspaceId: string
-    readonly kind: CollabLiveHintKind
-    readonly cursor: string | null
-}
-
 /** Connection and subscription phase visible to a surface; never business data. */
 export type CollabLiveState = {
     /**
@@ -50,69 +47,6 @@ export type CollabLiveState = {
     readonly reason: string | null
     /** The most recent accepted hint - a re-read trigger, not content. */
     readonly lastHint: CollabLiveHint | null
-}
-
-const COLLAB_LIVE_HINT_KINDS: ReadonlySet<string> = new Set(["message", "card", "task", "membership", "notice"])
-
-/** Whether a hint's kind word is one of the closed change kinds the namespace may announce. */
-const isCollabLiveHintKind = (value: unknown): value is CollabLiveHintKind =>
-    typeof value === "string" && COLLAB_LIVE_HINT_KINDS.has(value)
-
-/**
- * Which cached collab domains of the workspace a hint kind can touch. A card and a
- * task each live in the conversation page and the task projections; a message is a
- * group page change; membership is the Office roster; a notice is the notice reads.
- */
-const COLLAB_HINT_DOMAINS: Record<CollabLiveHintKind, ReadonlyArray<string>> = {
-    message: ["group"],
-    card: ["group", "task", "tasks"],
-    task: ["group", "task", "tasks"],
-    membership: ["office"],
-    notice: ["notices", "notice"],
-}
-
-/** Every cached collab query key of one workspace: `["NIVO_QUERY", viewer, "collab", domain, workspaceId, ...]`. */
-const collabWorkspaceKeys =
-    (workspaceId: string) =>
-    (key: unknown): boolean =>
-        Array.isArray(key) && key[0] === "NIVO_QUERY" && key[2] === "collab" && key[4] === workspaceId
-
-const collabDomainKeys =
-    (workspaceId: string, domains: ReadonlyArray<string>) =>
-    (key: unknown): boolean =>
-        Array.isArray(key) &&
-        collabWorkspaceKeys(workspaceId)(key) &&
-        typeof key[3] === "string" &&
-        domains.includes(key[3])
-
-/** Accept exactly the three hint fields; anything else is not a hint. */
-const readHint = (payload: unknown): CollabLiveHint | null => {
-    if (
-        typeof payload !== "object" ||
-        payload === null ||
-        !("workspaceId" in payload) ||
-        typeof payload.workspaceId !== "string" ||
-        !("kind" in payload) ||
-        !isCollabLiveHintKind(payload.kind)
-    ) {
-        return null
-    }
-    const cursor = "cursor" in payload ? payload.cursor : null
-    return {
-        workspaceId: payload.workspaceId,
-        kind: payload.kind,
-        cursor: typeof cursor === "string" ? cursor : null,
-    }
-}
-
-/** The subscribe acknowledgement; a denial is non-disclosing by design. */
-const readSubscribeAck = (payload: unknown): { ok: true } | { ok: false; reason: string } => {
-    if (typeof payload === "object" && payload !== null && "ok" in payload && payload.ok === true) {
-        return { ok: true }
-    }
-    const reasonValue =
-        typeof payload === "object" && payload !== null && "reason" in payload ? payload.reason : undefined
-    return { ok: false, reason: typeof reasonValue === "string" ? reasonValue : "unavailable" }
 }
 
 /**
@@ -150,25 +84,28 @@ export const useCollabLive = (workspaceId: string | null): CollabLiveState => {
             return
         }
 
+        let active = true
         const socket: Socket = io(COLLAB_SOCKET_URL, {
             auth: { token: accessToken },
             transports: ["websocket"],
             reconnection: true,
         })
-        const publish = (state: CollabLiveState) =>
-            setChannel((current) => (current.key === channelKey ? { key: channelKey, state } : current))
+        const publish = (state: CollabLiveState) => {
+            if (active) setChannel((current) => (current.key === channelKey ? { key: channelKey, state } : current))
+        }
 
         const subscribe = () => {
             // Every connect - first or regained - subscribes and re-reads everything:
             // hints that fired while the socket was down are unknowable.
             socket.emit("collab.subscribe", { workspaceId }, (ack: unknown) => {
+                if (!active) return
                 const answer = readSubscribeAck(ack)
-                if (!answer.ok) {
+                if (answer.ok) {
+                    publish({ status: "subscribed", reason: null, lastHint: null })
+                    void mutate(collabWorkspaceKeys(workspaceId))
+                } else {
                     publish({ status: "disconnected", reason: answer.reason, lastHint: null })
-                    return
                 }
-                publish({ status: "subscribed", reason: null, lastHint: null })
-                void mutate(collabWorkspaceKeys(workspaceId))
             })
         }
 
@@ -187,7 +124,8 @@ export const useCollabLive = (workspaceId: string | null): CollabLiveState => {
         })
 
         return () => {
-            socket.removeAllListeners()
+            active = false
+            socket.off()
             socket.disconnect()
         }
     }, [accessToken, workspaceId, mutate, channelKey])

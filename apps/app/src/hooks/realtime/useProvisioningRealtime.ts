@@ -1,13 +1,6 @@
-
-import { useEffect, useRef, useState } from "react"
-import { io, type Socket } from "socket.io-client"
-import { CORE_API_BASE } from "@/modules/config"
-import {
-    bindProvisioningSocket,
-    type ProvisioningEvent,
-    type ProvisioningRealtimeState,
-    type ProvisioningTarget,
-} from "./realtime.shared"
+import { useCallback, useState } from "react"
+import { useProvisioningSocket } from "./useProvisioningSocket"
+import { type ProvisioningRealtimeState, type ProvisioningTarget } from "./realtime.shared"
 
 /** Inputs required to subscribe to exactly one provisioning subject. */
 type UseProvisioningRealtimeInput = {
@@ -45,49 +38,13 @@ const useProvisioningRealtime = ({ accessToken, target }: UseProvisioningRealtim
         setChannel({ key: channelKey, state: { status: "connecting", reason: null } })
     }
 
-    const latestUpdatedAt = useRef<string | null>(null)
-    const latestSequence = useRef<number | null>(null)
-
-    useEffect(() => {
-        latestUpdatedAt.current = null
-        latestSequence.current = null
-        if (channelKey === null || accessToken === null || targetKind === undefined || targetId === undefined) {
-            return
-        }
-
-        const socket: Socket = io(`${CORE_API_BASE}/provisioning`, {
-            auth: { token: accessToken },
-            transports: ["websocket"],
-            reconnection: true,
-        })
-        const publish = (state: ProvisioningRealtimeState) =>
+    const publish = useCallback(
+        (state: ProvisioningRealtimeState) => {
             setChannel((current) => (current.key === channelKey ? { key: channelKey, state } : current))
-
-        bindProvisioningSocket(
-            socket,
-            { kind: targetKind, id: targetId },
-            {
-                connected: () => publish({ status: "connected", reason: null }),
-                disconnected: (reason) => publish({ status: "disconnected", reason }),
-                unsequenced: (event: ProvisioningEvent) => publish({ status: "event", reason: null, event }),
-                ordered: (updatedAt: string, event: ProvisioningEvent, sequence?: number) => {
-                    if (sequence !== undefined) {
-                        if (latestSequence.current !== null && latestSequence.current >= sequence) return
-                        latestSequence.current = sequence
-                    } else if (latestUpdatedAt.current !== null && latestUpdatedAt.current >= updatedAt) {
-                        return
-                    }
-                    latestUpdatedAt.current = updatedAt
-                    publish({ status: "event", reason: null, event })
-                },
-            },
-        )
-
-        return () => {
-            socket.removeAllListeners()
-            socket.disconnect()
-        }
-    }, [accessToken, targetId, targetKind, channelKey])
+        },
+        [channelKey],
+    )
+    useProvisioningSocket({ accessToken, channelKey, targetKind, targetId, onState: publish })
 
     if (channelKey === null) {
         return { status: "disconnected", reason: accessToken === null ? "anonymous" : null }

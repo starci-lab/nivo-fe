@@ -1,5 +1,5 @@
-import { Button, Input, Text, TextAction } from "@starci/grammar/common"
-import type { SubmitEvent } from "react"
+import { Button, Form, Input, Text, TextAction } from "@starci/grammar/common"
+import type { FormEvent } from "react"
 import type { AuthCodeCopy } from "@/modules/auth/authentication-panel/copy"
 import type { AuthenticationPanelProps } from "@/modules/auth/authentication-panel/actions"
 import type { AuthFieldErrors, AuthPanelFormState } from "@/modules/auth/authentication-panel/types"
@@ -28,7 +28,7 @@ export const AuthenticationPanelCode = (props: AuthenticationPanelCodeProps) => 
             </Text>
         )
 
-    const submitCode = (event: SubmitEvent<HTMLFormElement>) => {
+    const submitCode = (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault()
         const nextErrors: AuthFieldErrors = {}
         if (values.current.otp.trim() === "") nextErrors.otp = copy.codeRequired
@@ -48,7 +48,7 @@ export const AuthenticationPanelCode = (props: AuthenticationPanelCodeProps) => 
     const isCoolingDown = copy.cooldownLabel !== ""
     return (
         <div className={AUTH_PANEL_CLASS_NAME}>
-            <form onSubmit={submitCode}>
+            <Form onSubmit={(_, event) => submitCode(event)}>
                 <div className={AUTH_PANEL_FORM_CLASS_NAME}>
                     {[
                         <OtpField
@@ -70,56 +70,62 @@ export const AuthenticationPanelCode = (props: AuthenticationPanelCodeProps) => 
                         ...(!setsPassword
                             ? []
                             : [
-                            <Input
-                                key="new-password"
-                                id={NEW_PASSWORD_ID}
-                                name="newPassword"
-                                variant="primary"
-                                kind="newPassword"
-                                label={copy.newPasswordLabel}
-                                placeholder={copy.newPasswordPlaceholder}
-                                revealLabel={copy.revealLabel}
-                                hideLabel={copy.hideLabel}
-                                isDisabled={copy.isPending}
-                                hint={
-                                    fieldErrors.newPassword !== undefined
-                                        ? undefined
-                                        : (fieldErrors.newPassword ?? copy.newPasswordHint)
-                                }
-                                errorMessage={
-                                    fieldErrors.newPassword !== undefined
-                                        ? (fieldErrors.newPassword ?? copy.newPasswordHint)
-                                        : undefined
-                                }
-                                isError={fieldErrors.newPassword !== undefined}
-                                onValueChange={(value) => {
-                                    props.formState.setFieldValue("newPassword", value)
-                                    clearFieldError("newPassword")
-                                    clearFieldError("confirmNewPassword")
-                                }}
-                            />,
-                            <Input
-                                key="confirm-new-password"
-                                id={CONFIRM_NEW_PASSWORD_ID}
-                                name="confirmNewPassword"
-                                variant="primary"
-                                kind="newPassword"
-                                label={copy.confirmNewPasswordLabel}
-                                placeholder={copy.confirmNewPasswordPlaceholder}
-                                revealLabel={copy.revealLabel}
-                                hideLabel={copy.hideLabel}
-                                isDisabled={copy.isPending}
-                                hint={fieldErrors.confirmNewPassword !== undefined ? undefined : fieldErrors.confirmNewPassword}
-                                errorMessage={
-                                    fieldErrors.confirmNewPassword !== undefined ? fieldErrors.confirmNewPassword : undefined
-                                }
-                                isError={fieldErrors.confirmNewPassword !== undefined}
-                                onValueChange={(value) => {
-                                    props.formState.setFieldValue("confirmNewPassword", value)
-                                    clearFieldError("confirmNewPassword")
-                                }}
-                            />,
-                        ]),
+                                  <Input
+                                      key="new-password"
+                                      id={NEW_PASSWORD_ID}
+                                      name="newPassword"
+                                      variant="primary"
+                                      kind="newPassword"
+                                      label={copy.newPasswordLabel}
+                                      placeholder={copy.newPasswordPlaceholder}
+                                      revealLabel={copy.revealLabel}
+                                      hideLabel={copy.hideLabel}
+                                      isDisabled={copy.isPending}
+                                      hint={
+                                          fieldErrors.newPassword !== undefined
+                                              ? undefined
+                                              : (fieldErrors.newPassword ?? copy.newPasswordHint)
+                                      }
+                                      errorMessage={
+                                          fieldErrors.newPassword !== undefined
+                                              ? (fieldErrors.newPassword ?? copy.newPasswordHint)
+                                              : undefined
+                                      }
+                                      isError={fieldErrors.newPassword !== undefined}
+                                      onValueChange={(value) => {
+                                          props.formState.setFieldValue("newPassword", value)
+                                          clearFieldError("newPassword")
+                                          clearFieldError("confirmNewPassword")
+                                      }}
+                                  />,
+                                  <Input
+                                      key="confirm-new-password"
+                                      id={CONFIRM_NEW_PASSWORD_ID}
+                                      name="confirmNewPassword"
+                                      variant="primary"
+                                      kind="newPassword"
+                                      label={copy.confirmNewPasswordLabel}
+                                      placeholder={copy.confirmNewPasswordPlaceholder}
+                                      revealLabel={copy.revealLabel}
+                                      hideLabel={copy.hideLabel}
+                                      isDisabled={copy.isPending}
+                                      hint={
+                                          fieldErrors.confirmNewPassword !== undefined
+                                              ? undefined
+                                              : fieldErrors.confirmNewPassword
+                                      }
+                                      errorMessage={
+                                          fieldErrors.confirmNewPassword !== undefined
+                                              ? fieldErrors.confirmNewPassword
+                                              : undefined
+                                      }
+                                      isError={fieldErrors.confirmNewPassword !== undefined}
+                                      onValueChange={(value) => {
+                                          props.formState.setFieldValue("confirmNewPassword", value)
+                                          clearFieldError("confirmNewPassword")
+                                      }}
+                                  />,
+                              ]),
                         ...(status === undefined || copy.isError ? [] : [status]),
                         <div key="resend" className={AUTH_PANEL_TEXT_ACTIONS_CLASS_NAME}>
                             <TextAction
@@ -141,7 +147,7 @@ export const AuthenticationPanelCode = (props: AuthenticationPanelCodeProps) => 
                         </Button>,
                     ]}
                 </div>
-            </form>
+            </Form>
         </div>
     )
 }

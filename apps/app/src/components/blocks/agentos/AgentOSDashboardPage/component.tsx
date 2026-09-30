@@ -39,7 +39,7 @@ type AgentOSPageBaseCommands = {
     readonly create: () => void
 }
 /** The page's approved drawing: route identity, resolved copy and bound commands. */
-type AgentOSPageBaseProps = {
+type AgentOSDashboardPageBaseProps = {
     readonly state: AgentOSPageBaseState
     readonly props: AgentOSPageBaseData
     readonly on: AgentOSPageBaseCommands
@@ -64,8 +64,9 @@ const pageCopy = (state: AgentOSPageBaseState, labels: AgentOSPageLabels) => {
     }
 }
 /** Compose dashboard, create, and order routes without proxying child request data. */
-export const AgentOSPageBase = ({ state, props, on }: AgentOSPageBaseProps) => {
-    const { labels } = props
+export const AgentOSDashboardPageBase = (props: AgentOSDashboardPageBaseProps) => {
+    const { state, on } = props
+    const { labels } = props.props
     const isDashboard = state.mode === "dashboard"
     const { title, description, eyebrow } = pageCopy(state, labels)
     const path = isDashboard ? undefined : (

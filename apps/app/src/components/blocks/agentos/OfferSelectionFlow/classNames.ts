@@ -19,7 +19,7 @@ export const OFFER_ROW_CLASS_NAME = cn(
     "py-4",
     "last:border-b-0",
     "md:grid",
-    "md:grid-cols-[auto_2fr_minmax(0,1fr)_minmax(7.5rem,1fr)_repeat(2,minmax(0,1fr))_auto]",
+    "md:grid-cols-7",
     "md:items-start",
     "md:gap-3",
 )

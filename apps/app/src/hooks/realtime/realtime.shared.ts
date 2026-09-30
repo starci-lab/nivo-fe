@@ -8,12 +8,10 @@
 
 import type { Socket } from "socket.io-client"
 import {
-    terminalSagaStatus,
     unwrapMessage,
     type DeploymentMessage,
     type InstanceOperationMessage,
     type OrderMessage,
-    type SagaMessage,
     type SocketEnvelope,
     type WorkspaceMessage,
     type WorkspaceRuntimeMessage,
@@ -105,7 +103,7 @@ interface ProvisioningSink {
 type ProvisioningSocketTarget = { readonly kind: ProvisioningTarget["kind"]; readonly id: string }
 
 /**
- * Attach every provisioning message handler of one target to one socket.
+ * Attach resource message handlers of one target to one socket.
  *
  * @param socket - The live `/provisioning` socket of this subscription attempt.
  * @param target - The exact kind and id events must match before they may publish.
@@ -167,59 +165,6 @@ export const bindProvisioningSocket = (
                 kind: "deployment",
                 id: message.deploymentId,
                 status: message.status,
-                reason: message.reason,
-                updatedAt: message.updatedAt,
-            },
-            message.sequence,
-        )
-    })
-    socket.on("provisioning.saga.status", (payload: SagaMessage | SocketEnvelope<SagaMessage>) => {
-        const message = unwrapMessage(payload)
-        if (message === null) return
-        if (targetKind === "saga") {
-            if (message.sagaId !== targetId) return
-            sink.ordered(
-                message.updatedAt,
-                {
-                    kind: "saga",
-                    id: message.sagaId,
-                    status: message.status,
-                    direction: message.direction,
-                    stepKey: message.stepKey,
-                    reason: message.reason,
-                    updatedAt: message.updatedAt,
-                },
-                message.sequence,
-            )
-            return
-        }
-        const isWorkspace = targetKind === "workspace" && message.resourceKind === "agent_workspace"
-        const isDeployment = targetKind === "deployment" && message.resourceKind === "expert_deployment"
-        const isModuleInstallation =
-            targetKind === "module-installation" && message.resourceKind === "agentos_module_installation"
-        if ((!isWorkspace && !isDeployment && !isModuleInstallation) || message.resourceId !== targetId) return
-        if (isModuleInstallation) {
-            sink.ordered(
-                message.updatedAt,
-                {
-                    kind: "module-installation",
-                    id: targetId,
-                    status: terminalSagaStatus(message.status, "ready"),
-                    stepKey: message.stepKey,
-                    reason: message.reason,
-                    updatedAt: message.updatedAt,
-                },
-                message.sequence,
-            )
-            return
-        }
-        const kind = isWorkspace ? ("workspace" as const) : ("deployment" as const)
-        sink.ordered(
-            message.updatedAt,
-            {
-                kind,
-                id: targetId,
-                status: terminalSagaStatus(message.status, isWorkspace ? "active" : "running"),
                 reason: message.reason,
                 updatedAt: message.updatedAt,
             },

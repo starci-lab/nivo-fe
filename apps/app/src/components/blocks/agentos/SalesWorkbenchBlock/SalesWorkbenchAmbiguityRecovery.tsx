@@ -1,10 +1,19 @@
 import type { ReactNode } from "react"
-import { SalesWorkbenchActionRow, SalesWorkbenchFieldStack, SalesWorkbenchRegion, SalesWorkbenchRow } from "./sales-workbench.shared"
+import {
+    SalesWorkbenchActionRow,
+    SalesWorkbenchFieldStack,
+    SalesWorkbenchRegion,
+    SalesWorkbenchRow,
+} from "./sales-workbench.shared"
 import type { SalesWorkbenchSectionProps } from "./sales-workbench.types"
-import { Badge, Button, Input, Select, SurfaceCard, Text } from "@starci/grammar/common"
+import { Badge, Button, Form, Input, Select, SurfaceCard, Text } from "@starci/grammar/common"
 import { salesWorkbenchActionText, salesWorkbenchSubmitOn } from "./sales-workbench.helpers"
 import { salesClarificationFactKey } from "@/modules/sales/sales-workbench"
-import { SALES_FORM_FULL_SPAN_CLASS_NAME, SALES_FORM_GRID_CLASS_NAME, SALES_OPERATIONS_GRID_CLASS_NAME } from "./classNames"
+import {
+    SALES_FORM_FULL_SPAN_CLASS_NAME,
+    SALES_FORM_GRID_CLASS_NAME,
+    SALES_OPERATIONS_GRID_CLASS_NAME,
+} from "./classNames"
 
 /** Props for the ambiguous actions and recovery Sales workbench unit. */
 type SalesWorkbenchAmbiguityRecoveryProps = SalesWorkbenchSectionProps
@@ -17,7 +26,7 @@ export const SalesWorkbenchAmbiguityRecovery = (props: SalesWorkbenchAmbiguityRe
     const actionText = (status: string) => salesWorkbenchActionText(status, t)
     const ambiguity = () => (
         <SurfaceCard label={t("ambiguity.label")}>
-            <form onSubmit={salesWorkbenchSubmitOn(view.ambiguity.onClarify)}>
+            <Form onSubmit={(_, event) => salesWorkbenchSubmitOn(view.ambiguity.onClarify)(event)}>
                 <SalesWorkbenchFieldStack>
                     <Text size="sm" weight="semibold">
                         {t("ambiguity.question")}
@@ -69,7 +78,7 @@ export const SalesWorkbenchAmbiguityRecovery = (props: SalesWorkbenchAmbiguityRe
                         </Button>
                     </SalesWorkbenchActionRow>
                 </SalesWorkbenchFieldStack>
-            </form>
+            </Form>
             {view.ambiguity.standing === "loading" ? null : (
                 <Text size="xs" tone="muted">
                     {t("ambiguity.pendingNote")}
@@ -86,7 +95,7 @@ export const SalesWorkbenchAmbiguityRecovery = (props: SalesWorkbenchAmbiguityRe
                     : t("recovery.door", { door: t(`recovery.${view.routine.door}`) })
             }
         >
-            <form onSubmit={salesWorkbenchSubmitOn(view.routine.onRetry)}>
+            <Form onSubmit={(_, event) => salesWorkbenchSubmitOn(view.routine.onRetry)(event)}>
                 <SalesWorkbenchFieldStack>
                     <SalesWorkbenchActionRow>
                         <Input
@@ -177,9 +186,14 @@ export const SalesWorkbenchAmbiguityRecovery = (props: SalesWorkbenchAmbiguityRe
                         {t("recovery.doorNote")}
                     </Text>
                 </SalesWorkbenchFieldStack>
-            </form>
+            </Form>
         </SurfaceCard>
     )
 
-    return <div className={SALES_OPERATIONS_GRID_CLASS_NAME}>{ambiguity()}{recovery()}</div>
+    return (
+        <div className={SALES_OPERATIONS_GRID_CLASS_NAME}>
+            {ambiguity()}
+            {recovery()}
+        </div>
+    )
 }

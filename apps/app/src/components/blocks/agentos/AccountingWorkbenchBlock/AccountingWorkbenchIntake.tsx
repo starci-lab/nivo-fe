@@ -1,6 +1,6 @@
 import type { ReactNode } from "react"
 import type { AccountingSurfaceStanding } from "@/modules/accounting/accounting-workbench"
-import { Badge, Button, Input, SurfaceCard, Text } from "@starci/grammar/common"
+import { Badge, Button, Form, Input, SurfaceCard, Text } from "@starci/grammar/common"
 import { accountingEvidenceStateKey } from "@/modules/accounting/accounting-workbench"
 import {
     AccountingWorkbenchActionRow,
@@ -20,21 +20,14 @@ export const AccountingWorkbenchIntake = (props: AccountingWorkbenchIntakeProps)
     const { view, shared, scopeReady } = props.props
     const { t } = view
 
-    const region = (
-        standing: AccountingSurfaceStanding,
-        empty: string,
-        emptyHint: string,
-        children: ReactNode,
-    ) => (
-        <AccountingWorkbenchRegion
-            props={{ view, shared, scopeReady, standing, empty, emptyHint }}
-        >
+    const region = (standing: AccountingSurfaceStanding, empty: string, emptyHint: string, children: ReactNode) => (
+        <AccountingWorkbenchRegion props={{ view, shared, scopeReady, standing, empty, emptyHint }}>
             {children}
         </AccountingWorkbenchRegion>
     )
     return (
         <SurfaceCard label={t("intake.label")}>
-            <form onSubmit={accountingSubmitOn(view.intake.onAdmit)}>
+            <Form onSubmit={(_, event) => accountingSubmitOn(view.intake.onAdmit)(event)}>
                 <div className={ACCOUNTING_FORM_GRID_CLASS_NAME}>
                     <Input
                         id="accounting-evidence-id"
@@ -110,7 +103,7 @@ export const AccountingWorkbenchIntake = (props: AccountingWorkbenchIntakeProps)
                         </AccountingWorkbenchActionRow>
                     </div>
                 </div>
-            </form>
+            </Form>
             {region(
                 view.intake.standing,
                 t("intake.empty"),

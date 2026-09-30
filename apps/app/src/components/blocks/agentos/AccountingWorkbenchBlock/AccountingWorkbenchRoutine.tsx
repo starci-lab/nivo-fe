@@ -1,6 +1,6 @@
 import type { ReactNode } from "react"
 import type { AccountingSurfaceStanding } from "@/modules/accounting/accounting-workbench"
-import { Badge, Button, Input, SurfaceCard, Text } from "@starci/grammar/common"
+import { Badge, Button, Form, Input, SurfaceCard, Text } from "@starci/grammar/common"
 import { accountingRoutineStateKey } from "@/modules/accounting/accounting-workbench"
 import {
     AccountingWorkbenchActionRow,
@@ -20,21 +20,14 @@ export const AccountingWorkbenchRoutine = (props: AccountingWorkbenchRoutineProp
     const { view, shared, scopeReady } = props.props
     const { t } = view
 
-    const region = (
-        standing: AccountingSurfaceStanding,
-        empty: string,
-        emptyHint: string,
-        children: ReactNode,
-    ) => (
-        <AccountingWorkbenchRegion
-            props={{ view, shared, scopeReady, standing, empty, emptyHint }}
-        >
+    const region = (standing: AccountingSurfaceStanding, empty: string, emptyHint: string, children: ReactNode) => (
+        <AccountingWorkbenchRegion props={{ view, shared, scopeReady, standing, empty, emptyHint }}>
             {children}
         </AccountingWorkbenchRegion>
     )
     return (
         <SurfaceCard label={t("routine.label")}>
-            <form onSubmit={accountingSubmitOn(view.routine.onCommitRoutine)}>
+            <Form onSubmit={(_, event) => accountingSubmitOn(view.routine.onCommitRoutine)(event)}>
                 <div className={ACCOUNTING_FORM_GRID_CLASS_NAME}>
                     <Input
                         id="accounting-intent-id"
@@ -99,7 +92,7 @@ export const AccountingWorkbenchRoutine = (props: AccountingWorkbenchRoutineProp
                         </AccountingWorkbenchActionRow>
                     </div>
                 </div>
-            </form>
+            </Form>
             {region(
                 view.routine.standing,
                 t("routine.empty"),
@@ -137,7 +130,7 @@ export const AccountingWorkbenchRoutine = (props: AccountingWorkbenchRoutineProp
                     </AccountingWorkbenchRow>
                 ),
             )}
-            <form onSubmit={accountingSubmitOn(view.routine.onRetryRoutine)}>
+            <Form onSubmit={(_, event) => accountingSubmitOn(view.routine.onRetryRoutine)(event)}>
                 <AccountingWorkbenchFieldStack>
                     <Text size="xs" tone="muted">
                         {t("routine.retryHint")}
@@ -179,7 +172,7 @@ export const AccountingWorkbenchRoutine = (props: AccountingWorkbenchRoutineProp
                         {t("routine.retry")}
                     </Button>
                 </AccountingWorkbenchFieldStack>
-            </form>
+            </Form>
         </SurfaceCard>
     )
 }

@@ -1,8 +1,13 @@
 import type { ReactNode } from "react"
-import { Badge, Button, Input, SurfaceCard, Text } from "@starci/grammar/common"
+import { Badge, Button, Form, Input, SurfaceCard, Text } from "@starci/grammar/common"
 import { formatSalesInstant, type SalesSurfaceStanding } from "@/modules/sales/sales-workbench"
 import { salesWorkbenchSubmitOn } from "./sales-workbench.helpers"
-import { SalesWorkbenchActionRow, SalesWorkbenchFieldStack, SalesWorkbenchRegion, SalesWorkbenchRow } from "./sales-workbench.shared"
+import {
+    SalesWorkbenchActionRow,
+    SalesWorkbenchFieldStack,
+    SalesWorkbenchRegion,
+    SalesWorkbenchRow,
+} from "./sales-workbench.shared"
 import type { SalesWorkbenchSectionProps } from "./sales-workbench.types"
 
 /** Props for the installation and policy presentation unit. */
@@ -13,15 +18,8 @@ export const SalesWorkbenchInstallationPolicy = (props: SalesWorkbenchInstallati
     const { view, format, shared } = props.props
     const { t, scopeReady } = view
 
-    const region = (
-        standing: SalesSurfaceStanding,
-        empty: string,
-        emptyHint: string,
-        children: ReactNode,
-    ) => (
-        <SalesWorkbenchRegion props={{ ...props.props, standing, empty, emptyHint }}>
-            {children}
-        </SalesWorkbenchRegion>
+    const region = (standing: SalesSurfaceStanding, empty: string, emptyHint: string, children: ReactNode) => (
+        <SalesWorkbenchRegion props={{ ...props.props, standing, empty, emptyHint }}>{children}</SalesWorkbenchRegion>
     )
     const installationFact = (): string | undefined => {
         const model = view.installation.model
@@ -72,7 +70,7 @@ export const SalesWorkbenchInstallationPolicy = (props: SalesWorkbenchInstallati
                     : t("policy.revisionFact", { revision: view.policy.model.revision })
             }
         >
-            <form onSubmit={salesWorkbenchSubmitOn(view.policy.onConfigure)}>
+            <Form onSubmit={(_, event) => salesWorkbenchSubmitOn(view.policy.onConfigure)(event)}>
                 <SalesWorkbenchFieldStack>
                     <Input
                         id="sales-policy-revision"
@@ -105,7 +103,7 @@ export const SalesWorkbenchInstallationPolicy = (props: SalesWorkbenchInstallati
                         {t("policy.unsetNote")}
                     </Text>
                 </SalesWorkbenchFieldStack>
-            </form>
+            </Form>
             {view.policy.model === null ? null : (
                 <SalesWorkbenchFieldStack>
                     <Text size="xs" tone="muted">
@@ -121,5 +119,10 @@ export const SalesWorkbenchInstallationPolicy = (props: SalesWorkbenchInstallati
         </SurfaceCard>
     )
 
-    return <>{installation()}{policy()}</>
+    return (
+        <>
+            {installation()}
+            {policy()}
+        </>
+    )
 }

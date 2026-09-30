@@ -1,14 +1,12 @@
 import { Breadcrumbs, LifecycleStep, RequestSummary } from "@nivo/ui"
 import { Button, Input, Heading, Text } from "@starci/grammar/common"
-import type { ReactNode } from "react"
+import { TemplateAppProvisioning } from "./index"
 import type { TemplateAppProvisioningViewProps } from "@/modules/provisioning/template-app/view"
 
-/** The settled trees the template-app flow can draw. */
-export type TemplateAppProvisioningProps = TemplateAppProvisioningViewProps
 export type { TemplateAppProvisioningViewProps } from "@/modules/provisioning/template-app/view"
 
 /** Draw one Template App request and its deployment journey. */
-export const TemplateAppProvisioningBase = (props: TemplateAppProvisioningProps) => {
+const TemplateAppProvisioningFlow = (props: TemplateAppProvisioningViewProps) => {
     const { state, props: viewProps, on }: TemplateAppProvisioningViewProps = props
     const isRequest = state === "request" || state === "submitting"
     const journey = (
@@ -99,21 +97,28 @@ export type TemplateAppProvisioningPageViewProps = TemplateAppProvisioningRouteP
     readonly labels: TemplateAppProvisioningPageLabels
 }
 
+/** Atom-only page composition and resolved lifecycle view accepted by the twin. */
+export type TemplateAppProvisioningBaseProps =
+    | TemplateAppProvisioningViewProps
+    | {
+          readonly state: "page"
+          readonly props: TemplateAppProvisioningPageViewProps
+          readonly on: TemplateAppProvisioningPageActions
+      }
+
 /** Actions the route composition exposes. */
 type TemplateAppProvisioningPageActions = {
     readonly openApps: () => void
 }
 
-/** Pure route composition input, including the connected lifecycle screen. */
-type TemplateAppProvisioningPageBaseProps = {
-    readonly props: TemplateAppProvisioningPageViewProps
-    readonly on: TemplateAppProvisioningPageActions
-    readonly children: ReactNode
-}
-
 /** Draw the route heading and breadcrumb around the connected lifecycle screen. */
-export const TemplateAppProvisioningPageBase = (props: TemplateAppProvisioningPageBaseProps) => {
-    const { props: view, on, children } = props
+export const TemplateAppProvisioningBase = (props: TemplateAppProvisioningBaseProps) => {
+    if (props.state !== "page") return <TemplateAppProvisioningFlow {...props} />
+    const { props: view, on } = props
+    const context =
+        view.mode === "new"
+            ? { mode: "new" as const, templateKey: view.templateKey }
+            : { mode: "resume" as const, siteId: view.siteId }
     const title = view.mode === "new" ? view.labels.createTitle : view.labels.provisioningTitle
     const description = view.mode === "new" ? view.labels.createDescription : view.labels.provisioningDescription
     return (
@@ -146,7 +151,7 @@ export const TemplateAppProvisioningPageBase = (props: TemplateAppProvisioningPa
                     {description}
                 </Text>
             </div>
-            {children}
+            <TemplateAppProvisioning context={context} />
         </div>
     )
 }

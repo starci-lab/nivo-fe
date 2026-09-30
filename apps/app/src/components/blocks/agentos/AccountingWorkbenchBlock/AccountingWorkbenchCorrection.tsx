@@ -1,17 +1,13 @@
 import type { ReactNode } from "react"
 import type { AccountingSurfaceStanding } from "@/modules/accounting/accounting-workbench"
-import { Badge, Button, Input, SurfaceCard, Text } from "@starci/grammar/common"
+import { Badge, Button, Form, Input, SurfaceCard, Text } from "@starci/grammar/common"
 import { accountingCorrectionStateKey } from "@/modules/accounting/accounting-workbench"
 import {
     AccountingWorkbenchActionRow,
     AccountingWorkbenchFieldStack,
     AccountingWorkbenchRow,
 } from "./accounting-workbench.shared"
-import {
-    ACCOUNTING_CORRECTION_TONES,
-    accountingSubmitOn,
-    accountingToneFor,
-} from "./accounting-workbench.helpers"
+import { ACCOUNTING_CORRECTION_TONES, accountingSubmitOn, accountingToneFor } from "./accounting-workbench.helpers"
 import { ACCOUNTING_FORM_FULL_SPAN_CLASS_NAME, ACCOUNTING_FORM_GRID_CLASS_NAME } from "./classNames"
 import type { AccountingWorkbenchSectionData } from "./accounting-workbench.types"
 import { AccountingWorkbenchRegion } from "./accounting-workbench.shared"
@@ -25,21 +21,14 @@ export const AccountingWorkbenchCorrection = (props: AccountingWorkbenchCorrecti
     const { t } = view
     const amount = view.format.amount
 
-    const region = (
-        standing: AccountingSurfaceStanding,
-        empty: string,
-        emptyHint: string,
-        children: ReactNode,
-    ) => (
-        <AccountingWorkbenchRegion
-            props={{ view, shared, scopeReady, standing, empty, emptyHint }}
-        >
+    const region = (standing: AccountingSurfaceStanding, empty: string, emptyHint: string, children: ReactNode) => (
+        <AccountingWorkbenchRegion props={{ view, shared, scopeReady, standing, empty, emptyHint }}>
             {children}
         </AccountingWorkbenchRegion>
     )
     return (
         <SurfaceCard label={t("correction.label")}>
-            <form onSubmit={accountingSubmitOn(view.correction.onPropose)}>
+            <Form onSubmit={(_, event) => accountingSubmitOn(view.correction.onPropose)(event)}>
                 <div className={ACCOUNTING_FORM_GRID_CLASS_NAME}>
                     <Input
                         id="accounting-correction-id"
@@ -118,8 +107,8 @@ export const AccountingWorkbenchCorrection = (props: AccountingWorkbenchCorrecti
                         </AccountingWorkbenchActionRow>
                     </div>
                 </div>
-            </form>
-            <form onSubmit={accountingSubmitOn(view.correction.onAppend)}>
+            </Form>
+            <Form onSubmit={(_, event) => accountingSubmitOn(view.correction.onAppend)(event)}>
                 <AccountingWorkbenchFieldStack>
                     <Text size="xs" tone="muted">
                         {t("correction.appendHint")}
@@ -145,7 +134,7 @@ export const AccountingWorkbenchCorrection = (props: AccountingWorkbenchCorrecti
                         {t("correction.append")}
                     </Button>
                 </AccountingWorkbenchFieldStack>
-            </form>
+            </Form>
             {region(
                 view.correction.standing,
                 t("correction.empty"),
@@ -178,7 +167,9 @@ export const AccountingWorkbenchCorrection = (props: AccountingWorkbenchCorrecti
                                 {view.correction.model.correctionId}
                             </Text>
                             <AccountingWorkbenchActionRow>
-                                <Badge tone={accountingToneFor(ACCOUNTING_CORRECTION_TONES, view.correction.model.state)}>
+                                <Badge
+                                    tone={accountingToneFor(ACCOUNTING_CORRECTION_TONES, view.correction.model.state)}
+                                >
                                     {t(accountingCorrectionStateKey(view.correction.model.state))}
                                 </Badge>
                                 <Text size="sm">

@@ -26,14 +26,16 @@ type AgentOSModuleCreatePageBaseProps = {
 }
 
 /** Compose the pre-persistence intake route with a reliable modules breadcrumb. */
-export const AgentOSModuleCreatePageBase = ({ props, on }: AgentOSModuleCreatePageBaseProps) => {
+export const AgentOSModuleCreatePageBase = (props: AgentOSModuleCreatePageBaseProps) => {
+    const { on } = props
+    const data = props.props
     return (
         <div>
             <Breadcrumbs
                 props={{
                     mode: "back",
-                    label: props.labels.path,
-                    backLabel: props.labels.modules,
+                    label: data.labels.path,
+                    backLabel: data.labels.modules,
                 }}
                 on={{
                     back: on.back,
@@ -48,18 +50,18 @@ export const AgentOSModuleCreatePageBase = ({ props, on }: AgentOSModuleCreatePa
                     />
                     <div>
                         <Text size="sm" tone="accent" weight="semibold">
-                            {props.labels.eyebrow}
+                            {data.labels.eyebrow}
                         </Text>
                         <Heading level={1} scale="display">
-                            {props.labels.title}
+                            {data.labels.title}
                         </Heading>
                         <Text size="md" tone="muted">
-                            {props.labels.description}
+                            {data.labels.description}
                         </Text>
                     </div>
                 </div>
             </div>
-            <AgentOSModuleIntake workspaceId={props.workspaceId} />
+            <AgentOSModuleIntake workspaceId={data.workspaceId} />
         </div>
     )
 }

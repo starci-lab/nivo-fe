@@ -1,5 +1,5 @@
 import type { ReactNode } from "react"
-import { Badge, Button, Input, Select, SurfaceCard, Text } from "@starci/grammar/common"
+import { Badge, Button, Form, Input, Select, SurfaceCard, Text } from "@starci/grammar/common"
 import { formatSalesInstant, salesOutcomeKey, type SalesSurfaceStanding } from "@/modules/sales/sales-workbench"
 import {
     SALES_LIFECYCLE_TONES,
@@ -12,7 +12,12 @@ import {
     salesWorkbenchWorkStateText,
 } from "./sales-workbench.helpers"
 import { SALES_FORM_FULL_SPAN_CLASS_NAME, SALES_FORM_GRID_CLASS_NAME } from "./classNames"
-import { SalesWorkbenchActionRow, SalesWorkbenchFieldStack, SalesWorkbenchRegion, SalesWorkbenchRow } from "./sales-workbench.shared"
+import {
+    SalesWorkbenchActionRow,
+    SalesWorkbenchFieldStack,
+    SalesWorkbenchRegion,
+    SalesWorkbenchRow,
+} from "./sales-workbench.shared"
 import type { SalesWorkbenchSectionProps } from "./sales-workbench.types"
 
 /** Props for the Sales workbench wait unit. */
@@ -23,15 +28,8 @@ export const SalesWorkbenchWait = (props: SalesWorkbenchWaitProps) => {
     const { view, format, shared } = props.props
     const { t, scopeReady } = view
 
-    const region = (
-        standing: SalesSurfaceStanding,
-        empty: string,
-        emptyHint: string,
-        children: ReactNode,
-    ) => (
-        <SalesWorkbenchRegion props={{ ...props.props, standing, empty, emptyHint }}>
-            {children}
-        </SalesWorkbenchRegion>
+    const region = (standing: SalesSurfaceStanding, empty: string, emptyHint: string, children: ReactNode) => (
+        <SalesWorkbenchRegion props={{ ...props.props, standing, empty, emptyHint }}>{children}</SalesWorkbenchRegion>
     )
     const wait = () => (
         <SurfaceCard label={t("wait.label")} fact={view.wait.model === null ? undefined : view.wait.model.customerRef}>
@@ -81,7 +79,7 @@ export const SalesWorkbenchWait = (props: SalesWorkbenchWaitProps) => {
                     </SalesWorkbenchFieldStack>
                 ),
             )}
-            <form onSubmit={salesWorkbenchSubmitOn(() => undefined)}>
+            <Form onSubmit={(_, event) => salesWorkbenchSubmitOn(() => undefined)(event)}>
                 <SalesWorkbenchActionRow>
                     <Input
                         id="sales-opportunity-id"
@@ -95,7 +93,7 @@ export const SalesWorkbenchWait = (props: SalesWorkbenchWaitProps) => {
                         {t("reload")}
                     </Button>
                 </SalesWorkbenchActionRow>
-            </form>
+            </Form>
         </SurfaceCard>
     )
 
@@ -113,22 +111,15 @@ export const SalesWorkbenchClosure = (props: SalesWorkbenchClosureProps) => {
     const lifecycleText = (status: string) => salesWorkbenchLifecycleText(status, t)
     const workStateText = (status: string) => salesWorkbenchWorkStateText(status, t)
 
-    const region = (
-        standing: SalesSurfaceStanding,
-        empty: string,
-        emptyHint: string,
-        children: ReactNode,
-    ) => (
-        <SalesWorkbenchRegion props={{ ...props.props, standing, empty, emptyHint }}>
-            {children}
-        </SalesWorkbenchRegion>
+    const region = (standing: SalesSurfaceStanding, empty: string, emptyHint: string, children: ReactNode) => (
+        <SalesWorkbenchRegion props={{ ...props.props, standing, empty, emptyHint }}>{children}</SalesWorkbenchRegion>
     )
     return (
         <SurfaceCard
             label={t("closure.label")}
             fact={view.closure.model === null ? undefined : salesWorkbenchLifecycleText(view.closure.model.status, t)}
         >
-            <form onSubmit={salesWorkbenchSubmitOn(view.closure.onClose)}>
+            <Form onSubmit={(_, event) => salesWorkbenchSubmitOn(view.closure.onClose)(event)}>
                 <div className={SALES_FORM_GRID_CLASS_NAME}>
                     <Input
                         id="sales-close-intent"
@@ -197,7 +188,7 @@ export const SalesWorkbenchClosure = (props: SalesWorkbenchClosureProps) => {
                         </SalesWorkbenchActionRow>
                     </div>
                 </div>
-            </form>
+            </Form>
             {region(
                 view.closure.standing,
                 t("wait.empty"),

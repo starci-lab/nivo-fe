@@ -137,7 +137,7 @@ export const GroupChatPageBase = (props: GroupChatPageBaseProps) => {
             <div className={GROUP_CHAT_HEADER_BAND_COMPACT_CLASS_NAME}>
                 <div className={GROUP_CHAT_HEADER_COMPACT_ROW_CLASS_NAME}>
                     <Text size="sm" weight="semibold" overflow="truncate">
-                        <span>{labels.workspace}</span> <span>{view.workspaceName}</span>
+                        <Text as="span">{labels.workspace}</Text> <Text as="span">{view.workspaceName}</Text>
                     </Text>
                     {memberChip}
                 </div>
@@ -149,7 +149,7 @@ export const GroupChatPageBase = (props: GroupChatPageBaseProps) => {
                 level={2}
                 title={
                     <>
-                        <span>{labels.workspace}</span> <span>{view.workspaceName}</span>
+                        <Text as="span">{labels.workspace}</Text> <Text as="span">{view.workspaceName}</Text>
                     </>
                 }
                 description={labels.description}

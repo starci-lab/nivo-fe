@@ -3,7 +3,7 @@
 import { useTranslations } from "next-intl"
 import { useRouter } from "@/hooks/i18n"
 import { agentosHome, newWorkspace } from "@/modules/routes"
-import { AgentOSPageBase } from "./component"
+import { AgentOSDashboardPageBase } from "./component"
 import type { AgentOSPageBaseState, AgentOSPageLabels } from "./component"
 
 /** Route identity for the dashboard, pre-persistence create flow, or persisted order. */
@@ -22,7 +22,7 @@ export const AgentOSDashboardPage = (props: AgentOSDashboardPageProps) => {
     const state: AgentOSPageBaseState =
         props.mode === "resume" ? { mode: "resume", orderId: props.orderId } : { mode: props.mode }
     return (
-        <AgentOSPageBase
+        <AgentOSDashboardPageBase
             state={state}
             props={{
                 labels: {

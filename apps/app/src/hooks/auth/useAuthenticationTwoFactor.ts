@@ -1,4 +1,3 @@
-
 import { useCallback, useRef } from "react"
 import { useMutateVerifyTwoFactorSwr } from "@/hooks/swr/mutations/useMutateVerifyTwoFactorSwr"
 import type { AuthFactor } from "@/components/blocks/auth/AuthenticationPanel"
@@ -39,12 +38,17 @@ export const useAuthenticationTwoFactor = ({ control, session, t }: UseAuthentic
                 }),
             )
             if (!result.ok) {
-                if (result.kind === "unavailable") {
-                    hesitate(t("signIn.undecided"))
-                    return
+                switch (result.kind) {
+                    case "unavailable":
+                        hesitate(t("signIn.undecided"))
+                        return
+                    case "refused":
+                    case "forbidden":
+                    case "not-found":
+                    case "invalid":
+                        refuse(t("signIn.twoFactorRefused"))
+                        return
                 }
-                refuse(t("signIn.twoFactorRefused"))
-                return
             }
             if (result.data.requiresTwoFactor || result.data.accessToken === null) {
                 refuse(t("signIn.twoFactorRefused"))

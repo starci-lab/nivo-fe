@@ -1,5 +1,7 @@
 "use client"
 
+import { ContextVersionBlockBase } from "./component"
+
 type SetupApplyVersionValues = { readonly version: number }
 type SetupCompleteCountValues = { readonly passed: number; readonly total: number }
 type SetupDraftRevisionValues = { readonly revision: number }
@@ -37,10 +39,6 @@ export type ContextVersionBlockCopy = {
         readonly versionActive: (values: SetupVersionActiveValues) => string
     }
 }
-
-import { Badge, Button, Heading, SurfaceCard, Text } from "@starci/grammar/common"
-
-import { CONTEXT_BAND_CLASS_NAME, CONTEXT_GATE_ROW_CLASS_NAME, CONTEXT_RAISED_BAND_CLASS_NAME } from "./classNames"
 
 /** One readiness requirement and its measured evidence for the selected revision. */
 type SetupGate = {
@@ -127,91 +125,38 @@ export const ContextVersionBlock = (props: ContextVersionBlockProps) => {
         return { fact, key: `${fact}:${occurrence}` }
     })
     return (
-        <SurfaceCard ariaLabel={copy.setup.gatesReview} composition="joined">
-            <div className={CONTEXT_RAISED_BAND_CLASS_NAME} data-contract="SURFACE-3 GAP-3 PADDING-4">
-                <Heading level={3}>{copy.setup.reviewContext}</Heading>
-                <Text size="sm" tone="muted">
-                    {copy.setup.reviewSummary({
-                        draft:
-                            draft === null
-                                ? copy.setup.noDraft
-                                : copy.setup.draftRevision({ revision: draft.revision }),
-                        version: activeVersion === null ? copy.setup.notApplied : `v${activeVersion}`,
-                    })}
-                </Text>
-            </div>
-            <div className={CONTEXT_BAND_CLASS_NAME} data-contract="BOUNDARY-1 GAP-3 PADDING-4">
-                <Text size="sm" weight="semibold">
-                    {draft?.summary ?? copy.setup.noCandidate}
-                </Text>
-                {factRows.map(({ fact, key }) => (
-                    <Text size="sm" key={key}>
-                        {fact}
-                    </Text>
-                ))}
-            </div>
-            <div className={CONTEXT_BAND_CLASS_NAME} data-contract="BOUNDARY-1 GAP-3 PADDING-4">
-                <Heading level={4}>{copy.setup.setupGates}</Heading>
-                {gates.length > 0 ? (
-                    <Text size="sm" weight="semibold">
-                        {copy.setup.completeCount({ passed, total: gates.length })}
-                    </Text>
-                ) : (
-                    <Text size="sm" tone="muted">
-                        {copy.setup.noGates}
-                    </Text>
-                )}
-                {gates.map((gate) => (
-                    <div
-                        className={CONTEXT_GATE_ROW_CLASS_NAME}
-                        data-contract="BOUNDARY-1 GAP-2 PADDING-3"
-                        key={gate.key}
-                    >
-                        <Text size="sm">{gate.label}</Text>
-                        <Badge
-                            tone={gate.passed && (!gate.ownerConfirmation || gate.confirmed) ? "success" : "neutral"}
-                        >
-                            {gate.confirmed
-                                ? copy.setup.confirmed
-                                : gate.passed
-                                  ? copy.setup.complete
-                                  : copy.setup.needsFollowUp}
-                        </Badge>
-                        {gate.passed && gate.ownerConfirmation && !gate.confirmed ? (
-                            gate.citationPolicy === "none" ? (
-                                <Button
-                                    variant="secondary"
-                                    isDisabled={peerDisabled || pending}
-                                    onPress={() => onConfirmRequirement(gate)}
-                                >
-                                    {copy.setup.confirmRequirement}
-                                </Button>
-                            ) : (
-                                <Text size="xs" tone="muted">
-                                    {copy.setup.evidenceRequired}
-                                </Text>
-                            )
-                        ) : null}
-                    </div>
-                ))}
-            </div>
-            <div className={CONTEXT_BAND_CLASS_NAME} data-contract="BOUNDARY-1 GAP-3 PADDING-4">
-                <Heading level={4}>{copy.setup.exactTest}</Heading>
-                <Text size="sm" weight="semibold">
-                    {draft?.exactTestPassed ? copy.setup.testPassed : copy.setup.testRequired}
-                </Text>
-                <Text size="sm" tone="muted" live={refused ? "assertive" : undefined}>
-                    {refused ? copy.setup.operationRefused : copy.setup.applyHint}
-                </Text>
-                <Button
-                    variant="primary"
-                    isPending={ownPending}
-                    isDisabled={(!applyReady && !createReady) || peerDisabled || ownPending}
-                    onPress={createReady ? onCreateVersion : onApply}
-                >
-                    {applyLabel}
-                </Button>
-            </div>
-        </SurfaceCard>
+        <ContextVersionBlockBase
+            props={{
+                labels: {
+                    gatesReview: copy.setup.gatesReview,
+                    reviewContext: copy.setup.reviewContext,
+                    setupGates: copy.setup.setupGates,
+                    noGates: copy.setup.noGates,
+                    confirmed: copy.setup.confirmed,
+                    complete: copy.setup.complete,
+                    needsFollowUp: copy.setup.needsFollowUp,
+                    confirmRequirement: copy.setup.confirmRequirement,
+                    evidenceRequired: copy.setup.evidenceRequired,
+                    exactTest: copy.setup.exactTest,
+                },
+                reviewSummary: copy.setup.reviewSummary({
+                    draft: draft === null ? copy.setup.noDraft : copy.setup.draftRevision({ revision: draft.revision }),
+                    version: activeVersion === null ? copy.setup.notApplied : `v${activeVersion}`,
+                }),
+                summary: draft?.summary ?? copy.setup.noCandidate,
+                factRows,
+                gates,
+                completeCount: gates.length > 0 ? copy.setup.completeCount({ passed, total: gates.length }) : "",
+                testStatus: draft?.exactTestPassed ? copy.setup.testPassed : copy.setup.testRequired,
+                applyHint: refused ? copy.setup.operationRefused : copy.setup.applyHint,
+                applyLabel,
+                pending,
+                ownPending,
+                peerDisabled,
+                refused,
+                actionDisabled: (!applyReady && !createReady) || peerDisabled || ownPending,
+            }}
+            on={{ apply: createReady ? onCreateVersion : onApply, confirmRequirement: onConfirmRequirement }}
+        />
     )
 }

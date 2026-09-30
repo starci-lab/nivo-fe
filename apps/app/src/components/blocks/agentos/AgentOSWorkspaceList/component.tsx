@@ -169,14 +169,14 @@ const groupedRows = (
     const steady = rows.filter((row) => !ATTENTION_STATUSES.has(row.status))
     const group = (label: string, members: ReadonlyArray<AgentOSWorkspaceView>) =>
         members.length === 0 ? null : (
-            <section key={label} aria-label={label}>
+            <SurfaceCard key={label} label={label}>
                 <div className={GROUP_LABEL_CLASS_NAME}>
                     <Text size="sm" weight="semibold">
                         {label}
                     </Text>
                 </div>
                 {members.map((row) => workspaceRow(row, labels.manage, onOpen))}
-            </section>
+            </SurfaceCard>
         )
     return (
         <>

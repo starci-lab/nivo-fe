@@ -1,7 +1,12 @@
 import type { ReactNode } from "react"
-import { SalesWorkbenchActionRow, SalesWorkbenchFieldStack, SalesWorkbenchRegion, SalesWorkbenchRow } from "./sales-workbench.shared"
+import {
+    SalesWorkbenchActionRow,
+    SalesWorkbenchFieldStack,
+    SalesWorkbenchRegion,
+    SalesWorkbenchRow,
+} from "./sales-workbench.shared"
 import type { SalesWorkbenchSectionProps } from "./sales-workbench.types"
-import { Button, Input, SurfaceCard, SurfaceListCard, Text } from "@starci/grammar/common"
+import { Button, Form, Input, SurfaceCard, SurfaceListCard, Text } from "@starci/grammar/common"
 import { formatSalesInstant, type SalesSurfaceStanding } from "@/modules/sales/sales-workbench"
 import { SALES_FORM_FULL_SPAN_CLASS_NAME, SALES_FORM_GRID_CLASS_NAME } from "./classNames"
 import { SalesWorkbenchAttentionRow } from "./SalesWorkbenchAttentionRow"
@@ -16,19 +21,12 @@ export const SalesWorkbenchCommandAttention = (props: SalesWorkbenchCommandAtten
     const { t, scopeReady } = view
     const { selectOpportunity } = props.on
 
-    const region = (
-        standing: SalesSurfaceStanding,
-        empty: string,
-        emptyHint: string,
-        children: ReactNode,
-    ) => (
-        <SalesWorkbenchRegion props={{ ...props.props, standing, empty, emptyHint }}>
-            {children}
-        </SalesWorkbenchRegion>
+    const region = (standing: SalesSurfaceStanding, empty: string, emptyHint: string, children: ReactNode) => (
+        <SalesWorkbenchRegion props={{ ...props.props, standing, empty, emptyHint }}>{children}</SalesWorkbenchRegion>
     )
     const commandBand = () => (
         <SurfaceCard label={t("command.label")} fact={t("attention.covered", { count: view.attention.total })}>
-            <form onSubmit={salesWorkbenchSubmitOn(view.command.onSubmit)}>
+            <Form onSubmit={(_, event) => salesWorkbenchSubmitOn(view.command.onSubmit)(event)}>
                 <div className={SALES_FORM_GRID_CLASS_NAME}>
                     <Input
                         id="sales-command-id"
@@ -116,7 +114,7 @@ export const SalesWorkbenchCommandAttention = (props: SalesWorkbenchCommandAtten
                         )}
                     </div>
                 </div>
-            </form>
+            </Form>
         </SurfaceCard>
     )
     const attention = () => (

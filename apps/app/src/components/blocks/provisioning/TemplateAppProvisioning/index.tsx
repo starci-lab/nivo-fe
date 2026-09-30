@@ -6,11 +6,7 @@ import { useTranslations } from "next-intl"
 import { apps } from "@/modules/routes"
 import { templateStepState, TEMPLATE_PHASE_INDEX } from "@/modules/provisioning/template-app"
 import { templateAppProvisioningView } from "@/modules/provisioning/template-app/view"
-import {
-    TemplateAppProvisioningBase,
-    TemplateAppProvisioningPageBase,
-    type TemplateAppProvisioningRouteProps,
-} from "./component"
+import { TemplateAppProvisioningBase, type TemplateAppProvisioningRouteProps } from "./component"
 
 /** Route identity owned by the Template App provisioning block. */
 export type TemplateAppProvisioningProps = { readonly context: TemplateAppProvisioningContext }
@@ -54,12 +50,9 @@ export const TemplateAppProvisioningPage = (props: TemplateAppProvisioningPagePr
         props.mode === "new"
             ? { mode: "new" as const, templateKey: props.templateKey }
             : { mode: "resume" as const, siteId: props.siteId }
-    const context: TemplateAppProvisioningContext =
-        route.mode === "new"
-            ? { mode: "new", templateKey: route.templateKey }
-            : { mode: "resume", siteId: route.siteId }
     return (
-        <TemplateAppProvisioningPageBase
+        <TemplateAppProvisioningBase
+            state="page"
             props={{
                 ...route,
                 labels: {
@@ -72,9 +65,7 @@ export const TemplateAppProvisioningPage = (props: TemplateAppProvisioningPagePr
                 },
             }}
             on={{ openApps: () => router.push(apps()) }}
-        >
-            <TemplateAppProvisioning context={context} />
-        </TemplateAppProvisioningPageBase>
+        />
     )
 }
 
