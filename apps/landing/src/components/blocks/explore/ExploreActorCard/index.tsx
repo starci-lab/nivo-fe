@@ -1,4 +1,5 @@
 import type { ReactNode } from "react"
+import { DescriptionList, Text } from "@starci/grammar/common"
 import { CLASS_NAMES as C } from "./classNames"
 
 type ExploreActorCardProps = {
@@ -17,16 +18,14 @@ const ExploreActorCard = ({ index, future, staggered, fields, footer, children }
         data-future={future ? "true" : undefined}
         role="listitem"
     >
-        <span className={C.index}>{String(index + 1).padStart(2, "0")}</span>
+        <Text as="span">
+            <Text as="span">{String(index + 1).padStart(2, "0")}</Text>
+        </Text>
         {children}
-        <dl className={C.details}>
-            {fields.map(({ label, value }) => (
-                <div key={label}>
-                    <dt>{label}</dt>
-                    <dd>{value}</dd>
-                </div>
-            ))}
-        </dl>
+        <DescriptionList
+            className={C.details}
+            items={fields.map(({ label, value }) => ({ id: label, term: label, description: value }))}
+        />
         {footer}
     </article>
 )

@@ -2,7 +2,6 @@
 
 import type { ReactNode } from "react"
 import { useLocale, useTranslations } from "next-intl"
-import { ThemeToggle } from "@nivo/ui"
 import { toLocale } from "@/modules/i18n"
 import { ACADEMY, inLocale, isSafeThemeValue, type ThemeVariables } from "@/modules/academy/template"
 import { AcademyChromeBase } from "./component"
@@ -176,11 +175,24 @@ type AcademyChromeProps = {
 export const AcademyChrome = (props: AcademyChromeProps) => {
     const locale = toLocale(useLocale())
     const t = useTranslations("landing")
+    const themeCopy = useTranslations("theme")
     const theme = themeCss(inLocale(ACADEMY.identity.name, locale))
     return (
         <AcademyChromeBase
-            state={{ content: props.content, toolbar: <ThemeToggle namespace="theme" /> }}
-            props={{ themeCss: theme, customCss: ACADEMY.customCss ?? null, skipLabel: t("skipToContent") }}
+            state={{ content: props.content }}
+            props={{
+                themeCss: theme,
+                customCss: ACADEMY.customCss ?? null,
+                skipLabel: t("skipToContent"),
+                theme: {
+                    label: themeCopy("label"),
+                    options: {
+                        system: themeCopy("options.system"),
+                        light: themeCopy("options.light"),
+                        dark: themeCopy("options.dark"),
+                    },
+                },
+            }}
         />
     )
 }

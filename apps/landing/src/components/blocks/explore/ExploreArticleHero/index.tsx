@@ -1,4 +1,4 @@
-import { PageContainer, Text } from "@starci/grammar/common"
+import { DescriptionList, PageContainer, Text } from "@starci/grammar/common"
 import type { ReactNode } from "react"
 import { CLASS_NAMES as C } from "./classNames"
 
@@ -13,19 +13,15 @@ type ExploreArticleHeroProps = {
 /** Editorial header surface for one approved Idea. */
 const ExploreArticleHero = ({ children, thesis, metadata, dateNote }: ExploreArticleHeroProps) => (
     <header className={C.header}>
-        <span className={C.ring} aria-hidden="true" />
+        <Text as="span" aria-hidden="true" />
         <PageContainer>
             <div className={C.inner}>
                 {children}
-                <p className={C.thesis}>{thesis}</p>
-                <dl className={C.metadata}>
-                    {metadata.map(({ label, value }) => (
-                        <div key={label}>
-                            <dt>{label}</dt>
-                            <dd>{value}</dd>
-                        </div>
-                    ))}
-                </dl>
+                <Text as="p">{thesis}</Text>
+                <DescriptionList
+                    className={C.metadata}
+                    items={metadata.map(({ label, value }) => ({ id: label, term: label, description: value }))}
+                />
                 <Text as="p" size="sm" tone="muted">
                     {dateNote}
                 </Text>

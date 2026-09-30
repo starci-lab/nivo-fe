@@ -5,7 +5,7 @@ import { Button, Heading } from "@starci/grammar/common"
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion"
 import { createElement, useId, type ComponentType, type CSSProperties } from "react"
 
-import { RAIL_CLASS_NAME } from "./classNames"
+import { RAIL_CLASS_NAME, SCREEN_READER_ONLY_CLASS_NAME } from "./classNames"
 
 /** Props for an accessible navigation rail whose collapsed state the caller owns. */
 export type CollapsibleRailProps<RailProps extends object, CompactProps extends object, ToggleProps extends object> = {
@@ -49,17 +49,11 @@ export const CollapsibleRail = <R extends object, C extends object, T extends ob
         ? createElement(props.collapsedRail, props.collapsedRailProps)
         : createElement(props.rail, props.railProps)
     const toggleControl = createElement(props.toggleControl, props.toggleControlProps)
-    const Root = props.landmark === "none" ? motion.div : motion.aside
-    return (
-        <Root
-            className={RAIL_CLASS_NAME}
-            aria-labelledby={props.landmark === "none" ? undefined : headingId}
-            aria-label={props.landmark === "none" ? undefined : props.ariaLabel}
-            animate={{ width: collapsed ? 64 : 256 }}
-            initial={false}
-            transition={{ duration: reduceMotion === true ? 0 : 0.18, ease: "easeOut" }}
-            style={railStyle}
-        >
+    const labelledBy = props.landmark === "none" ? undefined : headingId
+    const accessibleName = props.landmark === "none" ? undefined : props.ariaLabel
+    const motionTransition = { duration: reduceMotion === true ? 0 : 0.18, ease: "easeOut" as const }
+    const content = (
+        <>
             <div id={headingId}>
                 <Heading level={2} isVisuallyHidden>
                     {props.ariaLabel}
@@ -70,11 +64,39 @@ export const CollapsibleRail = <R extends object, C extends object, T extends ob
                     {!collapsed && props.title === undefined ? null : <span>{collapsed ? null : props.title}</span>}
                 </AnimatePresence>
                 <Button type="button" variant="ghost" size="md" onPress={toggle}>
-                    <span className="sr-only">{label}</span>
+                    <span className={SCREEN_READER_ONLY_CLASS_NAME}>{label}</span>
                     <span aria-hidden="true">{toggleControl}</span>
                 </Button>
             </div>
             <div>{rail}</div>
-        </Root>
+        </>
+    )
+    if (props.landmark === "none") {
+        return (
+            <motion.div
+                className={RAIL_CLASS_NAME}
+                aria-labelledby={labelledBy}
+                aria-label={accessibleName}
+                animate={{ width: collapsed ? 64 : 256 }}
+                initial={false}
+                transition={motionTransition}
+                style={railStyle}
+            >
+                {content}
+            </motion.div>
+        )
+    }
+    return (
+        <motion.aside
+            className={RAIL_CLASS_NAME}
+            aria-labelledby={labelledBy}
+            aria-label={accessibleName}
+            animate={{ width: collapsed ? 64 : 256 }}
+            initial={false}
+            transition={motionTransition}
+            style={railStyle}
+        >
+            {content}
+        </motion.aside>
     )
 }

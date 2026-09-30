@@ -3,6 +3,13 @@
 import { Drawer } from "@heroui/react"
 import { useState, type ComponentType, type ReactNode } from "react"
 
+import {
+    DRAWER_HEADER_CLASS_NAME,
+    DRAWER_HEADING_CLASS_NAME,
+    TRIGGER_CLASS_NAME,
+    DRAWER_BODY_CLASS_NAME,
+} from "./classNames"
+
 type DrawerBranchContent<P extends object> =
     | {
           readonly content: ComponentType<P>
@@ -31,21 +38,15 @@ export const DrawerBranch = <P extends object>(props: DrawerBranchProps<P>) => {
         props.renderContent === undefined ? <props.content {...props.contentProps} /> : props.renderContent(close)
     return (
         <Drawer.Root isOpen={isOpen} onOpenChange={setIsOpen}>
-            <Drawer.Trigger className="min-h-10 rounded-lg px-3 text-sm font-semibold text-foreground outline-none data-[focus-visible=true]:ring-2 data-[focus-visible=true]:ring-accent">
-                {props.triggerLabel}
-            </Drawer.Trigger>
+            <Drawer.Trigger className={TRIGGER_CLASS_NAME}>{props.triggerLabel}</Drawer.Trigger>
             <Drawer.Backdrop isDismissable>
                 <Drawer.Content placement="right">
                     <Drawer.Dialog>
-                        <Drawer.Header className="border-b border-separator px-4 py-4">
-                            <Drawer.Heading className="text-lg font-semibold text-foreground">
-                                {props.title}
-                            </Drawer.Heading>
-                            <Drawer.CloseTrigger className="min-h-10 rounded-lg px-3 text-sm font-semibold text-foreground outline-none data-[focus-visible=true]:ring-2 data-[focus-visible=true]:ring-accent">
-                                {props.closeLabel}
-                            </Drawer.CloseTrigger>
+                        <Drawer.Header className={DRAWER_HEADER_CLASS_NAME}>
+                            <Drawer.Heading className={DRAWER_HEADING_CLASS_NAME}>{props.title}</Drawer.Heading>
+                            <Drawer.CloseTrigger className={TRIGGER_CLASS_NAME}>{props.closeLabel}</Drawer.CloseTrigger>
                         </Drawer.Header>
-                        <Drawer.Body className="p-0">{content}</Drawer.Body>
+                        <Drawer.Body className={DRAWER_BODY_CLASS_NAME}>{content}</Drawer.Body>
                     </Drawer.Dialog>
                 </Drawer.Content>
             </Drawer.Backdrop>

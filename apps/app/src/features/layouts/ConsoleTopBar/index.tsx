@@ -1,4 +1,5 @@
 import { useTranslations } from "next-intl"
+import { useCallback } from "react"
 import { ThemeToggle } from "@nivo/ui"
 import { AccountMenu } from "@/components/blocks/auth/AccountMenu"
 import { LanguageMenu } from "@/components/blocks/locale/LanguageMenu"
@@ -23,8 +24,6 @@ export type ConsoleTopBarProps = { readonly [key: string]: never }
  * re-renders exactly as the direct reference did.
  */
 const renderLocaleControl = () => <LanguageMenu />
-/** The theme menu on the same bridge. */
-const renderThemeControl = () => <ThemeToggle namespace="console.theme" />
 /** The account menu on the same bridge. */
 const renderAccountControl = () => <AccountMenu />
 
@@ -32,6 +31,21 @@ const renderAccountControl = () => <AccountMenu />
 export const ConsoleTopBar = (props: ConsoleTopBarProps) => {
     void props
     const t = useTranslations("console")
+    const themeCopy = useTranslations("console.theme")
+    const themeLabel = themeCopy("label")
+    const systemLabel = themeCopy("options.system")
+    const lightLabel = themeCopy("options.light")
+    const darkLabel = themeCopy("options.dark")
+    // Keep the mounted theme control stable while its resolved copy stays the same.
+    const renderThemeControl = useCallback(
+        () => (
+            <ThemeToggle
+                label={themeLabel}
+                options={{ system: systemLabel, light: lightLabel, dark: darkLabel }}
+            />
+        ),
+        [themeLabel, systemLabel, lightLabel, darkLabel],
+    )
     return (
         <ConsoleTopBarBase
             state={{

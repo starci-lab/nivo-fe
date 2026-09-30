@@ -16,9 +16,19 @@ const customPieces = (content: CustomContent, imageState: AcademySectionImageSta
     const imageUrl = content.imageUrl
     const imageAlt = headingText ?? ""
     const heading = headingText === undefined ? undefined : <Heading level={2}>{headingText}</Heading>
-    const body = bodyText === undefined ? undefined : <p className={CUSTOM_BODY_CLASS_NAME}>{bodyText}</p>
+    const body =
+        bodyText === undefined ? undefined : (
+            <div className={CUSTOM_BODY_CLASS_NAME}>
+                <Text as="p">{bodyText}</Text>
+            </div>
+        )
     const actionLeaf = actionSpec === undefined ? undefined : <Button variant="primary">{actionSpec.label}</Button>
-    const actionRun = actionLeaf === undefined ? undefined : <div><>{actionLeaf}</></div>
+    const actionRun =
+        actionLeaf === undefined ? undefined : (
+            <div>
+                <>{actionLeaf}</>
+            </div>
+        )
     const figure = <AcademySectionFigure src={imageUrl} alt={imageAlt} {...imageState} />
     return {
         shape: content.variant ?? "stack",
@@ -39,54 +49,81 @@ type CustomPieces = ReturnType<typeof customPieces>
 
 const quoteBand = ({ bodyText, headingText, attribution }: CustomPieces) => {
     const quoted = bodyText ?? headingText
-    const attributed = attribution === undefined ? [] : [<Text key="attribution" size="sm" tone="muted">{`— ${attribution}`}</Text>]
+    const attributed =
+        attribution === undefined ? [] : [<Text key="attribution" size="sm" tone="muted">{`— ${attribution}`}</Text>]
     return (
-        <AcademySectionBand.Band parts={[
-            <blockquote key="quote" className={PULL_QUOTE_CLASS_NAME}>{quoted}</blockquote>,
-            ...attributed,
-        ]} />
+        <AcademySectionBand.Band
+            parts={[
+                <blockquote key="quote" className={PULL_QUOTE_CLASS_NAME}>
+                    {quoted}
+                </blockquote>,
+                ...attributed,
+            ]}
+        />
     )
 }
 
 const columnsBand = ({ heading, columns, actionRun }: CustomPieces) => (
-    <AcademySectionBand.Band parts={[
-        ...(heading === undefined ? [] : [heading]),
-        <div key="columns">
-            {columns.map((column) => (
-                <Fragment key={column.title}>
-                    {AcademySectionBand.claimPanel({
-                        claim: <Text weight="medium">{column.title}</Text>,
-                        note: column.text === undefined ? undefined : <Text size="sm" tone="muted">{column.text}</Text>,
-                    })}
-                </Fragment>
-            ))}
-        </div>,
-        ...(actionRun === undefined ? [] : [actionRun]),
-    ]} />
+    <AcademySectionBand.Band
+        parts={[
+            ...(heading === undefined ? [] : [heading]),
+            <div key="columns">
+                {columns.map((column) => (
+                    <Fragment key={column.title}>
+                        {AcademySectionBand.claimPanel({
+                            claim: <Text weight="medium">{column.title}</Text>,
+                            note:
+                                column.text === undefined ? undefined : (
+                                    <Text size="sm" tone="muted">
+                                        {column.text}
+                                    </Text>
+                                ),
+                        })}
+                    </Fragment>
+                ))}
+            </div>,
+            ...(actionRun === undefined ? [] : [actionRun]),
+        ]}
+    />
 )
 
 const ctaBand = ({ heading, body, actionLeaf }: CustomPieces) => (
-    <AcademySectionBand.Band alt parts={[
-        <div key="cta">{heading}{body}{actionLeaf}</div>,
-    ]} />
+    <AcademySectionBand.Band
+        alt
+        parts={[
+            <div key="cta">
+                {heading}
+                {body}
+                {actionLeaf}
+            </div>,
+        ]}
+    />
 )
 
 const figureBand = ({ figure, heading, body, actionLeaf }: CustomPieces) => (
-    <AcademySectionBand.Band parts={[
-        <div key="figure">
-            {figure}
-            <div>{heading}{body}{actionLeaf}</div>
-        </div>,
-    ]} />
+    <AcademySectionBand.Band
+        parts={[
+            <div key="figure">
+                {figure}
+                <div>
+                    {heading}
+                    {body}
+                    {actionLeaf}
+                </div>
+            </div>,
+        ]}
+    />
 )
 
 const stackBand = ({ heading, imageUrl, figure, body, actionRun }: CustomPieces) => (
-    <AcademySectionBand.Band parts={[
-        ...(heading === undefined ? [] : [heading]),
-        ...(imageUrl === undefined ? [] : [figure]),
-        ...(body === undefined ? [] : [body]),
-        ...(actionRun === undefined ? [] : [actionRun]),
-    ]} />
+    <AcademySectionBand.Band
+        parts={[
+            ...(heading === undefined ? [] : [heading]),
+            ...(imageUrl === undefined ? [] : [figure]),
+            ...(body === undefined ? [] : [body]),
+            ...(actionRun === undefined ? [] : [actionRun]),
+        ]}
+    />
 )
 
 /** Draw an expert-authored section in its configured custom shape. */

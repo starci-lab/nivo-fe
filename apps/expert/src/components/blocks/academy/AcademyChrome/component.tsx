@@ -1,4 +1,6 @@
 import type { ReactNode } from "react"
+import { WorkspaceShell } from "@starci/grammar/common"
+import { ThemeToggle, type ThemeToggleProps } from "@nivo/ui"
 import { ACADEMY_MAIN_ID, ACADEMY_SKIP_LINK_CLASS_NAME, ACADEMY_TOOLBAR_CLASS_NAME } from "./classNames"
 
 /** The rendered tree the chrome wraps: state, never an atom. */
@@ -13,8 +15,6 @@ type AcademyChromeBaseState = {
      * name a reader can grep, and a second one cannot be slipped in beside it.
      */
     readonly content: ReactNode
-    /** The reader's own controls (theme), drawn after the skip link and before the main landmark. */
-    readonly toolbar: ReactNode
 }
 
 /** The atoms the chrome draws: both stylesheets, already rendered as text one file away. */
@@ -31,6 +31,8 @@ type AcademyChromeBaseData = {
     readonly customCss: string | null
     /** The words of the skip link. */
     readonly skipLabel: string
+    /** Resolved copy for the shared appearance control. */
+    readonly theme: ThemeToggleProps
 }
 
 /** Props for {@link AcademyChromeBase}. */
@@ -54,20 +56,23 @@ type AcademyChromeBaseProps = {
  * @param input - {@link AcademyChromeBaseProps}
  * @returns The themed shell.
  */
-export const AcademyChromeBase = ({ state, props }: AcademyChromeBaseProps) => (
-    <>
-        {/*
-         * The academy's theme, then the academy's own CSS -- in that order, so a hand-written
-         * rule can override a token rather than losing to one.
-         */}
-        <style>{props.themeCss}</style>
-        {props.customCss ? <style>{props.customCss}</style> : null}
-        <a className={ACADEMY_SKIP_LINK_CLASS_NAME} href={`#${ACADEMY_MAIN_ID}`}>
-            {props.skipLabel}
-        </a>
-        <div className={ACADEMY_TOOLBAR_CLASS_NAME}>{state.toolbar}</div>
-        <main id={ACADEMY_MAIN_ID} tabIndex={-1}>
-            {state.content}
-        </main>
-    </>
-)
+export const AcademyChromeBase = (props: AcademyChromeBaseProps) => {
+    const { state, props: data } = props
+    return (
+        <>
+            {/*
+             * The academy's theme, then the academy's own CSS -- in that order, so a hand-written
+             * rule can override a token rather than losing to one.
+             */}
+            <style>{data.themeCss}</style>
+            {data.customCss ? <style>{data.customCss}</style> : null}
+            <a className={ACADEMY_SKIP_LINK_CLASS_NAME} href={`#${ACADEMY_MAIN_ID}`}>
+                {data.skipLabel}
+            </a>
+            <div className={ACADEMY_TOOLBAR_CLASS_NAME}>
+                <ThemeToggle label={data.theme.label} options={data.theme.options} />
+            </div>
+            <WorkspaceShell primaryId={ACADEMY_MAIN_ID} primaryLabel={data.skipLabel} primary={state.content} />
+        </>
+    )
+}

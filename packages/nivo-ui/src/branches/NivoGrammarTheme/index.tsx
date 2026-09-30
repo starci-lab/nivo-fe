@@ -21,11 +21,11 @@ export type NivoGrammarThemeProps = {
  * @param props - The routed content to scope.
  * @returns The content under the NIVO family root.
  */
-export const NivoGrammarTheme = ({ children }: NivoGrammarThemeProps) => {
+export const NivoGrammarTheme = (props: NivoGrammarThemeProps) => {
     const { resolvedTheme } = useTheme()
     const isHydrated = useIsHydrated()
     const theme: ThemeMode =
         isHydrated && (resolvedTheme === "dark" || resolvedTheme === "light") ? resolvedTheme : "system"
 
-    return <NivoGrammarThemeView props={{ theme }}>{children}</NivoGrammarThemeView>
+    return <NivoGrammarThemeView props={{ theme }}>{props.children}</NivoGrammarThemeView>
 }

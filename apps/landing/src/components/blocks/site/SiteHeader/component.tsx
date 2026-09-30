@@ -1,7 +1,6 @@
 import { cn } from "@heroui/react"
-import { IconSource, NivoBrand } from "@nivo/ui"
-import type { ReactNode } from "react"
-import { Button, IconButton, PageContainer, TextAction } from "@starci/grammar/common"
+import { IconSource, NivoBrand, ThemeToggle, type ThemeToggleProps } from "@nivo/ui"
+import { Button, IconButton, NavigationFeatureNav, TextAction } from "@starci/grammar/common"
 import { SITE_CLASS_NAMES } from "@/features/layouts/SiteShell"
 import { SITE_HEADER_MENU_TRIGGER_CLASS_NAME } from "./classNames"
 
@@ -31,6 +30,7 @@ type SiteHeaderCopy = {
     readonly closeNavigationLabel: string
     readonly login: string
     readonly contact: string
+    readonly theme: ThemeToggleProps
 }
 
 /** The addresses the header links to, localised by the connected half. */
@@ -51,9 +51,9 @@ type NavigationListProps = {
 }
 
 const NavigationList = ({ navigation, variant, onFollow }: NavigationListProps) => (
-    <ul className={variant === "desktop" ? SITE_CLASS_NAMES.navigationList : SITE_CLASS_NAMES.navigationMobileList}>
+    <div className={variant === "desktop" ? SITE_CLASS_NAMES.navigationList : SITE_CLASS_NAMES.navigationMobileList}>
         {navigation.map((item) => (
-            <li key={item.id}>
+            <div key={item.id}>
                 {isNavigationGroup(item) ? (
                     <details className={SITE_CLASS_NAMES.navigationGroup}>
                         <summary
@@ -64,7 +64,7 @@ const NavigationList = ({ navigation, variant, onFollow }: NavigationListProps) 
                         >
                             {item.label}
                         </summary>
-                        <ul
+                        <div
                             className={
                                 variant === "desktop"
                                     ? SITE_CLASS_NAMES.navigationPanel
@@ -72,22 +72,22 @@ const NavigationList = ({ navigation, variant, onFollow }: NavigationListProps) 
                             }
                         >
                             {item.children.map((child) => (
-                                <li key={child.href}>
+                                <div key={child.href}>
                                     <TextAction href={child.href} appearance="section" size="sm" onFollow={onFollow}>
                                         {child.label}
                                     </TextAction>
-                                </li>
+                                </div>
                             ))}
-                        </ul>
+                        </div>
                     </details>
                 ) : (
                     <TextAction href={item.href} appearance="section" size="sm" onFollow={onFollow}>
                         {item.label}
                     </TextAction>
                 )}
-            </li>
+            </div>
         ))}
-    </ul>
+    </div>
 )
 
 /** The disclosure's settled situation: whether the compact navigation is open. */
@@ -104,53 +104,44 @@ type SiteHeaderBaseActions = {
     readonly follow: () => void
 }
 
-/** The mounted control the header hosts but does not own. */
-type SiteHeaderBaseState = {
-    readonly themeControl: ReactNode
-}
-
-/** Props for {@link SiteHeaderBase}: the hosted control, the disclosure's situation and its commands. */
+/** Props for {@link SiteHeaderBase}: the disclosure's situation and its commands. */
 type SiteHeaderBaseProps = {
-    readonly state: SiteHeaderBaseState
     readonly props: SiteHeaderBaseData
     readonly on: SiteHeaderBaseActions
 }
 
-/*
- * The installed `starci-fe/public-component-signature` rule reads the render half's own name and
- * demands the contract be spelled `<Unit>Props`, so this private alias is the only name the rule
- * accepts; the exported contract above stays `<Unit>BaseProps`, which the code-pattern check
- * requires the render half to own. Not exported: one public contract per unit.
- */
-type SiteHeaderProps = SiteHeaderBaseProps
-
 /** Accessible global navigation with one compact disclosure layer on small screens. */
-export const SiteHeaderBase = (props: SiteHeaderProps) => {
-    const { state, props: data, on } = props
+export const SiteHeaderBase = (props: SiteHeaderBaseProps) => {
+    const { props: data, on } = props
     const panelId = "site-mobile-navigation"
 
     return (
-        <header className={SITE_CLASS_NAMES.header}>
-            <PageContainer className={SITE_CLASS_NAMES.headerBar}>
+        <NavigationFeatureNav
+            className={SITE_CLASS_NAMES.header}
+            identity={
                 <a className={SITE_CLASS_NAMES.headerBrand} href={data.hrefs.home} aria-label={data.copy.homeLabel}>
                     <NivoBrand props={{ label: data.copy.homeLabel, variant: "lockup", scale: "navbar" }} />
                 </a>
-
-                <nav className={SITE_CLASS_NAMES.headerDesktopNavigation} aria-label={data.copy.primaryNavigationLabel}>
+            }
+            navigation={
+                <div className={SITE_CLASS_NAMES.headerDesktopNavigation}>
                     <NavigationList navigation={data.navigation} variant="desktop" />
-                </nav>
-
-                <div className={SITE_CLASS_NAMES.headerActions} aria-label={data.copy.quickActionsLabel}>
-                    {state.themeControl}
+                </div>
+            }
+            navigationLabel={data.copy.primaryNavigationLabel}
+            actions={
+                <div className={SITE_CLASS_NAMES.headerActions}>
+                    <ThemeToggle label={data.copy.theme.label} options={data.copy.theme.options} />
                     <TextAction href={data.hrefs.login} appearance="section" size="sm">
                         {data.copy.login}
                     </TextAction>
-                    {/* Product activation has no published destination yet, so Contact is the one call to action. */}
                     <Button href={data.hrefs.contact} variant="primary" size="sm">
                         {data.copy.contact}
                     </Button>
                 </div>
-
+            }
+            actionsLabel={data.copy.quickActionsLabel}
+            compactNavigationTrigger={
                 <div className={SITE_HEADER_MENU_TRIGGER_CLASS_NAME}>
                     <IconButton
                         source={IconSource("sidebar", "leading")}
@@ -161,26 +152,25 @@ export const SiteHeaderBase = (props: SiteHeaderProps) => {
                         onPress={on.toggle}
                     />
                 </div>
-            </PageContainer>
-
-            {data.open ? (
-                <nav
-                    id={panelId}
-                    className={SITE_CLASS_NAMES.headerMobileNavigation}
-                    aria-label={data.copy.mobileNavigationLabel}
-                >
-                    <NavigationList navigation={data.navigation} variant="mobile" onFollow={on.follow} />
-                    <div className={SITE_CLASS_NAMES.headerMobileActions}>
-                        {state.themeControl}
-                        <TextAction href={data.hrefs.login} appearance="section" size="sm" onFollow={on.follow}>
-                            {data.copy.login}
-                        </TextAction>
-                        <Button href={data.hrefs.contact} variant="primary" width="fill" onFollow={on.follow}>
-                            {data.copy.contact}
-                        </Button>
+            }
+            compactNavigationTriggerLabel={data.open ? data.copy.closeNavigationLabel : data.copy.openNavigationLabel}
+            featureNavigation={
+                data.open ? (
+                    <div id={panelId} className={SITE_CLASS_NAMES.headerMobileNavigation}>
+                        <NavigationList navigation={data.navigation} variant="mobile" onFollow={on.follow} />
+                        <div className={SITE_CLASS_NAMES.headerMobileActions}>
+                            <ThemeToggle label={data.copy.theme.label} options={data.copy.theme.options} />
+                            <TextAction href={data.hrefs.login} appearance="section" size="sm" onFollow={on.follow}>
+                                {data.copy.login}
+                            </TextAction>
+                            <Button href={data.hrefs.contact} variant="primary" width="fill" onFollow={on.follow}>
+                                {data.copy.contact}
+                            </Button>
+                        </div>
                     </div>
-                </nav>
-            ) : null}
-        </header>
+                ) : undefined
+            }
+            featureNavigationLabel={data.copy.mobileNavigationLabel}
+        />
     )
 }

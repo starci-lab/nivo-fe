@@ -1,9 +1,6 @@
 import Image from "next/image"
-import {
-    FIGURE_CLASS_NAME,
-    FIGURE_IMAGE_CLASS_NAME,
-    FIGURE_PLACEHOLDER_CLASS_NAME,
-} from "./classNames"
+import { MediaFrame } from "@starci/grammar/common"
+import { FIGURE_CLASS_NAME, FIGURE_IMAGE_CLASS_NAME, FIGURE_PLACEHOLDER_CLASS_NAME } from "./classNames"
 
 type AcademySectionFigureProps = {
     readonly src?: string
@@ -18,7 +15,7 @@ export const AcademySectionFigure = (props: AcademySectionFigureProps) => {
     const ratio = props.ratio ?? "4/3"
     const usable = props.src !== undefined && props.src !== "" && !props.failedImageSources.has(props.src)
     return (
-        <figure className={FIGURE_CLASS_NAME} style={{ aspectRatio: ratio }}>
+        <MediaFrame className={FIGURE_CLASS_NAME} aspect="auto">
             {usable ? (
                 <Image
                     src={props.src}
@@ -36,6 +33,6 @@ export const AcademySectionFigure = (props: AcademySectionFigureProps) => {
                     <path d="M8 62c0-13 11-22 24-22s24 9 24 22z" fill="currentColor" />
                 </svg>
             )}
-        </figure>
+        </MediaFrame>
     )
 }

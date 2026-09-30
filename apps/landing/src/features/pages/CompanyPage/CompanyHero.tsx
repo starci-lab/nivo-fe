@@ -1,7 +1,9 @@
-import { Button, Heading, PageContainer } from "@starci/grammar/common"
+import { NivoIcon } from "@nivo/ui"
+import { Button, Heading, PageContainer, Text } from "@starci/grammar/common"
 import { HeroBand } from "../../../components/blocks/commercial/HeroBand"
-import { CompanyArrowIcon } from "./CompanyArrowIcon"
 import { CLASS_NAMES } from "./classNames"
+
+const NEXT_CHIP_ICON_PROPS = { name: "next", usage: "chip" } as const
 
 type CompanyHeroProps = {
     readonly copy: {
@@ -29,19 +31,24 @@ export const CompanyHero = ({ copy, hrefs }: CompanyHeroProps) => (
     <HeroBand id="nivo-is" variant="company" aria-labelledby="company-title">
         <PageContainer className={CLASS_NAMES.heroGrid}>
             <div className={CLASS_NAMES.heroCopy}>
-                <span className={CLASS_NAMES.eyebrow}>{copy.eyebrow}</span>
-                <Heading level={1} scale="display">
-                    <span id="company-title">
-                        {copy.title} <em className={CLASS_NAMES.heroEmphasis}>{copy.titleEmphasis}</em>
-                    </span>
-                </Heading>
-                <p className={CLASS_NAMES.heroBody}>{copy.lede}</p>
+                <div className={CLASS_NAMES.eyebrow}>
+                    <Text as="span">{copy.eyebrow}</Text>
+                </div>
+                <div id="company-title">
+                    <Heading level={1} scale="display">
+                        {copy.title}
+                        <em className={CLASS_NAMES.heroEmphasis}>{copy.titleEmphasis}</em>
+                    </Heading>
+                </div>
+                <div className={CLASS_NAMES.heroBody}>
+                    <Text as="p">{copy.lede}</Text>
+                </div>
                 <div className={CLASS_NAMES.actionRow}>
                     <Button
                         href={hrefs.nivoOs}
                         variant="primary"
                         size="lg"
-                        endContent={<CompanyArrowIcon />}
+                        endContent={<NivoIcon props={NEXT_CHIP_ICON_PROPS} />}
                     >
                         {copy.primaryAction}
                     </Button>
@@ -49,28 +56,28 @@ export const CompanyHero = ({ copy, hrefs }: CompanyHeroProps) => (
                         href={hrefs.ecosystem}
                         variant="secondary"
                         size="lg"
-                        endContent={<CompanyArrowIcon />}
+                        endContent={<NivoIcon props={NEXT_CHIP_ICON_PROPS} />}
                     >
                         {copy.secondaryAction}
                     </Button>
                 </div>
             </div>
             <div className={CLASS_NAMES.companyVisual} aria-label={copy.visualLabel}>
-                <span className={CLASS_NAMES.visualOrbit} aria-hidden="true" />
+                <div className={CLASS_NAMES.visualOrbit} aria-hidden="true" />
                 <div className={CLASS_NAMES.visualCore}>
-                    <span>{copy.visualBrand}</span>
+                    <Text as="span">{copy.visualBrand}</Text>
                     <strong>{copy.visualCore}</strong>
                 </div>
                 <div className={`${CLASS_NAMES.orbitCard} ${CLASS_NAMES.orbitCardOne}`}>
-                    <span>01</span>
+                    <Text as="span">01</Text>
                     <strong>{copy.organization}</strong>
                 </div>
                 <div className={`${CLASS_NAMES.orbitCard} ${CLASS_NAMES.orbitCardTwo}`}>
-                    <span>02</span>
+                    <Text as="span">02</Text>
                     <strong>{copy.product}</strong>
                 </div>
                 <div className={`${CLASS_NAMES.orbitCard} ${CLASS_NAMES.orbitCardThree}`}>
-                    <span>03</span>
+                    <Text as="span">03</Text>
                     <strong>{copy.responsibility}</strong>
                 </div>
             </div>

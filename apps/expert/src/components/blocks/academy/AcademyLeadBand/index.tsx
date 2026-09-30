@@ -1,4 +1,4 @@
-import { Button, Input } from "@starci/grammar/common"
+import { Button, Form, Input } from "@starci/grammar/common"
 import type { AcademySection, LeadStatus } from "../../../../modules/academy/academy-sections"
 import { AcademySectionBand } from "../AcademySectionBand"
 
@@ -22,15 +22,7 @@ type LeadFieldRowProps = {
 }
 
 const LeadFieldRow = ({ id, label, kind, locked }: LeadFieldRowProps) => (
-    <Input
-        id={id}
-        name={id}
-        label={label}
-        kind={kind}
-        placeholder={label}
-        isRequired
-        isDisabled={locked}
-    />
+    <Input id={id} name={id} label={label} kind={kind} placeholder={label} isRequired isDisabled={locked} />
 )
 
 const leadForm = (
@@ -38,11 +30,11 @@ const leadForm = (
     status: LeadStatus,
     submitLabel: string,
     sendingLabel: string,
-    onSubmit: (event: React.SubmitEvent<HTMLFormElement>) => void,
+    onSubmit: (data: FormData) => void,
 ) => {
     const locked = status === "sending" || status === "sent"
     return (
-        <form onSubmit={onSubmit}>
+        <Form onSubmit={onSubmit}>
             <div>
                 {fields.map(([id, label, kind]) => (
                     <LeadFieldRow key={id} id={id} label={label} kind={kind} locked={locked} />
@@ -51,7 +43,7 @@ const leadForm = (
                     {status === "sending" ? sendingLabel : submitLabel}
                 </Button>
             </div>
-        </form>
+        </Form>
     )
 }
 
@@ -61,10 +53,8 @@ export const AcademyLeadBand = (props: AcademyLeadBandProps) => {
         ["lead-name", props.section.nameLabel, "text"],
         ["lead-phone", props.section.phoneLabel, "tel"],
     ]
-    const send = (event: React.SubmitEvent<HTMLFormElement>) => {
-        event.preventDefault()
+    const send = (form: FormData) => {
         if (props.status === "sending") return
-        const form = new FormData(event.currentTarget)
         props.submit({ name: leadField(form, "lead-name"), contact: leadField(form, "lead-phone") })
     }
     return (

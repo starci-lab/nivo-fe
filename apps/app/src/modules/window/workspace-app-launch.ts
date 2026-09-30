@@ -32,5 +32,9 @@ export const followWorkspaceAppRedirect = (redirectUrl: string): void => {
     anchor.rel = "noopener"
     anchor.hidden = true
     document.body.append(anchor)
-    window.requestAnimationFrame(() => anchor.click())
+    try {
+        anchor.click()
+    } finally {
+        anchor.remove()
+    }
 }

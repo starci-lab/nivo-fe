@@ -1,5 +1,5 @@
 import { NivoIcon } from "@nivo/ui"
-import { Button, RadioGroup } from "@starci/grammar/common"
+import { Button, Form, RadioGroup, Text } from "@starci/grammar/common"
 import { CardGrid } from "../CardGrid"
 import { CLASS_NAMES } from "./classNames"
 
@@ -25,35 +25,33 @@ const ArrowIcon = () => <NivoIcon props={{ name: "next", usage: "chip" }} />
 
 /** Accessible renderer-backed intent choices for the relationship router. */
 export const ContactIntentForm = (props: ContactIntentFormProps) => (
-    <form id="adaptive-form" className={CLASS_NAMES.form} action={props.action} method="get">
-        <CardGrid variant="intent">
-            <RadioGroup
-                name="intent"
-                label={props.legend}
-                isLabelHidden
-                defaultValue={props.initialIntent ?? undefined}
-                options={props.options.map((option, index) => ({
-                    value: option.id,
-                    label: (
-                        <span className={CLASS_NAMES.cardCopy}>
-                            <span className={CLASS_NAMES.cardIndex}>{String(index + 1).padStart(2, "0")}</span>
-                            <strong className={CLASS_NAMES.cardTitle}>{option.label}</strong>
-                            <small className={CLASS_NAMES.cardDescription}>{option.description}</small>
-                            <span
-                                className={CLASS_NAMES.cardCheck}
-                                data-contact-intent-check="true"
-                                aria-hidden="true"
-                            >
-                                <NivoIcon props={CHECK_CHIP_ICON_PROPS} />
-                            </span>
-                        </span>
-                    ),
-                }))}
-                orientation="horizontal"
-            />
-        </CardGrid>
-        <Button type="submit" variant="primary" size="lg" endContent={<ArrowIcon />}>
-            {props.submitLabel}
-        </Button>
-    </form>
+    <div className={CLASS_NAMES.form}>
+        <Form id="adaptive-form" action={props.action} method="get">
+            <CardGrid variant="intent">
+                <RadioGroup
+                    name="intent"
+                    label={props.legend}
+                    isLabelHidden
+                    defaultValue={props.initialIntent ?? undefined}
+                    options={props.options.map((option, index) => ({
+                        value: option.id,
+                        label: (
+                            <Text as="span">
+                                <Text as="span">{String(index + 1).padStart(2, "0")}</Text>
+                                <strong className={CLASS_NAMES.cardTitle}>{option.label}</strong>
+                                <small className={CLASS_NAMES.cardDescription}>{option.description}</small>
+                                <Text as="span" data-contact-intent-check="true" aria-hidden="true">
+                                    <NivoIcon props={CHECK_CHIP_ICON_PROPS} />
+                                </Text>
+                            </Text>
+                        ),
+                    }))}
+                    orientation="horizontal"
+                />
+            </CardGrid>
+            <Button type="submit" variant="primary" size="lg" endContent={<ArrowIcon />}>
+                {props.submitLabel}
+            </Button>
+        </Form>
+    </div>
 )
