@@ -1,16 +1,11 @@
 "use client"
 
-import { useSyncExternalStore } from "react"
+import { useIsHydrated } from "@nivo/ui"
 import { useTranslations } from "next-intl"
 import { useQueryMyExpertSitesSwr, useQueryNoticeData } from "@/hooks"
 import { nivoQueryReading, type NivoQueryFailure } from "@/modules/query"
 import { ACADEMY_HOST_SUFFIX } from "@/modules/config"
 import { AcademyControlCenterBase, type AcademyControlCenterMode } from "./component"
-
-/** The client mount read as an external store: no subscriptions, only the server/client snapshot split. */
-const subscribeToMount = () => () => {}
-const readClientMount = () => true
-const readServerMount = () => false
 
 /** Exact Academy identity supplied by the resource route. */
 export type AcademyControlCenterProps = {
@@ -23,7 +18,7 @@ export type AcademyControlCenterProps = {
 export const AcademyControlCenter = (props: AcademyControlCenterProps) => {
     const { siteId, mode, onSelectMode }: AcademyControlCenterProps = props
     const t = useTranslations("console.academyControlCenter")
-    const mounted = useSyncExternalStore(subscribeToMount, readClientMount, readServerMount)
+    const mounted = useIsHydrated()
     const answer = useQueryMyExpertSitesSwr()
     const noticeOf = useQueryNoticeData()
     const reading = nivoQueryReading(answer.data)

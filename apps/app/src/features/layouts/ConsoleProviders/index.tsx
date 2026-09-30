@@ -3,10 +3,10 @@
 import { I18nProvider } from "@heroui/react"
 import type { Messages } from "next-intl"
 import { I18nProvider as NextI18nProvider } from "@nivo/i18n/provider"
+import { NivoGrammarTheme } from "@nivo/ui"
 import { ThemeProvider } from "next-themes"
 import type { ReactNode } from "react"
 import { SessionProvider } from "@/modules/auth/session"
-import { NivoGrammarTheme } from "../NivoGrammarTheme"
 
 /** The resolved request facts the provider stack needs, resolved by the layout. */
 export type ConsoleProvidersData = {

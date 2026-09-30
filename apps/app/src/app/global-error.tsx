@@ -1,25 +1,31 @@
 "use client"
 
+import { GlobalErrorPage } from "@nivo/ui"
+import type en from "@/messages/en.json"
+import { toLocaleFromPathname } from "@/modules/i18n/config"
 import { usePathname } from "next/navigation"
-import { GlobalErrorPage, readGlobalErrorLocale } from "@/features/pages/GlobalErrorPage"
 import "./globals.css"
 
-/** What Next hands the document-level boundary: the failure and the callback that re-renders the tree. */
+type BoundaryCopy = (typeof en)["boundary"]
+
 type GlobalErrorRouteProps = {
     readonly error: Error & { readonly digest?: string }
     readonly reset: () => void
 }
 
-/**
- * The root boundary. It replaces the root layout, so it owns the document shell itself: the
- * stylesheet is imported here and the language comes from the address, not from a provider.
- */
+/** Render the root-layout failure with the address locale and this app's lazy boundary catalogue. */
 const GlobalError = ({ error, reset }: GlobalErrorRouteProps) => {
-    const locale = readGlobalErrorLocale(usePathname())
+    const locale = toLocaleFromPathname(usePathname())
+    const loadBoundaryCopy = async (): Promise<BoundaryCopy> => {
+        const catalogue: { readonly default: { readonly boundary: BoundaryCopy } } = await import(
+            `../messages/${locale}.json`
+        )
+        return catalogue.default.boundary
+    }
     return (
         <html lang={locale}>
             <body>
-                <GlobalErrorPage error={error} locale={locale} onRetry={reset} />
+                <GlobalErrorPage error={error} locale={locale} loadBoundaryCopy={loadBoundaryCopy} onRetry={reset} />
             </body>
         </html>
     )

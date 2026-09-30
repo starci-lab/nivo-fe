@@ -1,10 +1,12 @@
 import { cleanup, render, screen } from "@testing-library/react"
 import { afterEach, describe, expect, it, vi } from "vitest"
+import type * as NivoUI from "@nivo/ui"
 
 vi.mock("@/components/blocks/locale/LanguageMenu", () => ({
     LanguageMenu: () => <button type="button">language</button>,
 }))
-vi.mock("@/components/blocks/theme/ThemeToggle", () => ({
+vi.mock("@nivo/ui", async () => ({
+    ...(await vi.importActual<typeof NivoUI>("@nivo/ui")),
     ThemeToggle: () => <button type="button">theme</button>,
 }))
 vi.mock("@/components/blocks/auth/AccountMenu", () => ({

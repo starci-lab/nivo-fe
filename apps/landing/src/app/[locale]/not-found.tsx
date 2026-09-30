@@ -1,6 +1,12 @@
-import { NotFoundPage } from "@/features/pages/NotFoundPage"
+import { NotFoundPage } from "@nivo/ui"
+import { getLocale } from "next-intl/server"
+import { toLocale } from "@/modules/i18n/config"
+import { localizeHref } from "@/modules/i18n/navigation"
 
-/** The `/[locale]` not-found answer. It mounts one page and makes no drawing decision. */
-const NotFound = () => <NotFoundPage />
+/** Mount the shared not-found answer with this app's locale-aware home address. */
+const NotFound = async () => {
+    const locale = await getLocale()
+    return <NotFoundPage homeHref={localizeHref("/", toLocale(locale))} />
+}
 
 export default NotFound

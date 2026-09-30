@@ -1,6 +1,11 @@
-import { NotFoundPage } from "@/features/pages/NotFoundPage"
+import { NotFoundPage } from "@nivo/ui"
+import { getLocale } from "next-intl/server"
+import { getPathname } from "@/modules/i18n/navigation"
 
-/** The console not-found answer, drawn inside the console chrome. */
-const NotFound = () => <NotFoundPage />
+/** Keep console chrome around the shared not-found answer. */
+const NotFound = async () => {
+    const locale = await getLocale()
+    return <NotFoundPage homeHref={getPathname({ href: "/", locale })} />
+}
 
 export default NotFound

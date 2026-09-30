@@ -2,7 +2,7 @@
 
 import { useTranslations } from "next-intl"
 import { useEffect, useState } from "react"
-import { ThemeToggle } from "@/components/blocks/theme/ThemeToggle"
+import { ThemeToggle } from "@nivo/ui"
 import { useLocalizedHref } from "@/hooks"
 import { SITE_LINKS, SITE_NAVIGATION } from "@/modules/landing/site"
 import { SITE_MENU_TRIGGER_ID, SiteHeaderBase, type SiteHeaderEntry } from "./component"
@@ -51,7 +51,7 @@ export const SiteHeader = (props: SiteHeaderProps) => {
 
     return (
         <SiteHeaderBase
-            state={{ themeControl: <ThemeToggle /> }}
+            state={{ themeControl: <ThemeToggle namespace="site.theme" /> }}
             props={{
                 open: isOpen,
                 navigation,

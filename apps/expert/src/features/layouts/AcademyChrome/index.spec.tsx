@@ -2,7 +2,7 @@ import { render, screen } from "@testing-library/react"
 import { NextIntlClientProvider } from "next-intl"
 import { describe, expect, it, vi } from "vitest"
 
-vi.mock("@/components/blocks/theme/ThemeToggle", () => ({
+vi.mock("@nivo/ui", () => ({
     ThemeToggle: () => <button type="button">Theme</button>,
 }))
 

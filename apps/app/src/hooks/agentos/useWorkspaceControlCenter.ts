@@ -1,6 +1,6 @@
 "use client"
 
-import { useCallback, useEffect, useState, useSyncExternalStore } from "react"
+import { useCallback, useEffect, useState } from "react"
 import {
     useAgentOSShell,
     useMutateRenewAgentWorkspaceAppLaunchSwr,
@@ -18,10 +18,7 @@ import { createAgentOSWorkspaceControlCenterLabels } from "@/modules/agentos/wor
 import { workspaceAppLaunchChannelName, type WorkspaceAppLaunchMessage } from "@/modules/window/workspace-app-launch"
 import { useFormatter, useLocale, useTranslations } from "next-intl"
 import useSWR from "swr"
-
-const subscribeToHydration = () => () => undefined
-const getClientHydration = () => true
-const getServerHydration = () => false
+import { useIsHydrated } from "@nivo/ui"
 
 /** Own workspace reads, shell evidence, launch lifetime and page actions. */
 export const useWorkspaceControlCenter = (workspaceId: string) => {
@@ -30,7 +27,7 @@ export const useWorkspaceControlCenter = (workspaceId: string) => {
     const format = useFormatter()
     const locale = useLocale()
     const accessToken = useAccessToken()
-    const hydrated = useSyncExternalStore(subscribeToHydration, getClientHydration, getServerHydration)
+    const hydrated = useIsHydrated()
     const controlCenter = useQueryMyAgentWorkspaceControlCenterSwr(workspaceId)
     // The shell selection stays within this workspace and its own installed module inventory.
     const installations = useQueryMyAgentosModuleInstallationsSwr(workspaceId)

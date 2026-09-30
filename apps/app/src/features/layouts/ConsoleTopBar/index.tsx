@@ -1,9 +1,9 @@
 "use client"
 
 import { useTranslations } from "next-intl"
+import { ThemeToggle } from "@nivo/ui"
 import { AccountMenu } from "@/components/blocks/auth/AccountMenu"
 import { LanguageMenu } from "@/components/blocks/locale/LanguageMenu"
-import { ThemeToggle } from "@/components/blocks/theme/ThemeToggle"
 import { ConsoleTopBarBase } from "./component"
 
 /**
@@ -26,7 +26,7 @@ export type ConsoleTopBarProps = { readonly [key: string]: never }
  */
 const renderLocaleControl = () => <LanguageMenu />
 /** The theme menu on the same bridge. */
-const renderThemeControl = () => <ThemeToggle />
+const renderThemeControl = () => <ThemeToggle namespace="console.theme" />
 /** The account menu on the same bridge. */
 const renderAccountControl = () => <AccountMenu />
 
