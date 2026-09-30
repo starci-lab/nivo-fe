@@ -1,6 +1,7 @@
-import { cleanup, render } from "@testing-library/react"
+import { cleanup, render, screen } from "@testing-library/react"
 import { matchMediaFixture } from "../../../test-support/mock-result"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
+import { expectNoA11yViolations } from "@/testing/axe"
 import type * as HooksModule from "../../../hooks"
 import type * as ComponentModule from "./component"
 import type { GroupChatPageActions, GroupChatPageLabels, GroupChatPageView } from "./component"
@@ -334,6 +335,20 @@ describe("GroupChatPage", () => {
             expect(state.tasks.mutate).toHaveBeenCalledTimes(1)
             last().on.leaveOffice()
             expect(router.push).toHaveBeenCalledWith("/overview")
+        })
+    })
+
+    describe("accessibility", () => {
+        // The probe above stands in for the drawing half, so the check re-registers the real
+        // `./component` for its own module registry and renders the settled office.
+        it("has no axe violations", async () => {
+            vi.resetModules()
+            vi.doMock("./component", async () => await vi.importActual("./component"))
+            const { GroupChatPage: ConnectedGroupChatPage } = await import(".")
+            const { container } = render(<ConnectedGroupChatPage />)
+            await screen.findAllByText("Công ty An")
+            await expectNoA11yViolations(container)
+            vi.doUnmock("./component")
         })
     })
 

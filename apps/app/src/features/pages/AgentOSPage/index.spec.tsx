@@ -2,6 +2,7 @@ import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/re
 import { apiAnswer, unavailableFailure } from "@/test-support/mock-result"
 import { SWRConfig } from "swr"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
+import { expectNoA11yViolations } from "@/testing/axe"
 import enMessages from "@/messages/en.json"
 import viMessages from "@/messages/vi.json"
 
@@ -161,6 +162,16 @@ describe("AgentOSPage", () => {
             render(<ConnectedAgentOSPage mode="dashboard" />)
             expect(await screen.findByText("Workspace")).toBeInTheDocument()
             expect(screen.queryByRole("link", { name: "Workspace" })).toBeNull()
+        })
+
+        it("has no axe violations", async () => {
+            vi.mocked(myAgentWorkspace).mockResolvedValue(apiAnswer(myAgentWorkspace, {
+                ok: true,
+                data: [{ id: "workspace-1", name: "Workspace", status: "ready", catalogOrder: { id: "order-1" } }],
+            }))
+            const { container } = render(<ConnectedAgentOSPage mode="dashboard" />)
+            await screen.findByText("Workspace")
+            await expectNoA11yViolations(container)
         })
 
         it("records refusal states for the single-business binding", async () => {

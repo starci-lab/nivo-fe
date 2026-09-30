@@ -1,5 +1,6 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
+import { expectNoA11yViolations } from "@/testing/axe"
 
 const mocks = vi.hoisted(() => ({
     push: vi.fn(),
@@ -55,5 +56,23 @@ describe("AppsDashboard", () => {
         render(<AppsDashboard />)
         fireEvent.click(await screen.findByRole("button", { name: "Build" }))
         expect(mocks.push).toHaveBeenCalledWith("/apps/create/ai_academy")
+    })
+
+    it("has no axe violations", async () => {
+        mocks.catalogue.mockResolvedValue({
+            ok: true,
+            data: [
+                {
+                    id: "item-1",
+                    name: "Academy",
+                    tagline: "Learn",
+                    templateKey: "ai_academy",
+                    tiers: [{ name: "Starter", priceMonthlyVnd: 100 }],
+                },
+            ],
+        })
+        const { container } = render(<AppsDashboard />)
+        await screen.findByRole("button", { name: "Build" })
+        await expectNoA11yViolations(container)
     })
 })

@@ -1,6 +1,7 @@
 import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react"
 import { SWRConfig } from "swr"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
+import { expectNoA11yViolations } from "@/testing/axe"
 
 const mocks = vi.hoisted(() => ({
     offers: {
@@ -517,5 +518,17 @@ describe("AgentOSProvisioning", () => {
         await waitFor(() => expect(mocks.status.mutate).toHaveBeenCalled())
         view.rerender(<AgentOSProvisioning context={{ mode: "resume", orderId: "order" }} />)
         await waitFor(() => expect(flow()).toContain('"state":"ready"'))
+    })
+
+    // The probe above stands in for the flow drawing, so the accessibility check re-registers the
+    // real `./component` for its own module registry and renders the settled offer request.
+    it("has no axe violations", async () => {
+        vi.resetModules()
+        vi.doMock("./component", async () => await vi.importActual("./component"))
+        const { AgentOSProvisioning: ConnectedAgentOSProvisioning } = await import("./")
+        const { container } = render(<ConnectedAgentOSProvisioning context={{ mode: "new" }} />)
+        await screen.findAllByText("Nivo Operations Workspace")
+        await expectNoA11yViolations(container)
+        vi.doUnmock("./component")
     })
 })

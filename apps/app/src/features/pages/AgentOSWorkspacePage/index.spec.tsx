@@ -1,6 +1,7 @@
 import { cleanup, fireEvent, render, screen } from "@testing-library/react"
 import { SWRConfig } from "swr"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
+import { expectNoA11yViolations } from "@/testing/axe"
 
 type WorkspacePageProbeProps = {
     readonly props: { readonly workspaceId: string; readonly pageState: string }
@@ -118,6 +119,12 @@ describe("AgentOSWorkspacePage", () => {
         it("renders the workspace route while its snapshot is loading", async () => {
             render(<ConnectedAgentOSWorkspacePage workspaceId="workspace-1" />)
             expect(screen.getByRole("heading", { name: "workspace-1" })).toBeInTheDocument()
+        })
+
+        it("has no axe violations", async () => {
+            const { container } = render(<ConnectedAgentOSWorkspacePage workspaceId="workspace-1" />)
+            await screen.findByRole("heading", { name: "workspace-1" })
+            await expectNoA11yViolations(container)
         })
     })
 })

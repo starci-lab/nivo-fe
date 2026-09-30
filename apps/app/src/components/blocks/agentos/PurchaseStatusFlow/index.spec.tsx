@@ -1,6 +1,7 @@
 import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react"
 import { SWRConfig } from "swr"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
+import { expectNoA11yViolations } from "@/testing/axe"
 
 const mocks = vi.hoisted(() => ({
     status: {
@@ -857,5 +858,19 @@ describe("PurchaseStatusFlow", () => {
         view.rerender(<PurchaseStatusFlow purchaseId="purchase-1" />)
         expect(mocks.status.mutate).not.toHaveBeenCalled()
         expect(flow()).toContain('"state":"ready"')
+    })
+
+    // The probe above stands in for the flow drawing, so the accessibility check re-registers the
+    // real `./component` and design system for its own module registry and renders the settled flow.
+    it("has no axe violations", async () => {
+        vi.resetModules()
+        vi.doMock("./component", async () => await vi.importActual("./component"))
+        vi.doMock("@nivo/ui", async () => await vi.importActual("@nivo/ui"))
+        const { default: ConnectedPurchaseStatusFlow } = await import("./")
+        const { container } = render(<ConnectedPurchaseStatusFlow purchaseId="purchase-1" />)
+        await screen.findAllByText("Payment is not confirmed")
+        await expectNoA11yViolations(container)
+        vi.doUnmock("./component")
+        vi.doUnmock("@nivo/ui")
     })
 })

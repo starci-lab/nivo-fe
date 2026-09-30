@@ -2,6 +2,7 @@ import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/re
 import { apiAnswer, unavailableFailure } from "@/test-support/mock-result"
 import { SWRConfig } from "swr"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
+import { expectNoA11yViolations } from "@/testing/axe"
 
 const push = vi.fn()
 const replace = vi.fn()
@@ -96,6 +97,12 @@ describe("AppsPage", () => {
         it("settles AppsPage into its empty catalogue state", async () => {
             render(<ConnectedAppsPage />)
             expect(screen.getByText(enMessages.console.apps.title)).toBeInTheDocument()
+        })
+
+        it("has no axe violations", async () => {
+            const { container } = render(<ConnectedAppsPage />)
+            await screen.findByText(enMessages.console.apps.title)
+            await expectNoA11yViolations(container)
         })
 
         it("renders owned apps, an in-progress order, and catalogue offers", async () => {

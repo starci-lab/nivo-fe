@@ -1,23 +1,25 @@
-import { cleanup, render, screen } from "@testing-library/react"
+import { cleanup, render, waitFor } from "@testing-library/react"
 import { SWRConfig } from "swr"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import { expectNoA11yViolations } from "@/testing/axe"
 
-const push = vi.fn()
-const replace = vi.fn()
-const signedIn = { state: { status: "signed-in", accessToken: "token" } }
+const signedIn = { state: { status: "signed-in", accessToken: "control-center-token" } }
 const resetQueryCache = () => {
     for (const key of SWRConfig.defaultValue.cache.keys()) SWRConfig.defaultValue.cache.delete(key)
 }
-let viewerSequence = 0
 if (!Element.prototype.getAnimations) Element.prototype.getAnimations = () => []
 
 vi.mock("next/navigation", async () => ({
     ...(await vi.importActual("next/navigation")),
     useSearchParams: () => new URLSearchParams(),
 }))
-vi.mock("@/hooks/i18n/useRouter", () => ({ useRouter: () => ({ push, replace }) }))
-vi.mock("@/hooks/i18n/usePathname", () => ({ usePathname: () => "/wallet" }))
+vi.mock("@/hooks/i18n/useRouter", () => ({ useRouter: () => ({ push: vi.fn(), replace: vi.fn() }) }))
+vi.mock("@/hooks/i18n/usePathname", () => ({ usePathname: () => "/agentos/workspaces/workspace-1" }))
+vi.mock("@/hooks", async (importOriginal) => ({
+    ...(await importOriginal<object>()),
+    useProvisioningRealtime: () => ({ status: "disconnected", reason: null }),
+}))
+
 vi.mock("@/hooks/auth/useSession", () => ({ useSession: () => signedIn }))
 vi.mock("@/modules/api/expert-sites", () => ({ myExpertSites: vi.fn().mockResolvedValue({ ok: true, data: [] }) }))
 vi.mock("@/modules/api/instances", () => ({ myInstances: vi.fn().mockResolvedValue({ ok: true, data: [] }) }))
@@ -54,32 +56,23 @@ vi.mock("@/modules/api/academy", () => ({
     }),
 }))
 
-import { WalletPage } from "."
-import enMessages from "@/messages/en.json"
+import { AgentOSWorkspaceControlCenter } from "."
 
-describe("WalletPage", () => {
-    afterEach(() => {
-        cleanup()
-        resetQueryCache()
-    })
+describe("AgentOSWorkspaceControlCenter", () => {
     beforeEach(() => {
         window.matchMedia = vi
             .fn()
             .mockReturnValue({ matches: false, addEventListener: vi.fn(), removeEventListener: vi.fn() })
-        viewerSequence += 1
-        signedIn.state = { status: "signed-in", accessToken: `orchestration-pages-${viewerSequence}` }
-        push.mockClear()
-        replace.mockClear()
     })
-
-    it("settles WalletPage into empty ledgers", async () => {
-        render(<WalletPage />)
-        expect(screen.getAllByText(enMessages.console.wallet.title).length).toBeGreaterThan(0)
+    afterEach(() => {
+        cleanup()
+        resetQueryCache()
     })
 
     it("has no axe violations", async () => {
-        const { container } = render(<WalletPage />)
-        await screen.findAllByText(enMessages.console.wallet.title)
+        const { container } = render(<AgentOSWorkspaceControlCenter workspaceId="workspace-1" pageState="overview" onSelectPageState={vi.fn()} />)
+        await waitFor(() => expect(container.childElementCount).toBeGreaterThan(0))
+        await waitFor(() => expect(container.querySelector("[aria-busy=true]")).toBeNull())
         await expectNoA11yViolations(container)
     })
 })

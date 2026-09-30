@@ -1,5 +1,6 @@
 import { fireEvent, render, screen } from "@testing-library/react"
 import { afterEach, describe, expect, it, vi } from "vitest"
+import { expectNoA11yViolations } from "@/testing/axe"
 import en from "@/messages/en.json"
 import { ErrorPage } from "./"
 
@@ -29,5 +30,10 @@ describe("ErrorPage", () => {
         fireEvent.click(screen.getByRole("button", { name: en.boundary.error.reload }))
         expect(reload).toHaveBeenCalledTimes(1)
         expect(retry).not.toHaveBeenCalled()
+    })
+
+    it("has no axe violations", async () => {
+        const { container } = render(<ErrorPage error={new Error("secret stack detail")} onRetry={vi.fn()} />)
+        await expectNoA11yViolations(container)
     })
 })

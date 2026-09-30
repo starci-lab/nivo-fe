@@ -1,5 +1,6 @@
 import { fireEvent, render, screen } from "@testing-library/react"
 import { afterEach, describe, expect, it, vi } from "vitest"
+import { expectNoA11yViolations } from "@/testing/axe"
 import en from "@/messages/en.json"
 import vi_ from "@/messages/vi.json"
 import { GlobalErrorPage, readGlobalErrorLocale } from "./"
@@ -40,5 +41,11 @@ describe("GlobalErrorPage", () => {
         expect(await screen.findByText(vi_.boundary.error.staleBundle.message)).toBeInTheDocument()
         fireEvent.click(screen.getByRole("button", { name: vi_.boundary.error.reload }))
         expect(reload).toHaveBeenCalledTimes(1)
+    })
+
+    it("has no axe violations", async () => {
+        const { container } = render(<GlobalErrorPage error={new Error("boom")} locale="en" onRetry={vi.fn()} />)
+        await screen.findByText(en.boundary.error.unexpected.message)
+        await expectNoA11yViolations(container)
     })
 })

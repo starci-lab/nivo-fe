@@ -1,5 +1,6 @@
 import { fireEvent, render, screen } from "@testing-library/react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
+import { expectNoA11yViolations } from "@/testing/axe"
 import enMessages from "@/messages/en.json"
 import viMessages from "@/messages/vi.json"
 
@@ -106,5 +107,17 @@ describe("OverviewPage", () => {
 
         expect(screen.getByText(headline)).toBeInTheDocument()
         expect(mocks.domains).toHaveBeenCalledTimes(1)
+    })
+
+    // The probe above stands in for the page drawing, so the accessibility check re-registers the
+    // real `./component` for its own module registry and renders the whole settled screen.
+    it("has no axe violations", async () => {
+        vi.resetModules()
+        vi.doMock("./component", async () => await vi.importActual("./component"))
+        const { OverviewPage: ConnectedOverviewPage } = await import(".")
+        const { container } = render(<ConnectedOverviewPage />)
+        await screen.findAllByText(consoleCopy.overview.title)
+        await expectNoA11yViolations(container)
+        vi.doUnmock("./component")
     })
 })

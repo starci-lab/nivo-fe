@@ -1,5 +1,6 @@
-﻿import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react"
+import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
+import { expectNoA11yViolations } from "@/testing/axe"
 import en from "@/messages/en.json"
 import type { AuthActions, AuthCode, AuthDetails } from "@/components/blocks/auth/AuthenticationPanel"
 
@@ -622,5 +623,17 @@ describe("AuthenticationPage connected journeys", () => {
         expect(mocks.replace).toHaveBeenCalledTimes(1)
         expect(panel()).toContain(copy("signOut.unconfirmedNotice"))
         expect(mocks.session.adopt).not.toHaveBeenCalled()
+    })
+
+    // The probe above stands in for the drawing half, so the accessibility check re-registers the
+    // real `./component` for its own module registry and renders the anonymous sign-in screen.
+    it("has no axe violations", async () => {
+        vi.resetModules()
+        vi.doMock("./component", async () => await vi.importActual("./component"))
+        const { AuthenticationPage: ConnectedAuthenticationPage } = await import("./")
+        const { container } = render(<ConnectedAuthenticationPage />)
+        await screen.findByRole("main")
+        await expectNoA11yViolations(container)
+        vi.doUnmock("./component")
     })
 })
