@@ -1,3 +1,4 @@
+import { NivoIcon } from "@nivo/ui"
 import { Badge, Heading, PageContainer } from "@starci/grammar/common"
 import { useTranslations } from "next-intl"
 import { SiteMain } from "@/features/layouts/SiteShell"
