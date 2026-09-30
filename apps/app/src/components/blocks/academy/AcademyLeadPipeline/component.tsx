@@ -1,5 +1,6 @@
 import { Avatar, type AvatarData, QueryNoticeView, type QueryNoticeViewData } from "@nivo/ui"
 import { SurfaceCard, Button, Button as CoreButton, Heading, Text, TextAction, Badge } from "@starci/grammar/common"
+import { ExpertSiteLeadStatus, type ExpertSiteLeadFieldsFragment } from "@/modules/api/__generated__/core"
 
 /** Resolved copy for the lead pipeline. */
 export type AcademyLeadPipelineProps = AcademyLeadPipelineViewProps

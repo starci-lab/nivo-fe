@@ -57,7 +57,7 @@ export const useModuleTestRun = (input: ModuleTestRunInput) => {
                 setPending(false)
                 setActionRefused(true)
                 setActiveRunId(undefined)
-                return
+                return answer
             }
             void testSurfaceQuery.mutate(answer, {
                 revalidate: false,
@@ -101,7 +101,7 @@ export const useModuleTestRun = (input: ModuleTestRunInput) => {
             if (!result.ok) {
                 setPending(false)
                 setActionRefused(true)
-                return
+                return result
             }
             await mutateTestSurface(result, {
                 revalidate: false,

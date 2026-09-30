@@ -1,8 +1,9 @@
 
-import { useCallback, useEffect } from "react"
+import { useCallback } from "react"
 import { useTranslations } from "next-intl"
 import { useAccessToken } from "../auth/useAccessToken"
-import { useProvisioningRealtime } from "../realtime/useProvisioningRealtime"
+import useProvisioningRealtime from "../realtime/useProvisioningRealtime"
+import { useEventRevalidationSwr } from "../swr/useEventRevalidationSwr"
 import { useQueryWorkspaceCheckoutOffersSwr } from "../swr/queries/useQueryWorkspaceCheckoutOffersSwr"
 import { useQueryWorkspaceCheckoutStatusSwr } from "../swr/queries/useQueryWorkspaceCheckoutStatusSwr"
 import { settle } from "@nivo/api"
@@ -67,16 +68,17 @@ export const useAgentOSProvisioningFlow = (input: UseAgentOSProvisioningFlowInpu
               : `${event.kind}:${event.id}:${eventStatus}`
     const readyWorkspaceId = flow.phase === "ready" ? flow.workspaceId : null
 
-    useEffect(() => {
-        if (eventKey === null || !isResume) return
-        if (eventKind === "order" && eventId === orderId) void reconcile()
-        if (eventKind === "workspace" && eventId === readyWorkspaceId) void reconcile()
-    }, [eventId, eventKey, eventKind, isResume, orderId, readyWorkspaceId, reconcile])
-
-    useEffect(() => {
-        if (!isResume || realtime.status !== "connected" || flow.phase === "catalog_loading") return
-        void reconcile()
-    }, [flow.phase, isResume, realtime.status, reconcile])
+    const matchingEvent =
+        eventKey !== null &&
+        isResume &&
+        ((eventKind === "order" && eventId === orderId) ||
+            (eventKind === "workspace" && eventId === readyWorkspaceId))
+    const refreshSignal = matchingEvent
+        ? ["agentos-purchase", orderId ?? "", "event", eventKey ?? ""]
+        : isResume && realtime.status === "connected" && flow.phase !== "catalog_loading"
+          ? ["agentos-purchase", orderId ?? "", "connected", flow.phase]
+          : null
+    useEventRevalidationSwr(refreshSignal, reconcile)
 
     return { flow, t, tShared, productName, statusQuery, realtime, reconcile }
 }

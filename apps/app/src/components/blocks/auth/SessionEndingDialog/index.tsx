@@ -4,6 +4,7 @@ import { useEffect, useState } from "react"
 import { useTranslations } from "next-intl"
 import { useRouter } from "@/hooks/i18n"
 import { useSession } from "@/hooks/auth"
+import { SignOutScope } from "@/modules/api/__generated__/core"
 
 import { SessionEndingDialogBase } from "./component"
 

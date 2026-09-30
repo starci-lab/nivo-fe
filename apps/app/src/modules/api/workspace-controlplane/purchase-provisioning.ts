@@ -3,6 +3,7 @@ import { createWalletTopUpPayLink, payInvoice } from "../commerce"
 import { graphql } from "../graphql"
 import { issueAgentWorkspaceAppLaunch } from "../agentos-workspaces"
 import {
+    AgentWorkspaceAction,
     CancelWorkspaceProvisioningSagaDocument,
     ManageAgentWorkspaceDocument,
     RetryWorkspaceProvisioningSagaDocument,
@@ -13,11 +14,11 @@ import type {
     IssueAgentWorkspaceAppLaunchMutation,
     ManageAgentWorkspaceMutation,
     PayInvoiceMutation,
-    ProvisioningSagaEntity,
     WorkspaceProvisioningSagaQuery,
 } from "../__generated__/core"
 import { parseAgentWorkspaceRowAnswer } from "../agentos-workspaces.guards"
-import { parseProvisioningSaga, parseProvisioningSagaView } from "./payload.guards"
+import { parseProvisioningSaga, parseProvisioningSagaView } from "./saga.guards"
+import type { ProvisioningSagaEntity } from "../__generated__/core"
 import type { WorkspacePurchasePayLinkInput } from "./purchase-types"
 
 /**
@@ -122,6 +123,6 @@ export const retryWorkspaceProvisioningOrder = (
     graphql(ManageAgentWorkspaceDocument, parseAgentWorkspaceRowAnswer, {
         input: {
             agentWorkspaceId: workspaceId,
-            action: "retry_provision",
+            action: AgentWorkspaceAction.RetryProvision,
         },
     })

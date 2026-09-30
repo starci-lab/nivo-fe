@@ -1,6 +1,7 @@
 /** Runtime parsers for each commerce document's generated payload shape. */
 
 import { isBoolean, isNullableNumber, isNullableString, isNumber, isOneOf, isRecord, isString, parseEach } from "@nivo/api"
+import { BillingModel, CatalogOrderStatus, DomainStatus, InvoicePaymentGateway, InvoiceStatus, WalletTransactionType } from "./__generated__/core"
 import type {
     CatalogItemsQuery,
     CreateWalletTopUpPayLinkMutation,
@@ -19,7 +20,7 @@ const parseDomainRow = (
     isRecord(value) &&
     isString(value.id) &&
     isString(value.name) &&
-    isOneOf(value.status, ["active", "expiring", "expired"]) &&
+    isOneOf(value.status, [DomainStatus.Active, DomainStatus.Expiring, DomainStatus.Expired]) &&
     isNullableString(value.expiresAt) &&
     isBoolean(value.autoRenew)
         ? {
@@ -49,7 +50,7 @@ const parseWalletTransactionRow = (
     isRecord(value) &&
     isString(value.id) &&
     isNumber(value.amountVnd) &&
-    isOneOf(value.type, ["deposit", "spend"]) &&
+    isOneOf(value.type, [WalletTransactionType.Deposit, WalletTransactionType.Spend]) &&
     isNullableString(value.note) &&
     isString(value.createdAt)
         ? {
@@ -73,7 +74,7 @@ export const parseWalletTopUpPayLink = (
 ): NonNullable<CreateWalletTopUpPayLinkMutation["createWalletTopUpPayLink"]["data"]> | null =>
     isRecord(input) &&
     isString(input.paymentId) &&
-    isOneOf(input.gateway, ["payos", "sepay"]) &&
+    isOneOf(input.gateway, [InvoicePaymentGateway.Payos, InvoicePaymentGateway.Sepay]) &&
     isString(input.referenceId) &&
     isNullableString(input.checkoutUrl) &&
     isNullableString(input.qrCode) &&
@@ -97,7 +98,7 @@ const parseOrderProductItem = (value: unknown) => {
         !isRecord(value) ||
         !isString(value.id) ||
         !isString(value.name) ||
-        !isOneOf(value.billingModel, ["one_time", "recurring", "setup_plus_recurring"])
+        !isOneOf(value.billingModel, [BillingModel.OneTime, BillingModel.Recurring, BillingModel.SetupPlusRecurring])
     ) {
         return null
     }
@@ -139,7 +140,7 @@ const parseInvoiceRow = (
         !isRecord(value) ||
         !isString(value.id) ||
         !isNumber(value.amountVnd) ||
-        !isOneOf(value.status, ["unpaid", "paid", "cancelled"]) ||
+        !isOneOf(value.status, [InvoiceStatus.Unpaid, InvoiceStatus.Paid, InvoiceStatus.Cancelled]) ||
         !isString(value.dueAt) ||
         !isNullableString(value.paidAt)
     ) {
@@ -174,7 +175,14 @@ const parseCatalogOrderRow = (
     if (
         !isRecord(value) ||
         !isString(value.id) ||
-        !isOneOf(value.status, ["active", "cancelled", "completed", "in_progress", "pending_payment", "suspended"]) ||
+        !isOneOf(value.status, [
+            CatalogOrderStatus.Active,
+            CatalogOrderStatus.Cancelled,
+            CatalogOrderStatus.Completed,
+            CatalogOrderStatus.InProgress,
+            CatalogOrderStatus.PendingPayment,
+            CatalogOrderStatus.Suspended,
+        ]) ||
         !isNullableString(value.renewsAt) ||
         !isBoolean(value.autoRenew)
     ) {
@@ -198,7 +206,14 @@ export const parseCatalogOrderRowAnswer = (
     if (
         !isRecord(input) ||
         !isString(input.id) ||
-        !isOneOf(input.status, ["active", "cancelled", "completed", "in_progress", "pending_payment", "suspended"])
+        !isOneOf(input.status, [
+            CatalogOrderStatus.Active,
+            CatalogOrderStatus.Cancelled,
+            CatalogOrderStatus.Completed,
+            CatalogOrderStatus.InProgress,
+            CatalogOrderStatus.PendingPayment,
+            CatalogOrderStatus.Suspended,
+        ])
     ) {
         return null
     }

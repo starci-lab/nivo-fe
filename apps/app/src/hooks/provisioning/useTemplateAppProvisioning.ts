@@ -1,12 +1,13 @@
 
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { useTranslations } from "next-intl"
 import { app, appProvisioning, apps } from "@/modules/routes"
 import { useAccessToken } from "../auth/useAccessToken"
 import {
     useMutateCreateAndPublishExpertSiteSwr,
 } from "../swr/mutations/useMutateCreateAndPublishExpertSiteSwr"
-import { useProvisioningRealtime } from "../realtime/useProvisioningRealtime"
+import useProvisioningRealtime from "../realtime/useProvisioningRealtime"
+import { useEventRevalidationSwr } from "../swr/useEventRevalidationSwr"
 import { useQueryCatalogItemsSwr } from "../swr/queries/useQueryCatalogItemsSwr"
 import { useQueryMyExpertSiteDeploymentSwr } from "../swr/queries/useQueryMyExpertSiteDeploymentSwr"
 import { useRouter } from "../i18n/useRouter"
@@ -15,6 +16,7 @@ import {
     templateFlowWithDeploymentEvent,
     type TemplateFlow,
 } from "@/modules/provisioning/template-app"
+import { CatalogCategory } from "@/modules/api/__generated__/core"
 
 /** Route identity owned by the Template App provisioning block. */
 export type TemplateAppProvisioningContext =
@@ -36,7 +38,7 @@ export const useTemplateAppProvisioning = (context: TemplateAppProvisioningConte
         (submitted?.phase === "accepted" || submitted?.phase === "preparing" || submitted?.phase === "ready"
             ? submitted.siteId
             : undefined)
-    const catalogQuery = useQueryCatalogItemsSwr("site_from_template", templateKey !== null)
+    const catalogQuery = useQueryCatalogItemsSwr(CatalogCategory.SiteFromTemplate, templateKey !== null)
     const deploymentQuery = useQueryMyExpertSiteDeploymentSwr(trackedSiteId)
     const baseFlow = templateFlowFromAnswers({
         templateKey,
@@ -58,10 +60,12 @@ export const useTemplateAppProvisioning = (context: TemplateAppProvisioningConte
     const flow = templateFlowWithDeploymentEvent(baseFlow, event, t("failedProvision"))
     const refreshDeployment = deploymentQuery.mutate
 
-    useEffect(() => {
-        if (realtime.status !== "connected" || trackedSiteId === undefined) return
-        void refreshDeployment()
-    }, [realtime.status, refreshDeployment, trackedSiteId])
+    useEventRevalidationSwr(
+        realtime.status === "connected" && trackedSiteId !== undefined
+            ? ["template-deployment", trackedSiteId, "connected"]
+            : null,
+        refreshDeployment,
+    )
 
     const changeSlug = (value: string): void => setSlug(value)
     const submit = async (): Promise<void> => {
@@ -72,11 +76,15 @@ export const useTemplateAppProvisioning = (context: TemplateAppProvisioningConte
         try {
             const published = await createAndPublish.trigger(siteSlug)
             if (!published.ok) {
-                setSubmitted({ phase: "failed", subject: siteSlug, reason: published.reason })
-                return
+                setSubmitted({
+                    phase: "failed",
+                    subject: siteSlug,
+                    reason: published.kind === "unavailable" ? t("failedLoad") : t("failedProvision"),
+                })
+            } else {
+                setSubmitted({ phase: "accepted", siteId: published.data.id, subject: published.data.slug })
+                router.replace(appProvisioning(published.data.id))
             }
-            setSubmitted({ phase: "accepted", siteId: published.data.id, subject: published.data.slug })
-            router.replace(appProvisioning(published.data.id))
         } catch {
             setSubmitted({ phase: "failed", subject: siteSlug, reason: t("failedLoad") })
         }

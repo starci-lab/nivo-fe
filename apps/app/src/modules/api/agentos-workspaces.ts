@@ -8,6 +8,7 @@
 import type { Outcome } from "@nivo/api"
 import { graphql } from "./graphql"
 import {
+    AgentWorkspaceApp,
     IssueAgentWorkspaceAppLaunchDocument,
     MyAgentWorkspaceControlCenterDocument,
     MyAgentWorkspaceDocument,
@@ -57,7 +58,7 @@ export const issueAgentWorkspaceAppLaunch = (
     graphql(IssueAgentWorkspaceAppLaunchDocument, parseAgentWorkspaceAppLaunch, {
         input: {
             workspaceId,
-            app: "Openclaw",
+            app: AgentWorkspaceApp.Openclaw,
         },
     })
 

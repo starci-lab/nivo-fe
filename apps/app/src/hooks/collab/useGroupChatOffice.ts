@@ -1,5 +1,6 @@
 
 import { useEffect, useState } from "react"
+import type { Failure } from "@nivo/api"
 import type { CollabHumanRole, CollabTurnNoticeItem } from "../../modules/api/collab"
 import { useCollabLive } from "../collab-live/useCollabLive"
 import { useMutateCollabInviteByEmailSwr } from "../swr/mutations/useMutateCollabInviteByEmailSwr"
@@ -24,6 +25,11 @@ export type GroupChatOfficeScope = {
 }
 
 type NoticeOutcome = "handled" | "ended" | "unavailable"
+type InviteOutcome = {
+    readonly kind: "created" | "existing" | "refused"
+    readonly email: string | null
+    readonly failure?: Failure
+}
 
 /**
  * The scroll a followed open notice asks for: which card element, which tab the
@@ -71,18 +77,19 @@ export const useGroupChatOffice = (scope: GroupChatOfficeScope) => {
     /* ---------------- Invite ---------------- */
     const [inviteEmail, setInviteEmail] = useState("")
     const [inviteRole, setInviteRole] = useState<CollabHumanRole>("staff")
-    const [inviteOutcome, setInviteOutcome] = useState<{
-        kind: "created" | "existing" | "refused"
-        email: string | null
-    } | null>(null)
+    const [inviteOutcome, setInviteOutcome] = useState<InviteOutcome | null>(null)
     const inviteByEmail = useMutateCollabInviteByEmailSwr(workspaceId)
 
-    const submitInvite = async (): Promise<void> => {
+    const submitInvite = async () => {
         if (inviteEmail.trim().length === 0) {
             return
         }
         const answer = await inviteByEmail.trigger({ email: inviteEmail, role: inviteRole })
-        const outcome = answer.ok ? readCollabInviteOutcome(answer.data) : null
+        if (!answer.ok) {
+            setInviteOutcome({ kind: "refused", email: null, failure: answer })
+            return answer
+        }
+        const outcome = readCollabInviteOutcome(answer.data)
         if (outcome !== null) {
             setInviteOutcome({ kind: outcome, email: inviteEmail })
             if (outcome === "created") {
@@ -164,6 +171,7 @@ export const useGroupChatOffice = (scope: GroupChatOfficeScope) => {
         noticeOutcomes,
         openNotice: setPendingNoticeId,
         invite,
+        inviteFailure: inviteOutcome?.failure ?? null,
         changeInviteEmail: setInviteEmail,
         changeInviteRole: setInviteRole,
         submitInvite,

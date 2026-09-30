@@ -127,7 +127,8 @@ export const AgentOSModuleAttachmentsBase = (props: AgentOSModuleAttachmentsBase
                     }))
                     const ingestionStatus = "ingestionStatus" in file ? file.ingestionStatus : file.status
                     const refused = ingestionStatus === "refused"
-                    const chunkLabel = "chunkCount" in file && file.chunkCount > 0 ? chunks(file.chunkCount) : ""
+                    const chunkCount = "chunkCount" in file ? file.chunkCount : undefined
+                    const chunkLabel = typeof chunkCount === "number" && chunkCount > 0 ? chunks(chunkCount) : ""
                     const caption = [file.mediaType || "—", chunkLabel].filter(Boolean).join(" · ")
                     return (
                         <div key={file.id}>

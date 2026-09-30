@@ -1,12 +1,16 @@
 
-import type { AgentosSolutionModuleSummary } from "@/modules/api/__generated__/core"
+import type {
+    AgentosModuleInstallationFieldsFragment,
+    AgentosSolutionModuleSummary,
+} from "@/modules/api/__generated__/core"
 
-import { useCallback, useEffect, useState } from "react"
+import { useCallback, useState } from "react"
 import { useLocale, useTranslations } from "next-intl"
 import {
     useMutateInstallAgentosSolutionModuleSwr,
 } from "../swr/mutations/useMutateInstallAgentosSolutionModuleSwr"
-import { useProvisioningRealtime } from "../realtime/useProvisioningRealtime"
+import useProvisioningRealtime from "../realtime/useProvisioningRealtime"
+import { useEventRevalidationSwr } from "../swr/useEventRevalidationSwr"
 import {
     useQueryMyAgentosModuleInstallationsSwr,
 } from "../swr/queries/useQueryMyAgentosModuleInstallationsSwr"
@@ -14,12 +18,14 @@ import { useQueryMyAgentosSolutionModulesSwr } from "../swr/queries/useQueryMyAg
 import { useAccessToken } from "../auth/useAccessToken"
 import { nivoQueryReading } from "../../modules/query"
 import {
-    solutionCatalogCards,
-    solutionInstallationCards,
     solutionSectionState,
     type AgentOSSolutionModuleCenterCopy,
     type AgentOSSolutionModuleCenterRouteProps,
 } from "../../modules/agentos/solution-module-center"
+import {
+    solutionCatalogCardsFromQuery,
+    solutionInstallationCardsFromQuery,
+} from "../../modules/agentos/solution-module-center-query"
 
 /** Own solution reads, installation admission, and its selected Saga refresh. */
 export const useAgentOSSolutionModuleCenter = (props: AgentOSSolutionModuleCenterRouteProps) => {
@@ -36,7 +42,8 @@ export const useAgentOSSolutionModuleCenter = (props: AgentOSSolutionModuleCente
     const catalogReading = nivoQueryReading(catalogQuery.data)
     const installationsReading = nivoQueryReading(installationsQuery.data)
     const catalog = catalogReading.status === "ready" ? catalogReading.data : undefined
-    const installations = installationsReading.status === "ready" ? installationsReading.data : undefined
+    const installations: ReadonlyArray<AgentosModuleInstallationFieldsFragment> | undefined =
+        installationsReading.status === "ready" ? installationsReading.data : undefined
     const [pendingKey, setPendingKey] = useState<string>()
     const [trackedInstallationId, setTrackedInstallationId] = useState<string>()
     const [outcome, setOutcome] = useState<string>()
@@ -51,11 +58,13 @@ export const useAgentOSSolutionModuleCenter = (props: AgentOSSolutionModuleCente
                 ? null
                 : { kind: "module-installation", id: trackedInstallationId },
     })
-    useEffect(() => {
-        if (realtime.status !== "event" && realtime.status !== "connected") return
-        if (realtime.status === "event" && realtime.event.kind !== "module-installation") return
-        void refresh()
-    }, [realtime, refresh])
+    const refreshSignal =
+        realtime.status === "connected"
+            ? ["agentos-solution-center", workspaceId, "connected"]
+            : realtime.status === "event" && realtime.event.kind === "module-installation"
+              ? ["agentos-solution-center", workspaceId, "module-installation", realtime.event.id, realtime.event.updatedAt]
+              : null
+    useEventRevalidationSwr(refreshSignal, refresh)
 
     const copy: AgentOSSolutionModuleCenterCopy = {
         available: t("status.available"),
@@ -80,8 +89,8 @@ export const useAgentOSSolutionModuleCenter = (props: AgentOSSolutionModuleCente
         catalogueEmptyHint: t("catalogueEmptyHint"),
         installedEmptyAction: t("emptyAction"),
     }
-    const catalogCards = solutionCatalogCards(catalog, installations, copy)
-    const { cards: installedCards, rows: installedRows } = solutionInstallationCards(
+    const catalogCards = solutionCatalogCardsFromQuery(catalog, installations, copy)
+    const { cards: installedCards, rows: installedRows } = solutionInstallationCardsFromQuery(
         installations,
         catalog,
         locale,
@@ -109,12 +118,13 @@ export const useAgentOSSolutionModuleCenter = (props: AgentOSSolutionModuleCente
                 if (!result.ok) {
                     if (result.kind !== "unavailable") clearKey()
                     setOutcome(t("installFailed"))
-                    return
+                    return result
+                } else {
+                    clearKey()
+                    setTrackedInstallationId(result.data.id)
+                    setOutcome(t("installAccepted"))
+                    setMode("installed")
                 }
-                clearKey()
-                setTrackedInstallationId(result.data.id)
-                setOutcome(t("installAccepted"))
-                setMode("installed")
             } catch {
                 setPendingKey(undefined)
                 setOutcome(t("installFailed"))

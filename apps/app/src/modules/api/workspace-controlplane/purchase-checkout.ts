@@ -1,6 +1,6 @@
 import { failed, failureKindOfCode, type Outcome } from "@nivo/api"
 import { orderAgentOs } from "../commerce"
-import type { CatalogOrderStatus } from "../__generated__/core"
+import { CatalogOrderStatus } from "../__generated__/core"
 import { readWorkspacePurchaseStatus } from "./purchase-status"
 import type { WorkspacePurchaseReceipt } from "./purchase-types"
 
@@ -10,10 +10,10 @@ import type { WorkspacePurchaseReceipt } from "./purchase-types"
  * absent on purpose - a terminal purchase admits a fresh checkout.
  */
 const REUSABLE_ORDER_STATUSES: ReadonlySet<CatalogOrderStatus> = new Set([
-    "active",
-    "completed",
-    "in_progress",
-    "pending_payment",
+    CatalogOrderStatus.Active,
+    CatalogOrderStatus.Completed,
+    CatalogOrderStatus.InProgress,
+    CatalogOrderStatus.PendingPayment,
 ])
 
 /** How long an exact repeat of one admitted checkout resolves to the receipt it already earned. */

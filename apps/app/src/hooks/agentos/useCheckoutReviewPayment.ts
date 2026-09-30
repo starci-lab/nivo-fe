@@ -130,10 +130,24 @@ export const useCheckoutReviewPayment = ({ offer, renewalEntitlementId, copy }: 
         try {
             const response = await startCheckout.trigger(request)
             if (!response.ok) {
-                setStart({ kind: "notice", notice: copy.checkoutUnavailable })
-                return
+                switch (response.kind) {
+                    case "refused":
+                    case "forbidden":
+                        setStart({ kind: "refused", message: copy.refusedNotAdmitted, nextAction: copy.nextActionSignIn })
+                        break
+                    case "not-found":
+                        setStart({ kind: "refused", message: copy.staleOffer, nextAction: null })
+                        break
+                    case "invalid":
+                        setStart({ kind: "refused", message: copy.conflictNotice, nextAction: null })
+                        break
+                    case "unavailable":
+                        setStart({ kind: "notice", notice: copy.checkoutUnavailable })
+                        break
+                }
+            } else {
+                settleStartAnswer(response.data)
             }
-            settleStartAnswer(response.data)
         } catch {
             if (purchaseRef !== null) {
                 router.push(purchaseStatusPath(purchaseRef))

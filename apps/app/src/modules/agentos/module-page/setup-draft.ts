@@ -45,6 +45,10 @@ const SETUP_GATE_LABELS: Readonly<Partial<Record<string, keyof ModulePageCopy["s
     prohibitedClaims: "prohibitedClaims",
     freshnessPolicy: "freshnessPolicy",
 }
+const setupStatusOf = (status: string): ContextDraft["status"] | null => {
+    if (status === "open" || status === "ready" || status === "completed" || status === "superseded") return status
+    return null
+}
 const readableGate = (key: string, copy: ModulePageCopy): string => {
     const known = Object.hasOwn(SETUP_GATE_LABELS, key) ? SETUP_GATE_LABELS[key] : undefined
     return known === undefined ? copy.setup.unknownGate({ key }) : copy.setup.gateLabels[known]
@@ -130,9 +134,10 @@ export const exactTestPassedFor = (
     digest: string | null,
 ): boolean => {
     if (digest === null || context === null) return false
+    const manifest: AgentosRuntimeManifestView = runtime.installation.runtimeManifest
     const required =
-        runtime.installation.runtimeManifest.setup?.requiredAcceptanceScenarios ??
-        runtime.installation.runtimeManifest.test?.scenarios.map((scenario) => scenario.key) ??
+        manifest.setup?.requiredAcceptanceScenarios ??
+        manifest.test?.scenarios.map((scenario) => scenario.key) ??
         []
     if (required.length === 0) return false
     const passed = new Set(
@@ -163,6 +168,9 @@ export const contextDraftFor = (
 ): ContextDraft | null => {
     if (setup?.setupRevision === null || setup?.setupRevision === undefined || setup.setupStatus === null)
         return null
+    const status = setupStatusOf(setup.setupStatus)
+    if (status === null) return null
+    const manifest: AgentosRuntimeManifestView = runtime.installation.runtimeManifest
     const context = runtime.contextVersions.find((candidate) => candidate.sourceSetupSessionId === setup.id) ?? null
     const snapshot = context?.snapshot ?? setup.draftSnapshot
     const summary =
@@ -179,15 +187,15 @@ export const contextDraftFor = (
         contextId: context?.id ?? null,
         setupSessionId: setup.id,
         revision: setup.setupRevision,
-        status: setup.setupStatus,
+        status,
         version: context?.version ?? null,
         digest: setup.draftDigest,
         summary,
         facts: draftFactsFor(snapshot),
         gates: setupGatesFor(
             setup,
-            runtime.installation.runtimeManifest.setup?.requirements ?? [],
-            runtime.installation.runtimeManifest.operations?.setupFields ?? [],
+            manifest.setup?.requirements ?? [],
+            manifest.operations?.setupFields ?? [],
             {
                 authority: runtime.installation.setupAuthorityGeneration,
                 source: runtime.installation.setupSourceGeneration,

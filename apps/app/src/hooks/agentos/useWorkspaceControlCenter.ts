@@ -6,7 +6,8 @@ import {
 import {
     useMutateRevokeAgentWorkspaceAppLaunchSwr,
 } from "../swr/mutations/useMutateRevokeAgentWorkspaceAppLaunchSwr"
-import { useProvisioningRealtime } from "../realtime/useProvisioningRealtime"
+import useProvisioningRealtime from "../realtime/useProvisioningRealtime"
+import { useEventRevalidationSwr } from "../swr/useEventRevalidationSwr"
 import {
     useQueryMyAgentosModuleInstallationsSwr,
 } from "../swr/queries/useQueryMyAgentosModuleInstallationsSwr"
@@ -55,19 +56,31 @@ export const useWorkspaceControlCenter = (workspaceId: string) => {
         target: accessToken === null ? null : { kind: "workspace", id: workspaceId },
     })
     const refreshControlCenter = controlCenter.mutate
-    useEffect(() => {
-        if (realtime.status !== "event") return
-        const currentFingerprint = answer?.ok === true ? (answer.data.runtime?.fingerprint ?? null) : null
-        if (realtime.event.kind === "workspace-runtime" && realtime.event.fingerprint === currentFingerprint) return
-        if (realtime.event.kind !== "workspace-runtime" && realtime.event.kind !== "workspace") return
-        void refreshControlCenter()
-    }, [answer, realtime, refreshControlCenter])
+    const currentFingerprint = answer?.ok === true ? (answer.data.runtime?.fingerprint ?? null) : null
+    const refreshEvent =
+        realtime.status === "event" &&
+        (realtime.event.kind === "workspace-runtime" || realtime.event.kind === "workspace") &&
+        !(realtime.event.kind === "workspace-runtime" && realtime.event.fingerprint === currentFingerprint)
+            ? realtime.event
+            : null
+    useEventRevalidationSwr(
+        refreshEvent === null
+            ? null
+            : [
+                  "workspace-control-center",
+                  workspaceId,
+                  refreshEvent.kind,
+                  refreshEvent.id,
+                  refreshEvent.updatedAt,
+              ],
+        refreshControlCenter,
+    )
     useEffect(() => {
         const channel = new BroadcastChannel(workspaceAppLaunchChannelName(workspaceId))
         let activeLaunchId: string | null = null
         // Revocation is best effort: its outcome is deliberately not read.
         const revoke = (launchId: string): void => void settle(() => revokeLaunch(launchId))
-        channel.addEventListener("message", (event: MessageEvent<WorkspaceAppLaunchMessage>) => {
+        const onMessage = (event: MessageEvent<WorkspaceAppLaunchMessage>): void => {
             if (event.data.workspaceId !== workspaceId) return
             if (event.data.status === "failed") {
                 setLaunchState("blocked")
@@ -77,8 +90,10 @@ export const useWorkspaceControlCenter = (workspaceId: string) => {
             activeLaunchId = event.data.launchId
             setLaunchId(event.data.launchId)
             setLaunchState("connected")
-        })
+        }
+        channel.addEventListener("message", onMessage)
         return () => {
+            channel.removeEventListener("message", onMessage)
             channel.close()
             if (activeLaunchId !== null) revoke(activeLaunchId)
         }

@@ -2508,6 +2508,7 @@
       "notFound": "Không tìm thấy nội dung này.",
       "invalid": "Yêu cầu đã bị từ chối.",
       "unavailable": "Không tải được nội dung này. Kiểm tra kết nối rồi thử lại.",
+      "actionUnavailable": "Không thể hoàn tất thao tác này. Hãy kiểm tra kết nối rồi thử lại.",
       "retry": "Thử lại"
     },
     "attentionGroup": "Cần bạn xử lý"

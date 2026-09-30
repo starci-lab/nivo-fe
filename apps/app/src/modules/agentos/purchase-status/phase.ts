@@ -151,6 +151,8 @@ export const phaseOf = (purchase: WorkspaceCheckoutPurchaseStatusFieldsFragment)
                 default:
                     return "provisioning"
             }
+        default:
+            return "payment-unknown"
     }
 }
 

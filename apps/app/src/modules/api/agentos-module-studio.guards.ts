@@ -156,7 +156,12 @@ export const parseModuleUploadCapability = (input: unknown): UploadCapability | 
         return null
     }
     return {
-        ...studio,
+        module: studio.module,
+        profileFacts: studio.profileFacts,
+        messages: studio.messages,
+        attachments: studio.attachments,
+        integrations: studio.integrations,
+        specification: studio.specification,
         attachmentId: input.attachmentId,
         uploadUrl: input.uploadUrl,
         uploadMethod: "PUT",

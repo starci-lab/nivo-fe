@@ -1,6 +1,6 @@
 import { LoadingRegion } from "@/components/blocks/loading/LoadingRegion"
 import type { ReactNode } from "react"
-import { Badge, Button, EmptyNotice, Input, SurfaceCard, Text } from "@starci/grammar/common"
+import { Badge, Button, EmptyNotice, Form, Input, SurfaceCard, Text } from "@starci/grammar/common"
 import type { SalesHandoffValue } from "@/modules/api/sales"
 import type { useSalesHandoff } from "@/hooks/agentos"
 import { salesWording, type SalesSurfaceStanding } from "@/modules/sales/sales-workbench"
@@ -34,16 +34,11 @@ const HANDOFF_STATUS_TONES: Readonly<Record<string, "success" | "warning" | "neu
 }
 const HANDOFF_LOOKUP_ONLY_STATUSES: ReadonlySet<string> = new Set(["possible-start", "outcome-unknown"])
 type ChildrenProps = { readonly children: ReactNode }
-type FormSubmitEvent = { readonly preventDefault: () => void }
 const Row = (props: ChildrenProps) => <div className={SALES_HANDOFF_ROW_CLASS_NAME} data-contract="GAP-2 PADDING-4">{props.children}</div>
 const FieldStack = (props: ChildrenProps) => <div className={SALES_HANDOFF_FIELD_STACK_CLASS_NAME}>{props.children}</div>
 const ActionRow = (props: ChildrenProps) => <div className={SALES_HANDOFF_ACTION_ROW_CLASS_NAME} data-contract="GAP-2">{props.children}</div>
 const toneFor = (state: string): "success" | "warning" | "neutral" => HANDOFF_STATUS_TONES[state] ?? "neutral"
 const lookupOnly = (status: string): boolean => HANDOFF_LOOKUP_ONLY_STATUSES.has(status)
-const stop = (handler: () => void) => (event: FormSubmitEvent) => {
-    event.preventDefault()
-    handler()
-}
 const resolveStatusText = (status: string, t: ReturnType<typeof useSalesHandoff>["t"]): string =>
     salesWording(HANDOFF_STATUS_KEYS[status] ?? null, status, t)
 const region = (
@@ -104,7 +99,7 @@ export const SalesHandoffReadbackCard = (props: SalesHandoffReadbackCardProps) =
                 model === null ? null : facts(model),
                 t,
             )}
-            <form onSubmit={stop(() => undefined)}>
+            <Form onSubmit={() => undefined}>
                 <FieldStack>
                     <Input
                         id="sales-handoff-id"
@@ -126,7 +121,7 @@ export const SalesHandoffReadbackCard = (props: SalesHandoffReadbackCardProps) =
                         </Button>
                     </ActionRow>
                 </FieldStack>
-            </form>
+            </Form>
             {status !== "accounting-admitted" ? null : (
                 <Text size="xs" tone="muted">
                     {t("handoff.intakeOnly")}
@@ -148,7 +143,7 @@ export const SalesHandoffSubmissionCard = (props: SalesHandoffSubmissionCardProp
     const statusText = (value: string) => resolveStatusText(value, t)
     return (
         <SurfaceCard label={t("submission.label")} fact={model === null ? undefined : statusText(model.status)}>
-            <form onSubmit={stop(submission.onSubmit)}>
+            <Form onSubmit={submission.onSubmit}>
                 <div className={SALES_HANDOFF_FORM_GRID_CLASS_NAME}>
                     <Input
                         id="sales-handoff-fingerprint"
@@ -194,7 +189,7 @@ export const SalesHandoffSubmissionCard = (props: SalesHandoffSubmissionCardProp
                         </FieldStack>
                     </div>
                 </div>
-            </form>
+            </Form>
             <Text size="xs" tone="muted">
                 {t("submission.note")}
             </Text>

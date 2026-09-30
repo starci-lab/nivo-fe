@@ -24,7 +24,7 @@ export type NivoQueryAnswer<T> = Outcome<T, NivoQueryFailureDetail>
 /** What a settled failure states: its kind, and the code, reason and retryability it carries. */
 export type NivoQueryFailure = Omit<
     Extract<NivoQueryAnswer<unknown>, { readonly ok: false }>,
-    "status"
+    "ok" | "status"
 >
 
 /**

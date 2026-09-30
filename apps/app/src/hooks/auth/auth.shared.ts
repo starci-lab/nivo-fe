@@ -1,36 +1,20 @@
 ﻿import type { AuthDetails, AuthMode, AuthPendingAction } from "@/components/blocks/auth/AuthenticationPanel"
 import type { AuthPhase } from "@/modules/auth/authentication"
+import type {
+    ContinueBrokeredSignInPayload,
+    ExchangeOauthCodePayload,
+    ForgotPasswordInitInput,
+    OtpChallenge,
+    SignInInput,
+    SignInPayload,
+    SignUpInitInput,
+} from "@/modules/api/__generated__/core"
 
 import { type Outcome } from "@nivo/api"
 import type { Session } from "@/modules/auth/session"
-import { continuationReference, UNAVAILABLE_RETURN_LANDING } from "@/modules/auth/authentication"
-import { OAUTH_PROVIDER_KEY, readStored, RETURN_TO_STORAGE_KEY } from "@/modules/browser-storage"
-import { DEFAULT_AUTHENTICATED_LANDING, validatedReturnTo } from "@/modules/auth"
 
 /** The authentication catalogue translator accepted by the flow hooks. */
 export type AuthenticationTranslate = (key: string, values?: Record<string, string | number>) => string
-
-/** Initial navigation facts carried through a provider round trip. */
-type AuthenticationArrival = {
-    readonly provider: "google" | "github" | null
-    readonly refused: boolean
-}
-
-/** Read the validated return intent once, falling back to the value saved before provider navigation. */
-export const readAuthenticationReturnToFromBrowser = (): string | null => {
-    if (typeof window === "undefined") return null
-    return readAuthenticationReturnTo(window.location.search, readStored("session", RETURN_TO_STORAGE_KEY))
-}
-
-/** Read only the provider label and refusal marker from the arriving address. */
-export const readAuthenticationArrival = (): AuthenticationArrival => {
-    if (typeof window === "undefined") return { provider: null, refused: false }
-    const remembered = readStored("session", OAUTH_PROVIDER_KEY)
-    return {
-        provider: remembered === "github" || remembered === "google" ? remembered : null,
-        refused: new URLSearchParams(window.location.search).has("error"),
-    }
-}
 
 /** A sentence and whether it reports a refusal. */
 type AuthenticationFeedback = {
@@ -52,19 +36,6 @@ export type AuthenticationFlowControl = {
     readonly hesitate: (message: string) => void
     readonly setPendingAction: (action: AuthPendingAction | null) => void
     readonly runPending: <Answer>(action: AuthPendingAction, request: () => Promise<Answer>) => Promise<Answer>
-}
-
-/** Read the interrupted path once, preferring the live address over its provider-round-trip copy. */
-export const readAuthenticationReturnTo = (search: string, stored: string | null): string | null => {
-    const fromAddress = validatedReturnTo(new URLSearchParams(search).get("returnTo"))
-    return fromAddress ?? validatedReturnTo(stored)
-}
-
-/** Place an authenticated reader at the backend's answer or the validated return intent. */
-export const authenticationDestination = (asked: string | null, resolved: string | null): string => {
-    const answered = validatedReturnTo(resolved)
-    if (asked !== null && answered !== null && answered !== asked) return UNAVAILABLE_RETURN_LANDING
-    return answered ?? asked ?? DEFAULT_AUTHENTICATED_LANDING
 }
 
 type DetailSubmissionOptions = {
@@ -121,30 +92,34 @@ export const submitAuthenticationDetails = async (options: DetailSubmissionOptio
         if (!result.ok) {
             if (result.kind === "unavailable") {
                 hesitate(t("signIn.undecided"))
+            } else {
+                signInIdentity.current = null
+                refuse(t("signIn.refused"))
+            }
+        } else {
+            if (result.data.requiresTwoFactor) {
+                signInIdentity.current = null
+                activateTwoFactor(result.data.twoFactorToken)
+                clearFeedback()
+                return
+            }
+            if (result.data.undecided !== null) {
+                hesitate(t("signIn.undecided"))
+                return
+            }
+            if (result.data.accessToken === null) {
+                signInIdentity.current = null
+                refuse(t("signIn.refused"))
                 return
             }
             signInIdentity.current = null
-            refuse(t("signIn.refused"))
-            return
+            session.adopt({
+                accessToken: result.data.accessToken,
+                requiresTwoFactor: result.data.requiresTwoFactor,
+                twoFactorToken: result.data.twoFactorToken,
+            })
+            landOnDestination(result.data.destination)
         }
-        if (result.data.requiresTwoFactor) {
-            signInIdentity.current = null
-            activateTwoFactor(result.data.twoFactorToken)
-            clearFeedback()
-            return
-        }
-        if (result.data.undecided !== null) {
-            hesitate(t("signIn.undecided"))
-            return
-        }
-        if (result.data.accessToken === null) {
-            signInIdentity.current = null
-            refuse(t("signIn.refused"))
-            return
-        }
-        signInIdentity.current = null
-        session.adopt(result.data)
-        landOnDestination(result.data.destination)
         return
     }
 
@@ -159,14 +134,12 @@ export const submitAuthenticationDetails = async (options: DetailSubmissionOptio
     )
     if (!result.ok) {
         refuse(mode === "signUp" ? t("signUp.mailRefused") : t("forgotPassword.mailRefused"))
-        return
+    } else {
+        startCode(details.email, result.data)
     }
-    startCode(details.email, result.data)
 }
 
 type BrokeredSettlementOptions = {
-    readonly continueBrokered: (input: ContinueBrokeredSignInInput) => Promise<Outcome<ContinueBrokeredSignInPayload>>
-    readonly runPending: AuthenticationFlowControl["runPending"]
     readonly session: Session
     readonly t: AuthenticationTranslate
     readonly activateTwoFactor: (token: string | null) => void
@@ -176,14 +149,12 @@ type BrokeredSettlementOptions = {
     readonly landOnReturnTo: () => void
 }
 
-/** Read brokered answers in contract order, continuing an undecided held proof once. */
-export const settleBrokeredAnswer = async (
+/** Settle a brokered answer after any continuation has been read through SWR. */
+export const settleBrokeredAnswer = (
     answer: ExchangeOauthCodePayload | ContinueBrokeredSignInPayload,
     options: BrokeredSettlementOptions,
-): Promise<void> => {
+): void => {
     const {
-        continueBrokered,
-        runPending,
         session,
         t,
         activateTwoFactor,
@@ -202,24 +173,17 @@ export const settleBrokeredAnswer = async (
         return
     }
     if (answer.undecided !== null) {
-        const reference = continuationReference(answer)
-        if (reference === null) {
-            hesitate(t("signIn.oauthUndecided"))
-            return
-        }
-        const continued = await runPending("provider", () => continueBrokered({ continuationReference: reference }))
-        if (!continued.ok) {
-            if (continued.kind === "unavailable") hesitate(t("signIn.oauthUndecided"))
-            else refuse(t("signIn.oauthRefused"))
-            return
-        }
-        await settleBrokeredAnswer(continued.data, options)
+        hesitate(t("signIn.oauthUndecided"))
         return
     }
     if (answer.accessToken === null) {
         refuse(t("signIn.oauthRefused"))
         return
     }
-    session.adopt(answer)
+    session.adopt({
+        accessToken: answer.accessToken,
+        requiresTwoFactor: answer.requiresTwoFactor,
+        twoFactorToken: answer.twoFactorToken,
+    })
     landOnReturnTo()
 }

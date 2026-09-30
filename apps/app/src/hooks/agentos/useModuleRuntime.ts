@@ -90,7 +90,9 @@ export const useModuleRuntime = (input: ModuleRuntimeQueryInput) => {
         view === "test" || view === "setup",
     )
 
-    const runtimeReading = nivoQueryReading(runtimeQuery.data)
+    const runtimeReading = nivoQueryReading<NonNullable<MyAgentosModuleRuntimeQuery["myAgentosModuleRuntime"]["data"]>>(
+        runtimeQuery.data,
+    )
     const runtime = runtimeForWorkspace(runtimeReading, workspaceId)
     const runtimeForeign = foreignRuntimeFor(runtimeReading, workspaceId)
     const testSurfaceReading = nivoQueryReading(testSurfaceQuery.data)

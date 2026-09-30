@@ -129,13 +129,21 @@ export const collabGatewayTransport: CollabTransport = async ({ accessToken, req
 }
 
 /** Send one tagged member request and preserve the boundary's own failure vocabulary. */
-export const collabRequest = async <T, OperationName extends CollabOperation>(
-    accessToken: string,
-    workspaceId: string,
-    op: OperationName,
-    input: Extract<CollabTransportCall["request"], { readonly op: OperationName }>["input"],
-    pick: (result: Record<string, unknown>) => T | null,
-): Promise<Outcome<T>> => {
+type CollabTransportCall = Parameters<CollabTransport>[0]
+
+type CollabRequestArguments<T> = {
+    [OperationName in CollabOperation]: [
+        accessToken: string,
+        workspaceId: string,
+        op: OperationName,
+        input: Extract<CollabTransportCall["request"], { readonly op: OperationName }>["input"],
+        pick: (result: Record<string, unknown>) => T | null,
+    ]
+}[CollabOperation]
+
+/** Route one operation-scoped Collab call through the transport and preserve its failure kind. */
+export const collabRequest = async <T>(...args: CollabRequestArguments<T>): Promise<Outcome<T>> => {
+    const [accessToken, workspaceId, op, input, pick] = args
     if (accessToken === "") {
         return collabFailure("unauthenticated", "COLLAB_UNAUTHENTICATED", "sign-in required", false)
     }
@@ -144,7 +152,40 @@ export const collabRequest = async <T, OperationName extends CollabOperation>(
     }
     let served: Outcome<CollabServed>
     try {
-        served = await collabGatewayTransport({ accessToken, request: { workspaceId, op, input } })
+        const sendRequest = async (): Promise<Outcome<CollabServed>> => {
+            switch (op) {
+                case "openOffice":
+                    return collabGatewayTransport({ accessToken, request: { workspaceId, op, input } })
+                case "readGroup":
+                    return collabGatewayTransport({ accessToken, request: { workspaceId, op, input } })
+                case "listTasks":
+                    return collabGatewayTransport({ accessToken, request: { workspaceId, op, input } })
+                case "readTask":
+                    return collabGatewayTransport({ accessToken, request: { workspaceId, op, input } })
+                case "availableCommands":
+                    return collabGatewayTransport({ accessToken, request: { workspaceId, op, input } })
+                case "readNotices":
+                    return collabGatewayTransport({ accessToken, request: { workspaceId, op, input } })
+                case "openNotice":
+                    return collabGatewayTransport({ accessToken, request: { workspaceId, op, input } })
+                case "reconcileRequest":
+                    return collabGatewayTransport({ accessToken, request: { workspaceId, op, input } })
+                case "postMessage":
+                    return collabGatewayTransport({ accessToken, request: { workspaceId, op, input } })
+                case "pressApprovalButton":
+                    return collabGatewayTransport({ accessToken, request: { workspaceId, op, input } })
+                case "inviteByEmail":
+                    return collabGatewayTransport({ accessToken, request: { workspaceId, op, input } })
+                case "acceptInvitation":
+                    return collabGatewayTransport({ accessToken, request: { workspaceId, op, input } })
+                case "withdrawInvitation":
+                    return collabGatewayTransport({ accessToken, request: { workspaceId, op, input } })
+                case "changeMemberRole":
+                    return collabGatewayTransport({ accessToken, request: { workspaceId, op, input } })
+            }
+            return collabFailure("invalid", "COLLAB_INVALID", "unsupported operation", false)
+        }
+        served = await sendRequest()
     } catch {
         return collabFailure("unknown", "COLLAB_UNKNOWN", "transport threw", true)
     }
@@ -157,9 +198,6 @@ export const collabRequest = async <T, OperationName extends CollabOperation>(
         return collabFailure("unknown", "COLLAB_UNKNOWN", "malformed result", true)
     }
 }
-
-/** Credential and request shape used by the typed transport seam. */
-type CollabTransportCall = Parameters<CollabTransport>[0]
 
 /** The `membership` result record of a member command, or null when malformed. */
 export const readMembershipResult = (result: Record<string, unknown>): CollabMembershipResult | null =>

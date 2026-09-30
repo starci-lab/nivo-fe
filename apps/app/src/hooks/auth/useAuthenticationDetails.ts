@@ -7,17 +7,18 @@ import { useOauthReturnExchange } from "@/hooks/swr/mutations/useOauthReturnExch
 import { useMutateContinueBrokeredSignInSwr } from "@/hooks/swr/mutations/useMutateContinueBrokeredSignInSwr"
 import { useRouter } from "@/hooks/i18n/useRouter"
 import { useSession } from "@/hooks/auth/useSession"
+import useSWRImmutable from "swr/immutable"
 import type { AuthDetails, AuthMode, AuthProvider } from "@/components/blocks/auth/AuthenticationPanel"
+import type { OtpChallenge } from "@/modules/api/__generated__/core"
 
 import {
-    authenticationDestination,
-    readAuthenticationArrival,
-    readAuthenticationReturnToFromBrowser,
     settleBrokeredAnswer,
     submitAuthenticationDetails,
     type AuthenticationFlowControl,
     type AuthenticationTranslate,
 } from "./auth.shared"
+import { authenticationDestination, readAuthenticationArrival, readAuthenticationReturnToFromBrowser } from "@/modules/auth/authentication-arrival"
+import { continuationReference } from "@/modules/auth/authentication"
 import { removeStored, RETURN_TO_STORAGE_KEY, writeStored } from "@/modules/browser-storage"
 import { authenticationOauthRedirectUrl, rememberOauthProvider } from "@/modules/auth"
 
@@ -131,8 +132,6 @@ export const useAuthenticationDetails = ({
     const settleBrokered = useCallback(
         (answer: Parameters<typeof settleBrokeredAnswer>[0]) =>
             settleBrokeredAnswer(answer, {
-                continueBrokered: (input) => continueBrokered.trigger(input),
-                runPending,
                 session,
                 t,
                 activateTwoFactor,
@@ -141,20 +140,39 @@ export const useAuthenticationDetails = ({
                 refuse,
                 landOnReturnTo,
             }),
-        [activateTwoFactor, clearFeedback, continueBrokered, hesitate, landOnReturnTo, refuse, runPending, session, t],
+        [activateTwoFactor, clearFeedback, hesitate, landOnReturnTo, refuse, session, t],
+    )
+
+    const exchangeAnswer = oauthReturn.answer
+    const continuationId =
+        exchangeAnswer?.ok === true ? continuationReference(exchangeAnswer.data) : null
+    const continuation = useSWRImmutable(
+        continuationId === null ? null : (["AUTH_BROKERED_CONTINUATION", continuationId] as const),
+        ([, reference]) => continueBrokered.trigger({ continuationReference: reference }),
     )
 
     useEffect(() => {
-        const result = oauthReturn.answer
-        if (result === undefined || hasAdoptedOauth.current) return
-        hasAdoptedOauth.current = true
-        if (!result.ok) {
-            if (result.kind === "unavailable") hesitate(t("signIn.oauthUndecided"))
+        if (exchangeAnswer === undefined || hasAdoptedOauth.current) return
+        if (!exchangeAnswer.ok) {
+            hasAdoptedOauth.current = true
+            if (exchangeAnswer.kind === "unavailable") hesitate(t("signIn.oauthUndecided"))
             else refuse(t("signIn.oauthRefused"))
-            return
+        } else if (exchangeAnswer.data.undecided !== null && continuationId !== null) {
+            const continuationAnswer = continuation.data
+            if (continuationAnswer !== undefined) {
+                hasAdoptedOauth.current = true
+                if (!continuationAnswer.ok) {
+                    if (continuationAnswer.kind === "unavailable") hesitate(t("signIn.oauthUndecided"))
+                    else refuse(t("signIn.oauthRefused"))
+                } else {
+                    settleBrokered(continuationAnswer.data)
+                }
+            }
+        } else {
+            hasAdoptedOauth.current = true
+            settleBrokered(exchangeAnswer.data)
         }
-        void settleBrokered(result.data)
-    }, [hesitate, oauthReturn.answer, refuse, settleBrokered, t])
+    }, [continuation.data, continuationId, exchangeAnswer, hesitate, refuse, settleBrokered, t])
 
     return {
         mode,

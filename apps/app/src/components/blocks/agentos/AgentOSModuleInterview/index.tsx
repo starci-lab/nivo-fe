@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { useTranslations } from "next-intl"
+import type { FailureKind } from "@nivo/api"
 import { useAgentOSModuleStudioProjection } from "@/hooks/agentos"
 import { useMutateAnswerAgentosCustomModuleIntakeSwr } from "@/hooks/swr"
 import { AgentOSModuleInterviewBase } from "./component"
@@ -18,28 +19,59 @@ const projectionState = (refused: boolean, studio: ReturnType<typeof useAgentOSM
 export const AgentOSModuleInterview = (props: AgentOSModuleInterviewProps) => {
     const { workspaceId, moduleId }: AgentOSModuleInterviewProps = props
     const t = useTranslations("console.agentos.modules.studio.interview")
+    const queryT = useTranslations("console.query")
     const { studio } = useAgentOSModuleStudioProjection()
     const answerIntake = useMutateAnswerAgentosCustomModuleIntakeSwr(workspaceId, moduleId)
-    const [refused, setRefused] = useState(false)
+    const [failureMessage, setFailureMessage] = useState<string>()
     const [answer, setAnswer] = useState("")
     const send = async () => {
         try {
             const result = await answerIntake.trigger({
                 answer: answer.trim(),
             })
-            if (!result.ok) {
-                setRefused(true)
+            if (result.ok) {
+                setFailureMessage(undefined)
+                setAnswer("")
                 return
             }
-            setRefused(false)
-            setAnswer("")
+            const failureText = (kind: FailureKind): string => {
+                switch (kind) {
+                    case "refused":
+                        return queryT("signInRequired")
+                    case "forbidden":
+                        return queryT("forbidden")
+                    case "not-found":
+                        return queryT("notFound")
+                    case "invalid":
+                        return queryT("invalid")
+                    case "unavailable":
+                        return queryT("actionUnavailable")
+                }
+            }
+            switch (result.kind) {
+                case "refused":
+                    setFailureMessage(failureText(result.kind))
+                    return
+                case "forbidden":
+                    setFailureMessage(failureText(result.kind))
+                    return
+                case "not-found":
+                    setFailureMessage(failureText(result.kind))
+                    return
+                case "invalid":
+                    setFailureMessage(failureText(result.kind))
+                    return
+                case "unavailable":
+                    setFailureMessage(failureText(result.kind))
+                    return
+            }
         } catch {
-            setRefused(true)
+            setFailureMessage(queryT("actionUnavailable"))
         }
     }
     return (
         <AgentOSModuleInterviewBase
-            state={projectionState(refused, studio)}
+            state={projectionState(failureMessage !== undefined, studio)}
             props={{
                 studio: studio ?? undefined,
                 answer,
@@ -47,7 +79,7 @@ export const AgentOSModuleInterview = (props: AgentOSModuleInterviewProps) => {
                 labels: {
                     title: t("title"),
                     saved: t("saved"),
-                    refused: t("refused"),
+                    refused: failureMessage ?? t("refused"),
                     field: t("field"),
                     placeholder: t("placeholder"),
                     send: t("send"),

@@ -23,8 +23,6 @@ import type {
     WorkspaceCheckoutEntryOutcome,
 } from "./checkout-types"
 import type {
-    ProvisioningSagaEntity,
-    ProvisioningSagaStepEntity,
     WorkspaceBillingEntryType,
     WorkspaceEntryDestinationType,
     WorkspaceOfferSelectionType,
@@ -33,10 +31,10 @@ import type {
     WorkspaceProvisioningFactType,
     WorkspacePurchaseLedgerFactType,
     WorkspacePurchaseStatusType,
+    WorkspaceReadinessFactType,
     WorkspaceRefundStatusFactType,
     WorkspaceServiceEligibilityFactType,
     WorkspaceSourceFactType,
-    WorkspaceProvisioningSagaQuery,
 } from "../__generated__/core"
 
 const parseChatbotChannelBinding = (value: unknown): ChatbotChannelPayload | null =>
@@ -205,7 +203,16 @@ const parseSourceFact = (value: unknown): WorkspaceSourceFactType | null =>
 const parseProvisioningFact = (value: unknown): WorkspaceProvisioningFactType | null => {
     if (!isRecord(value) || !isNullableString(value.disposition) || !isNullableString(value.reason)) return null
     const fact = parseSourceFact(value)
-    return fact === null ? null : { ...fact, disposition: value.disposition, reason: value.reason }
+    return fact === null
+        ? null
+        : {
+              source: fact.source,
+              state: fact.state,
+              reference: fact.reference,
+              observedAt: fact.observedAt,
+              disposition: value.disposition,
+              reason: value.reason,
+          }
 }
 
 const parseRenewalAction = (
@@ -244,7 +251,10 @@ const parseEligibilityFact = (value: unknown): WorkspaceServiceEligibilityFactTy
             : parseRenewalAction(value.renewalAction)
     if (value.renewalAction !== null && value.renewalAction !== undefined && renewalAction === null) return null
     return {
-        ...fact,
+        source: fact.source,
+        state: fact.state,
+        reference: fact.reference,
+        observedAt: fact.observedAt,
         reason: value.reason,
         heldSince: value.heldSince,
         paidThrough: value.paidThrough,
@@ -311,8 +321,33 @@ const parseLedgerFact = (value: unknown): WorkspacePurchaseLedgerFactType | null
 const parseRefundFact = (value: unknown): WorkspaceRefundStatusFactType | null => {
     if (!isRecord(value) || !isString(value.projection) || !isNullableString(value.refundEntryId)) return null
     const fact = parseSourceFact(value)
-    return fact === null ? null : { ...fact, projection: value.projection, refundEntryId: value.refundEntryId }
+    return fact === null
+        ? null
+        : {
+              source: fact.source,
+              state: fact.state,
+              reference: fact.reference,
+              observedAt: fact.observedAt,
+              projection: value.projection,
+              refundEntryId: value.refundEntryId,
+          }
 }
+
+const parseReadinessFact = (value: unknown): WorkspaceReadinessFactType | null =>
+    isRecord(value) &&
+    isString(value.source) &&
+    isString(value.state) &&
+    isNullableString(value.reference) &&
+    isNullableString(value.observedAt) &&
+    isNullableString(value.observationId)
+        ? {
+              source: value.source,
+              state: value.state,
+              reference: value.reference,
+              observedAt: value.observedAt,
+              observationId: value.observationId,
+          }
+        : null
 
 const parseStatusView = (value: unknown): WorkspacePurchaseStatusType | null => {
     if (!isRecord(value) || !isString(value.purchaseId) || !isOneOf(value.state, CHECKOUT_STATES)) return null
@@ -320,7 +355,7 @@ const parseStatusView = (value: unknown): WorkspacePurchaseStatusType | null => 
     const payment = parseSourceFact(value.payment)
     const billing = parseSourceFact(value.billing)
     const provisioning = parseProvisioningFact(value.provisioning)
-    const readiness = parseSourceFact(value.readiness)
+    const readiness = parseReadinessFact(value.readiness)
     if (offer === null || payment === null || billing === null || provisioning === null || readiness === null) {
         return null
     }
@@ -545,101 +580,4 @@ export const parseWorkspaceCheckoutEntryOutcome = (input: unknown): WorkspaceChe
         default:
             return null
     }
-}
-
-const parseSagaRow = (value: unknown): ProvisioningSagaEntity | null =>
-    isRecord(value) &&
-    isString(value.id) &&
-    isString(value.jobId) &&
-    isString(value.definitionKey) &&
-    isNumber(value.definitionVersion) &&
-    isString(value.resourceKind) &&
-    isString(value.resourceId) &&
-    isString(value.ownerId) &&
-    isOneOf(value.status, [
-        "queued",
-        "running_forward",
-        "waiting_retry",
-        "compensating",
-        "completed",
-        "compensated",
-        "compensation_failed",
-    ]) &&
-    isOneOf(value.direction, ["forward", "compensating"]) &&
-    isNumber(value.forwardCursor) &&
-    isNullableNumber(value.compensationCursor) &&
-    isNumber(value.sequence) &&
-    isNullableString(value.failureCode) &&
-    isNullableString(value.failureReason) &&
-    isNullableString(value.finishedAt) &&
-    isString(value.createdAt) &&
-    isString(value.updatedAt)
-        ? {
-              id: value.id,
-              jobId: value.jobId,
-              definitionKey: value.definitionKey,
-              definitionVersion: value.definitionVersion,
-              resourceKind: value.resourceKind,
-              resourceId: value.resourceId,
-              ownerId: value.ownerId,
-              status: value.status,
-              direction: value.direction,
-              forwardCursor: value.forwardCursor,
-              compensationCursor: value.compensationCursor,
-              sequence: value.sequence,
-              failureCode: value.failureCode,
-              failureReason: value.failureReason,
-              finishedAt: value.finishedAt,
-              createdAt: value.createdAt,
-              updatedAt: value.updatedAt,
-          }
-        : null
-
-/** Parse the `data` of `retryProvisioningSaga`/`cancelProvisioningSaga`: one saga row. */
-export const parseProvisioningSaga = (input: unknown): ProvisioningSagaEntity | null => parseSagaRow(input)
-
-const SAGA_STEP_STATUSES = [
-    "pending",
-    "running",
-    "completed",
-    "failed",
-    "compensating",
-    "compensated",
-    "compensation_failed",
-    "skipped",
-] as const
-
-const parseSagaStep = (value: unknown): ProvisioningSagaStepEntity | null =>
-    isRecord(value) &&
-    isString(value.id) &&
-    isString(value.stepKey) &&
-    isNumber(value.ordinal) &&
-    isBoolean(value.isCompensable) &&
-    isOneOf(value.forwardStatus, SAGA_STEP_STATUSES) &&
-    isOneOf(value.compensationStatus, SAGA_STEP_STATUSES) &&
-    isNullableString(value.lastError) &&
-    isString(value.createdAt) &&
-    isString(value.updatedAt)
-        ? {
-              id: value.id,
-              stepKey: value.stepKey,
-              ordinal: value.ordinal,
-              isCompensable: value.isCompensable,
-              forwardStatus: value.forwardStatus,
-              compensationStatus: value.compensationStatus,
-              lastError: value.lastError,
-              createdAt: value.createdAt,
-              updatedAt: value.updatedAt,
-          }
-        : null
-
-/** Parse the `data` of `myProvisioningSaga`: `{ saga, steps }`. */
-export const parseProvisioningSagaView = (
-    input: unknown,
-): NonNullable<WorkspaceProvisioningSagaQuery["myProvisioningSaga"]["data"]> | null => {
-    if (!isRecord(input)) return null
-    const saga = parseSagaRow(input.saga)
-    const steps = parseEach(input.steps, parseSagaStep)
-    if (saga === null || steps === null) return null
-    return { saga, steps }
 }

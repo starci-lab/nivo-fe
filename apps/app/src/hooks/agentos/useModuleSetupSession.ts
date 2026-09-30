@@ -1,9 +1,9 @@
-
-import type { MyAgentosModuleRuntimeQuery } from "@/modules/api/__generated__/core"
+﻿import type { MyAgentosModuleRuntimeQuery } from "@/modules/api/__generated__/core"
 
 import { useCallback, useRef, useState } from "react"
 import { useTranslations } from "next-intl"
 import { setupSessionFor } from "../../modules/agentos/module-page/setup-draft"
+import type { SetupAction, SetupFeedback } from "../../modules/agentos/module-page/setup-session-types"
 import {
     confirmationEvidence,
     idempotencyKey,
@@ -11,8 +11,6 @@ import {
     type ModuleRuntimeControls,
 } from "./agentos.shared"
 
-type SetupAction = { readonly kind: "send" | "apply" | "confirm"; readonly sessionId: string } | { readonly kind: "start" }
-type SetupFeedback = { readonly refused?: "send" | "apply"; readonly unconfirmed?: boolean }
 /** The runtime state and shared commands the setup session state machine connects. */
 interface ModuleSetupSessionInput {
     readonly installationId: string

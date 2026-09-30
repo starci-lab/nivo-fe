@@ -11,6 +11,7 @@ import { graphql } from "./graphql"
 import {
     CatalogItemsDocument,
     CreateWalletTopUpPayLinkDocument,
+    InvoicePaymentGateway,
     MyCatalogOrdersDocument,
     MyDomainsDocument,
     MyInvoicesDocument,
@@ -78,7 +79,7 @@ export const createWalletTopUpPayLink = (
     graphql(CreateWalletTopUpPayLinkDocument, parseWalletTopUpPayLink, {
         input: {
             amountVnd,
-            gateway: "sepay",
+            gateway: InvoicePaymentGateway.Sepay,
             returnUrl,
             cancelUrl,
         },

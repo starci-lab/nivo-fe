@@ -1,6 +1,7 @@
 import type { CatalogItemFieldsFragment, ExpertDeploymentSnapshotFieldsFragment } from "@/modules/api/__generated__/core"
 
 import { type Outcome } from "@nivo/api"
+import type { NivoQueryFailure } from "@/modules/query"
 
 
 
@@ -24,7 +25,7 @@ export type TemplateFlow =
           readonly deploymentId: string
           readonly publicHost: string | null
       }
-    | { readonly phase: "failed"; readonly subject: string; readonly reason: string }
+    | { readonly phase: "failed"; readonly subject: string; readonly reason: string; readonly failure?: NivoQueryFailure }
 
 /** The step index for each visible flow phase. */
 export const TEMPLATE_PHASE_INDEX: Readonly<Record<TemplateFlow["phase"], number>> = {
@@ -97,7 +98,7 @@ export const templateFlowFromAnswers = (input: TemplateFlowFromAnswersInput): Te
     if (submitted?.phase === "failed") return submitted
     if (submitted?.phase === "accepted") {
         if (!accessReady || deployment === undefined) return submitted
-        if (!deployment.ok) return { phase: "failed", subject: submitted.subject, reason: failedLoad }
+        if (!deployment.ok) return { phase: "failed", subject: submitted.subject, reason: failedLoad, failure: deployment }
         return settleDeployment(submitted.siteId, submitted.subject, deployment.data, failedProvision)
     }
     if (submitted !== null) return submitted
@@ -107,13 +108,13 @@ export const templateFlowFromAnswers = (input: TemplateFlowFromAnswersInput): Te
             return { phase: "submitting", name }
         }
         if (catalog === undefined) return { phase: "catalog_loading" }
-        if (!catalog.ok) return { phase: "failed", subject: templateKey, reason: failedLoad }
+        if (!catalog.ok) return { phase: "failed", subject: templateKey, reason: failedLoad, failure: catalog }
         const item = catalog.data.find((candidate) => candidate.templateKey === templateKey)
         if (item === undefined || templateKey !== "ai_academy") return { phase: "unsupported", name: item?.name ?? templateKey }
         return { phase: "request", name: item.name }
     }
     if (resumeSiteId === null || !accessReady || deployment === undefined) return { phase: "catalog_loading" }
-    if (!deployment.ok) return { phase: "failed", subject: resumeSiteId, reason: failedLoad }
+    if (!deployment.ok) return { phase: "failed", subject: resumeSiteId, reason: failedLoad, failure: deployment }
     if (submitted !== null) return submitted
     return settleDeployment(resumeSiteId, resumeSiteId, deployment.data, failedProvision)
 }

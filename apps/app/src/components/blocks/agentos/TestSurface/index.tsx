@@ -8,8 +8,14 @@ import { cockpitPane } from "../cockpitPane"
 import { cockpitSidecarPane } from "../cockpitSidecarPane"
 import { isTestCompactPane, isTestMode } from "../../../../modules/agentos/module-page/surface-types.guards"
 
-const testRunStatusLabel = (status: keyof ModulePageCopy["testStatus"] | undefined, copy: ModulePageCopy): string =>
-    status === undefined ? copy.pageTest.notRun : copy.testStatus[status]
+const testRunStatusLabel = (status: string | undefined, copy: ModulePageCopy): string => {
+    if (status === undefined) return copy.pageTest.notRun
+    if (status === "failed") return copy.testStatus.failed
+    if (status === "passed") return copy.testStatus.passed
+    if (status === "running") return copy.testStatus.running
+    if (status === "warning") return copy.testStatus.warning
+    return status
+}
 
 type TestSurfaceProps = WithModulePageCopy<TestSurfaceDataProps>
 

@@ -2,6 +2,8 @@
 
 import { useState } from "react"
 import { useFormatter, useTranslations } from "next-intl"
+import type { SWRResponse } from "swr"
+import type { Outcome } from "@nivo/api"
 import {
     useModuleOperate,
     useModuleRuntime,
@@ -16,10 +18,15 @@ import type { DiagnosticsSurfaceProps, SetupSurfaceProps } from "@/modules/agent
 import { contextDraftFor } from "@/modules/agentos/module-page/setup-draft"
 import { moduleScreenFor, moduleShellPropsFor } from "@/modules/agentos/module-page/screens"
 import { activeVersionFor } from "@/modules/agentos/module-page/sessions"
+import { parseModuleTestSurface } from "@/modules/api/agentos-module-tests.guards"
+import type { AgentosModuleTestSurfaceView } from "@/modules/api/agentos-module-tests"
+import type { AgentosRuntimeManifestView } from "@/modules/api/agentos-module-runtime"
 import { QueryNotice } from "@/components/blocks/query/QueryNotice"
 import type { Formatter } from "@/modules/i18n/formatter"
 import { installation, workspaceModules } from "@/modules/routes"
 import { AgentOSSolutionModulePageBase, AgentOSSolutionModuleState, buildModulePageCopy } from "./component"
+
+type AgentosSetupRequirement = NonNullable<AgentosRuntimeManifestView["setup"]>["requirements"][number]
 
 /** Exact workspace and installation route identities connected by the page. */
 export type AgentOSModuleRoutePageProps = {
@@ -50,6 +57,13 @@ export const AgentOSModuleRoutePage = (props: AgentOSModuleRoutePageProps) => {
 
     const moduleRuntime = useModuleRuntime({ workspaceId, installationId, view })
     const { runtime, runtimeReading, runtimeForeign, testSurface, testSurfaceReading } = moduleRuntime
+    const parsedTestSurface = parseModuleTestSurface(testSurface)
+    const testSurfaceQuery: Pick<SWRResponse<Outcome<AgentosModuleTestSurfaceView>, Error>, "mutate"> = {
+        mutate: async (answer) => {
+            await moduleRuntime.testSurfaceQuery.mutate(answer, { revalidate: false })
+            return undefined
+        },
+    }
     const setup = useModuleSetupSession({
         installationId,
         runtime,
@@ -61,11 +75,11 @@ export const AgentOSModuleRoutePage = (props: AgentOSModuleRoutePageProps) => {
         chatbotIdentity: moduleRuntime.chatbotIdentity,
         controls: moduleRuntime.controls,
     })
-    const testContract = testSurface?.contract ?? runtime?.installation.runtimeManifest.test
+    const testContract = parsedTestSurface?.contract ?? runtime?.installation.runtimeManifest.test
     const testRun = useModuleTestRun({
         installationId,
         testContract,
-        testSurfaceQuery: moduleRuntime.testSurfaceQuery,
+        testSurfaceQuery,
         setPending: moduleRuntime.controls.setPending,
         setActionRefused: moduleRuntime.controls.setActionRefused,
     })
@@ -89,6 +103,7 @@ export const AgentOSModuleRoutePage = (props: AgentOSModuleRoutePageProps) => {
             <QueryNotice
                 props={{
                     failure: {
+                        ok: false,
                         kind: "not-found",
                         code: "MODULE_RUNTIME_FOREIGN",
                         reason: "",
@@ -107,7 +122,7 @@ export const AgentOSModuleRoutePage = (props: AgentOSModuleRoutePageProps) => {
     if (runtime === null) return <AgentOSSolutionModuleState refused={moduleRuntime.refused} copy={copy} />
 
     const activeVersion = activeVersionFor(runtime)
-    const draft = contextDraftFor(runtime, setup.selectedSetup, testSurface, copy)
+    const draft = contextDraftFor(runtime, setup.selectedSetup, parsedTestSurface, copy)
     const moduleRoot = installation(workspaceId, installationId)
     const shell = moduleShellPropsFor({
         workspaceId,
@@ -130,7 +145,7 @@ export const AgentOSModuleRoutePage = (props: AgentOSModuleRoutePageProps) => {
         draft,
         sourceAttachmentPanel:
             runtime.installation.runtimeManifest.setup?.requirements.some(
-                (requirement) => requirement.citationPolicy === "attachment-content",
+                (requirement: AgentosSetupRequirement) => requirement.citationPolicy === "attachment-content",
             ) === true ? (
                 <AgentOSModuleAttachments
                     scope="solution"
@@ -141,8 +156,12 @@ export const AgentOSModuleRoutePage = (props: AgentOSModuleRoutePageProps) => {
             ) : undefined,
         setup: { ...setup, compactPane: setupPane, selectPane: setSetupPane },
         operate: { ...operate, isChatbot: moduleRuntime.isChatbotInstallation },
-        test: { ...testRun, contract: testContract, surface: testSurface },
-        settings,
+        test: { ...testRun, contract: testContract, surface: parsedTestSurface },
+        settings: {
+            ...settings,
+            currentConfirmation: settings.currentConfirmation === true,
+            currentOperatingMode: settings.currentOperatingMode === "autopilot" ? "autopilot" : "assist",
+        },
         diagnostics: {
             compactPane: diagnosticsPane,
             signal: diagnosticSignal,

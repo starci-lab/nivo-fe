@@ -6,6 +6,7 @@ import useSWRImmutable from "swr/immutable"
 import { SignOutScope } from "../api/__generated__/core"
 import { refreshSession, signOut as signOutMutation } from "../api/auth"
 import { setAccessTokenReader, setLocaleReader } from "../api/graphql"
+import type { NivoQueryFailure } from "../query"
 import { authorityEndingFrom, SessionContext } from "./session.shared"
 import type { Session, SessionEndReport, SessionState } from "./session.shared"
 
@@ -36,6 +37,25 @@ export type { Session, SessionEndReport, SessionState } from "./session.shared"
 type SessionProviderProps = {
     /** Everything that may read the session. */
     readonly children: ComponentProps<"div">["children"]
+}
+
+const unansweredSessionEndReport = (scope?: SignOutScope): SessionEndReport => ({
+    localCleared: true,
+    remoteRevocation: "unknown",
+    authorityEnding: scope === SignOutScope.Everywhere ? "unconfirmed" : "notAsked",
+})
+
+/** Map a failed result to the facts a session-ending report can confirm. */
+const sessionEndReportAfterFailure = (failure: NivoQueryFailure, scope?: SignOutScope): SessionEndReport => {
+    switch (failure.kind) {
+        case "refused":
+        case "forbidden":
+        case "not-found":
+        case "invalid":
+        case "unavailable":
+            return unansweredSessionEndReport(scope)
+    }
+    return unansweredSessionEndReport(scope)
 }
 
 /**
@@ -113,11 +133,7 @@ export const SessionProvider = (props: SessionProviderProps) => {
                     scope,
                 })
                 if (!answer.ok) {
-                    return {
-                        localCleared: true,
-                        remoteRevocation: "unknown",
-                        authorityEnding: "unconfirmed",
-                    }
+                    return sessionEndReportAfterFailure(answer, scope)
                 }
                 return {
                     localCleared: true,
@@ -158,11 +174,7 @@ export const SessionProvider = (props: SessionProviderProps) => {
                   },
         )
         if (!answer.ok) {
-            return {
-                localCleared: true,
-                remoteRevocation: "unknown",
-                authorityEnding: "notAsked",
-            }
+            return sessionEndReportAfterFailure(answer, scope)
         }
         return {
             localCleared: true,

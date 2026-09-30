@@ -77,7 +77,7 @@ export const uploadAgentosModuleAttachment = async (
 ): Promise<Outcome<boolean>> => {
     const sent = await send({
         url: resolveCoreApiCapabilityUrl(capability.uploadUrl),
-        method: capability.uploadMethod,
+        method: "PUT",
         // The capability URL is signed and short-lived; it is the credential, so no cookie or token rides along.
         credentials: "omit",
         contentType: mediaType,

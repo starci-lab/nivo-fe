@@ -141,7 +141,7 @@ const mutateChatbot = async <TVariables>(
     chatbotRequest(workspaceId, accessToken, document, variables, field, parseChatbotCommandResult)
 
 /** Bind an opaque, already-sealed channel reference to one installation. */
-export const bindChatbotChannel = (
+export const bindChatbotChannel = async (
     _hostname: string,
     workspaceId: string,
     accessToken: string,
@@ -159,7 +159,7 @@ export const bindChatbotChannel = (
 }
 
 /** Start a one-time Zalo OAuth intent; the browser receives no provider token. */
-export const startChatbotZaloOauth = (
+export const startChatbotZaloOauth = async (
     _hostname: string,
     workspaceId: string,
     accessToken: string,
@@ -177,7 +177,7 @@ export const startChatbotZaloOauth = (
 }
 
 /** Fence one conversation into human mode before any later provider start. */
-export const setChatbotHandoff = (
+export const setChatbotHandoff = async (
     _hostname: string,
     workspaceId: string,
     accessToken: string,
@@ -189,7 +189,7 @@ export const setChatbotHandoff = (
 }
 
 /** Resolve human mode only through the installation-qualified authority command. */
-export const resolveChatbotHandoff = (
+export const resolveChatbotHandoff = async (
     _hostname: string,
     workspaceId: string,
     accessToken: string,
@@ -207,7 +207,7 @@ export const resolveChatbotHandoff = (
 }
 
 /** Reconcile ambiguous delivery evidence without issuing a blind resend. */
-export const reconcileChatbotDelivery = (
+export const reconcileChatbotDelivery = async (
     _hostname: string,
     workspaceId: string,
     accessToken: string,

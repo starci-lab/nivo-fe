@@ -1,4 +1,5 @@
 import { isBoolean, isNullableString, isOneOf, isRecord, isString, parseEach } from "@nivo/api"
+import { AgentChannelApplyState, AgentChannelProvider } from "./__generated__/core"
 import type { ConfigureAgentWorkspaceChannelMutation } from "./__generated__/core"
 import type { AgentWorkspaceChannelSettingView } from "./agentos-module-runtime"
 
@@ -8,9 +9,21 @@ type ChannelSetting = NonNullable<ConfigureAgentWorkspaceChannelMutation["config
 export const parseChannelSetting = (input: unknown): AgentWorkspaceChannelSettingView | null => {
     if (
         !isRecord(input) ||
-        !isOneOf(input.provider, ["Discord", "Messenger", "Slack", "Telegram", "Whatsapp", "Zalo"]) ||
+        !isOneOf(input.provider, [
+            AgentChannelProvider.Discord,
+            AgentChannelProvider.Messenger,
+            AgentChannelProvider.Slack,
+            AgentChannelProvider.Telegram,
+            AgentChannelProvider.Whatsapp,
+            AgentChannelProvider.Zalo,
+        ]) ||
         !isString(input.accountId) ||
-        !isOneOf(input.state, ["Applied", "Error", "NotConfigured", "Pending"]) ||
+        !isOneOf(input.state, [
+            AgentChannelApplyState.Applied,
+            AgentChannelApplyState.Error,
+            AgentChannelApplyState.NotConfigured,
+            AgentChannelApplyState.Pending,
+        ]) ||
         !isNullableString(input.displayName)
     ) {
         return null

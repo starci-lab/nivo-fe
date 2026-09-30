@@ -1,8 +1,9 @@
 import type { WorkspaceCheckoutPurchaseStatusFieldsFragment } from "@/modules/api/__generated__/core"
 
-import { useCallback, useEffect } from "react"
-import { useProvisioningRealtime } from "../realtime/useProvisioningRealtime"
+import { useCallback } from "react"
+import useProvisioningRealtime from "../realtime/useProvisioningRealtime"
 import { type ProvisioningTarget } from "../realtime/realtime.shared"
+import { useEventRevalidationSwr } from "../swr/useEventRevalidationSwr"
 import type { WorkspaceCheckoutAnswer } from "@/modules/api/workspace-controlplane"
 import { settle, type Outcome } from "@nivo/api"
 import {
@@ -81,13 +82,12 @@ export const usePurchaseStatusPhase = ({
         ((event?.kind === "order" && event.id === purchaseId) ||
             (event?.kind === "workspace" && readyWorkspaceId !== null && event.id === readyWorkspaceId))
 
-    useEffect(() => {
-        if (relevantEvent) void reconcile()
-    }, [eventKey, relevantEvent, reconcile])
-
-    useEffect(() => {
-        if (realtime.status === "connected" && phase !== "loading" && phase !== "denied") void reconcile()
-    }, [realtime.status, phase, reconcile])
+    const refreshSignal = relevantEvent
+        ? ["purchase-status", purchaseId, "event", eventKey ?? ""]
+        : realtime.status === "connected" && phase !== "loading" && phase !== "denied"
+          ? ["purchase-status", purchaseId, "connected", phase]
+          : null
+    useEventRevalidationSwr(refreshSignal, reconcile)
 
     return {
         purchase,

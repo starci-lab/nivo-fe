@@ -136,8 +136,9 @@ export const AuthenticationPage = (props: AuthenticationPageProps) => {
     void props
     const translateLoading = useTranslations("boundary.loading")
     const [sessionEnding, setSessionEnding] = useState<SessionEndingArrival | null>(null)
+    const loadingFallback = <RouteLoadingView props={{ label: translateLoading("label") }} />
     return (
-        <Suspense fallback={<RouteLoadingView props={{ label: translateLoading("label") }} />}>
+        <Suspense fallback={loadingFallback}>
             <SessionEndingQuery onParam={setSessionEnding} />
             <AuthenticationPageConnected sessionEnding={sessionEnding} />
         </Suspense>

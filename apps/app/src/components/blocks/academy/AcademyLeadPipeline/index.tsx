@@ -8,6 +8,7 @@ import {
     useQueryMyExpertSiteLeadsSwr,
 } from "@/hooks/swr"
 import { useQueryNoticeData } from "@/hooks/query"
+import { ExpertSiteLeadStatus, type ExpertSiteLeadFieldsFragment } from "@/modules/api/__generated__/core"
 
 import { nivoQueryReading, type NivoQueryReading } from "@/modules/query"
 import { AcademyLeadPipelineBase } from "./component"

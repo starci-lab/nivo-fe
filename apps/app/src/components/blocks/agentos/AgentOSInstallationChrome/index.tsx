@@ -67,7 +67,8 @@ const installationGroups = (
  * Add the module subnavigation of this workspace's installations and the setup/operate/test/
  * settings/diagnostics route tabs, all bound to the exact workspace and installation segments.
  */
-export const AgentOSInstallationChrome = ({ children }: AgentOSInstallationChromeProps) => {
+export const AgentOSInstallationChrome = (props: AgentOSInstallationChromeProps) => {
+    const { children }: AgentOSInstallationChromeProps = props
     const { workspaceId, installationId } = useParams<{
         readonly workspaceId: string
         readonly installationId: string

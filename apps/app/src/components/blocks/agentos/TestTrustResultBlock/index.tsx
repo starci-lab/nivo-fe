@@ -105,6 +105,13 @@ const DEFAULT_EVIDENCE_REGISTRY: EvidenceRegistry = {
     "nivo.test-evidence@1.0.0": NivoTestEvidence,
 }
 const RUN_SUMMARY_KEYS = ["total", "pass", "warning", "fail"] as const
+const testStatusLabel = (status: string, copy: TestTrustResultBlockCopy): string => {
+    if (status === "failed") return copy.testStatus.failed
+    if (status === "passed") return copy.testStatus.passed
+    if (status === "running") return copy.testStatus.running
+    if (status === "warning") return copy.testStatus.warning
+    return status
+}
 const count = (run: NonNullable<MyAgentosModuleTestSurfaceQuery["myAgentosModuleTestSurface"]["data"]>["runs"][number], key: "total" | "pass" | "warning" | "fail"): string => {
     const value = run.summary[key]
     return typeof value === "number" || typeof value === "string" ? String(value) : "0"
@@ -121,11 +128,11 @@ export const TestTrustResultBlock = (props: TestTrustResultBlockProps) => {
         registry = DEFAULT_EVIDENCE_REGISTRY,
     }: TestTrustResultBlockProps = props
     return (
-        <SurfaceCard label={copy.trust.title} fact={run === null ? copy.trust.notRun : copy.testStatus[run.status]}>
+        <SurfaceCard label={copy.trust.title} fact={run === null ? copy.trust.notRun : testStatusLabel(run.status, copy)}>
             <div>
                 <div>
                     <Heading level={3}>
-                        {run === null ? copy.trust.collect : copy.trust.result({ status: copy.testStatus[run.status] })}
+                        {run === null ? copy.trust.collect : copy.trust.result({ status: testStatusLabel(run.status, copy) })}
                     </Heading>
                     <Text size="sm" tone="muted">
                         {contextLabel}

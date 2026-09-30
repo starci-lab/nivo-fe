@@ -5,6 +5,7 @@ import type { FleetStatus } from "../../components/blocks/provisioning/FleetRow"
 
 
 import { type Outcome } from "@nivo/api"
+import type { NivoQueryFailure } from "../query"
 
 /** Public API role for one owned app or unbuilt order row. */
 export type OwnedAppRow = {
@@ -34,7 +35,7 @@ export type OwnedSectionView =
     | { readonly phase: "resting"; readonly label: string }
     | { readonly phase: "empty"; readonly label: string; readonly note: string }
     | { readonly phase: "answered"; readonly label: string; readonly rows: ReadonlyArray<OwnedAppRow> }
-    | { readonly phase: "refused"; readonly label: string; readonly note: string }
+    | { readonly phase: "refused"; readonly label: string; readonly note: string; readonly failure: NivoQueryFailure }
 
 /** The settled view of the template catalogue section of the apps dashboard. */
 export type CatalogueSectionView =
@@ -46,7 +47,7 @@ export type CatalogueSectionView =
           readonly fact: string
           readonly offers: ReadonlyArray<TemplateOfferRowView>
       }
-    | { readonly phase: "refused"; readonly label: string; readonly note: string }
+    | { readonly phase: "refused"; readonly label: string; readonly note: string; readonly failure: NivoQueryFailure }
 
 /** Plain values already resolved by the connected owner. */
 export type AppsDashboardData = {
@@ -119,7 +120,12 @@ export const ownedSectionFor = (
 ): OwnedSectionView => {
     const label = copy.listLabel
     if (sites === undefined) return { phase: "resting", label }
-    if (!sites.ok) return { phase: "refused", label, note: copy.refusalUnknown }
+    if (!sites.ok) return { phase: "refused", label, note: copy.refusalUnknown, failure: sites }
+    if (instances !== undefined && !instances.ok)
+        return { phase: "refused", label, note: copy.refusalUnknown, failure: instances }
+    if (orders !== undefined && !orders.ok) return { phase: "refused", label, note: copy.refusalUnknown, failure: orders }
+    if (catalogue !== undefined && !catalogue.ok)
+        return { phase: "refused", label, note: copy.refusalUnknown, failure: catalogue }
     const catalogueRows = catalogue?.ok === true ? catalogue.data : []
     const instanceRows = instances?.ok === true ? instances.data : []
     const apps = sites.data.map((site) => {
@@ -162,7 +168,7 @@ export const catalogueSectionFor = (
     const label = copy.catalogueLabel
     const fact = copy.catalogueFact
     if (catalogue === undefined) return { phase: "resting", label, fact }
-    if (!catalogue.ok) return { phase: "refused", label, note: copy.refusalUnknown }
+    if (!catalogue.ok) return { phase: "refused", label, note: copy.refusalUnknown, failure: catalogue }
     if (catalogue.data.length === 0) return { phase: "empty", label, note: copy.emptyDescription }
     return {
         phase: "answered",

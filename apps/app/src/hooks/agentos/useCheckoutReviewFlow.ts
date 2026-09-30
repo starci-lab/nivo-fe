@@ -124,7 +124,19 @@ export const useCheckoutReviewFlow = (props: CheckoutReviewFlowProps): CheckoutR
         return offersQuery.error === undefined
             ? { state: "loading", props: { copy, links } }
             : refused(t("checkoutUnavailable"), null, null)
-    if (!answer.ok) return refused(t("checkoutUnavailable"), null, null)
+    if (!answer.ok) {
+        switch (answer.kind) {
+            case "refused":
+            case "forbidden":
+                return refused(t("refusedNotAdmitted"), t("nextActionSignIn"), null)
+            case "not-found":
+                return refused(t("staleOffer"), null, null)
+            case "invalid":
+                return refused(t("conflictNotice"), null, null)
+            case "unavailable":
+                return refused(t("checkoutUnavailable"), null, null)
+        }
+    }
     const outcome = answer.data
     if (outcome.status === "refused") {
         const nextAction =

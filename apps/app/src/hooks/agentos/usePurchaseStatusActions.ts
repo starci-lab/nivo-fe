@@ -85,8 +85,21 @@ export const usePurchaseStatusActions = ({
 
     let entryRefusal: string | null = null
     if (settledEntryAnswer !== undefined) {
-        if (!settledEntryAnswer.ok) entryRefusal = settledEntryAnswer.reason
-        else if (entryResult?.status === "entry" && entryPath === null) entryRefusal = copy.entryConflictNotice
+        if (!settledEntryAnswer.ok) {
+            switch (settledEntryAnswer.kind) {
+                case "refused":
+                case "forbidden":
+                    entryRefusal = copy.entryRefusalLabel(settledEntryAnswer.code)
+                    break
+                case "not-found":
+                case "invalid":
+                    entryRefusal = copy.entryConflictNotice
+                    break
+                case "unavailable":
+                    entryRefusal = copy.unavailableNotice
+                    break
+            }
+        } else if (entryResult?.status === "entry" && entryPath === null) entryRefusal = copy.entryConflictNotice
         else if (entryResult?.status === "not-ready") entryRefusal = copy.entryNotReadyNotice
         else if (entryResult?.status === "refused" || entryResult?.status === "unavailable")
             entryRefusal = copy.entryRefusalLabel(entryResult.code)
@@ -104,14 +117,20 @@ export const usePurchaseStatusActions = ({
         // The last confirmed purchase remains the view's source of truth, so the outcome is not read.
         await settle(refreshStatus)
     }, [refreshStatus])
-    const recover = useCallback(async (): Promise<void> => {
+    const recover = useCallback(async () => {
         if (purchase === null || recoverPurchase.isMutating) return
         setEntryTarget(null)
         setFeedback({ answer: statusAnswer })
         const response = await recoverPurchase.trigger({ purchaseId, lastObserved: observedIdentitiesOf(purchase) })
         if (!response.ok) {
-            setFeedback({ answer: statusAnswer, recoverRefusal: response.reason })
-            return
+            const refusal =
+                response.kind === "unavailable"
+                    ? copy.unavailableNotice
+                    : response.kind === "not-found" || response.kind === "invalid"
+                      ? copy.entryConflictNotice
+                      : copy.entryRefusalLabel(response.code)
+            setFeedback({ answer: statusAnswer, recoverRefusal: refusal })
+            return response
         }
         const recovered = purchaseOf(response.data)
         if (recovered !== null) {

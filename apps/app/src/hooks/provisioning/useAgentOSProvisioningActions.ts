@@ -97,7 +97,7 @@ export const useAgentOSProvisioningActions = (input: UseAgentOSProvisioningActio
         else await flowState.reconcile()
     }
 
-    const enterWorkspace = async (): Promise<void> => {
+    const enterWorkspace = async () => {
         const flow = flowState.flow
         if (flow.phase !== "ready" || entryPending) return
         setEntryPending(true)
@@ -114,7 +114,7 @@ export const useAgentOSProvisioningActions = (input: UseAgentOSProvisioningActio
                     statusAnswer: flowState.statusQuery.data,
                     message: queryFailureText(answer.kind, copy.shared),
                 })
-                return
+                return answer
             }
             const entry = answer.data
             if (entry.status === "entry") {

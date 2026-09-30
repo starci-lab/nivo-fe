@@ -235,15 +235,17 @@ export const AgentOSWorkspaceControlCenterBase = (props: AgentOSWorkspaceControl
         <PageContainer measure="product">
             <div className={CONTENT_CLASS_NAME} data-contract="GAP-2">
                 {header}
-                <section
-                    role="tabpanel"
-                    id={"workspace-panel-" + pageState}
-                    aria-label={labels.tabs.find((tab) => tab.id === pageState)?.label}
-                >
-                    <div className={SECTIONS_CLASS_NAME} data-contract="GAP-5">
-                        {sections}
+                <SurfaceCard ariaLabel={labels.tabs.find((tab) => tab.id === pageState)?.label}>
+                    <div
+                        role="tabpanel"
+                        id={"workspace-panel-" + pageState}
+                        aria-label={labels.tabs.find((tab) => tab.id === pageState)?.label}
+                    >
+                        <div className={SECTIONS_CLASS_NAME} data-contract="GAP-5">
+                            {sections}
+                        </div>
                     </div>
-                </section>
+                </SurfaceCard>
             </div>
         </PageContainer>
     )

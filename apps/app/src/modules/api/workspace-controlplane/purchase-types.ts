@@ -1,4 +1,5 @@
 
+import type { Failure } from "@nivo/api"
 import type { CatalogOrderStatus, InvoiceStatus } from "../__generated__/core"
 
 /** The stable purchase identity admitted by checkout; the catalog order row IS the purchase. */
@@ -28,7 +29,7 @@ type WorkspacePurchaseOrderFact =
           readonly tierName: string | null
       }
     | { readonly state: "missing" }
-    | { readonly state: "unavailable"; readonly code: string | null }
+    | { readonly state: "unavailable"; readonly code: string | null; readonly failure: Failure }
 
 /** The billing-source fact of one purchase status read. */
 type WorkspacePurchasePaymentFact =
@@ -40,7 +41,7 @@ type WorkspacePurchasePaymentFact =
           readonly amountVnd: number
           readonly paidAt: string | null
       }
-    | { readonly state: "unavailable"; readonly code: string | null }
+    | { readonly state: "unavailable"; readonly code: string | null; readonly failure: Failure }
 
 /** The provisioning-source fact of one purchase status read. */
 type WorkspacePurchaseProvisioningFact =
@@ -51,7 +52,7 @@ type WorkspacePurchaseProvisioningFact =
           readonly workspaceName: string | null
           readonly workspaceStatus: string
       }
-    | { readonly state: "unavailable"; readonly code: string | null }
+    | { readonly state: "unavailable"; readonly code: string | null; readonly failure: Failure }
 
 /**
  * Source-qualified status view composed from the order, billing and workspace reads.

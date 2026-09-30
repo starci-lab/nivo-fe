@@ -14,6 +14,7 @@ import {
 
 /** Route identity owned by the Template App provisioning block. */
 export type TemplateAppProvisioningProps = { readonly context: TemplateAppProvisioningContext }
+type TemplateAppProvisioningPageProps = TemplateAppProvisioningRouteProps
 
 /** Compose the connected Template App flow into its localized presentation. */
 export const TemplateAppProvisioning = (props: TemplateAppProvisioningProps) => {
@@ -46,7 +47,7 @@ export const TemplateAppProvisioning = (props: TemplateAppProvisioningProps) => 
 }
 
 /** Connect route copy and navigation around the provisioning lifecycle. */
-export const TemplateAppProvisioningPage = (props: TemplateAppProvisioningRouteProps) => {
+export const TemplateAppProvisioningPage = (props: TemplateAppProvisioningPageProps) => {
     const t = useTranslations("console")
     const router = useRouter()
     const route =

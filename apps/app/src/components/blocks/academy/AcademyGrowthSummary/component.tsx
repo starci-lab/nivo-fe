@@ -1,5 +1,6 @@
 import { LabelledProgressRow, QueryNoticeView, type QueryNoticeViewData } from "@nivo/ui"
 import { SurfaceCard, Text } from "@starci/grammar/common"
+import type { AcademyGrowthSnapshot } from "@/modules/api/__generated__/core"
 
 /** Resolved copy for the growth block. */
 export type AcademyGrowthSummaryProps = AcademyGrowthSummaryViewProps

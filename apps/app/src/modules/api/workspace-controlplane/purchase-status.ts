@@ -17,60 +17,60 @@ import type { WorkspacePurchaseStatus } from "./purchase-types"
 export const readWorkspacePurchaseStatus = async (purchaseId: string): Promise<Outcome<WorkspacePurchaseStatus>> => {
     const [orders, invoices, workspaces] = await Promise.all([myCatalogOrders(), myInvoices(), myAgentWorkspace()])
     if (!orders.ok && !invoices.ok && !workspaces.ok) return orders
-    const order = orders.ok ? orders.data.find((row) => row.id === purchaseId) : undefined
-    const invoice = invoices.ok ? invoices.data.find((row) => row.catalogOrder?.id === purchaseId) : undefined
-    const workspace = workspaces.ok ? workspaces.data.find((row) => row.catalogOrder?.id === purchaseId) : undefined
+    let orderFact: WorkspacePurchaseStatus["order"]
+    if (!orders.ok) {
+        orderFact = { state: "unavailable", code: orders.code, failure: orders }
+    } else {
+        const order = orders.data.find((row) => row.id === purchaseId)
+        orderFact =
+            order === undefined
+                ? { state: "missing" }
+                : {
+                      state: "observed",
+                      status: order.status,
+                      offerName: order.catalogItem?.name ?? null,
+                      tierName: order.catalogTier?.name ?? null,
+                  }
+    }
+    let paymentFact: WorkspacePurchaseStatus["payment"]
+    if (!invoices.ok) {
+        paymentFact = { state: "unavailable", code: invoices.code, failure: invoices }
+    } else {
+        const invoice = invoices.data.find((row) => row.catalogOrder?.id === purchaseId)
+        paymentFact =
+            invoice === undefined
+                ? { state: "not-raised" }
+                : {
+                      state: "observed",
+                      invoiceId: invoice.id,
+                      status: invoice.status,
+                      amountVnd: invoice.amountVnd,
+                      paidAt: invoice.paidAt,
+                  }
+    }
+    let provisioningFact: WorkspacePurchaseStatus["provisioning"]
+    if (!workspaces.ok) {
+        provisioningFact = { state: "unavailable", code: workspaces.code, failure: workspaces }
+    } else {
+        const workspace = workspaces.data.find((row) => row.catalogOrder?.id === purchaseId)
+        provisioningFact =
+            workspace === undefined
+                ? { state: "not-admitted" }
+                : {
+                      state: "observed",
+                      workspaceId: workspace.id,
+                      workspaceName: workspace.name,
+                      workspaceStatus: workspace.status,
+                  }
+    }
     return {
         ok: true,
         data: {
             purchaseId,
             observedAt: new Date().toISOString(),
-            order: !orders.ok
-                ? {
-                      state: "unavailable",
-                      code: orders.code ?? null,
-                  }
-                : order === undefined
-                  ? {
-                        state: "missing",
-                    }
-                  : {
-                        state: "observed",
-                        status: order.status,
-                        offerName: order.catalogItem?.name ?? null,
-                        tierName: order.catalogTier?.name ?? null,
-                    },
-            payment: !invoices.ok
-                ? {
-                      state: "unavailable",
-                      code: invoices.code ?? null,
-                  }
-                : invoice === undefined
-                  ? {
-                        state: "not-raised",
-                    }
-                  : {
-                        state: "observed",
-                        invoiceId: invoice.id,
-                        status: invoice.status,
-                        amountVnd: invoice.amountVnd,
-                        paidAt: invoice.paidAt,
-                    },
-            provisioning: !workspaces.ok
-                ? {
-                      state: "unavailable",
-                      code: workspaces.code ?? null,
-                  }
-                : workspace === undefined
-                  ? {
-                        state: "not-admitted",
-                    }
-                  : {
-                        state: "observed",
-                        workspaceId: workspace.id,
-                        workspaceName: workspace.name,
-                        workspaceStatus: workspace.status,
-                    },
+            order: orderFact,
+            payment: paymentFact,
+            provisioning: provisioningFact,
         },
     }
 }

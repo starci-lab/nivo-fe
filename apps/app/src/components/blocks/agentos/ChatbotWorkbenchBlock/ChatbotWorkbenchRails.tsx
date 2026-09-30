@@ -1,26 +1,31 @@
 import type { ChatbotConversationPayload } from "@/modules/api/__generated__/agentos-controlplane"
 
 import { Badge, Button, EmptyNotice, SurfaceCard, SurfaceListCard, Text } from "@starci/grammar/common"
+import type { ComponentProps } from "react"
 
 import { CHATBOT_CHANNEL_ROW_CLASS_NAME } from "./classNames"
-import type {
-    ChatbotWorkbenchBlockBaseActions,
-    ChatbotWorkbenchBlockBaseCopy,
-    ChatbotWorkbenchBlockBaseData,
-} from "./component"
+import type { ChatbotWorkbenchBlock } from "."
 
+type ChatbotWorkbenchBlockCopy = ComponentProps<typeof ChatbotWorkbenchBlock>["copy"]
+type ChatbotWorkbenchBlockProps = ComponentProps<typeof ChatbotWorkbenchBlock>
 type WorkbenchRailProps = {
-    readonly props: ChatbotWorkbenchBlockBaseData
-    readonly on: ChatbotWorkbenchBlockBaseActions
+    readonly props: Pick<
+        ChatbotWorkbenchBlockProps,
+        "installationId" | "workbench" | "selectedConversationId" | "pending" | "copy"
+    >
+    readonly on: {
+        readonly selectConversation: ChatbotWorkbenchBlockProps["onSelectConversation"]
+        readonly connectZalo: ChatbotWorkbenchBlockProps["onConnectZalo"]
+    }
 }
 
-const conversationLabel = (conversation: ChatbotConversationPayload, copy: ChatbotWorkbenchBlockBaseCopy): string =>
+const conversationLabel = (conversation: ChatbotConversationPayload, copy: ChatbotWorkbenchBlockCopy): string =>
     conversation.handoffState === "human" ? copy.humanOwned : copy.automated
 
 /** Resolve the selected conversation's ownership label including an in-flight control action. */
 export const chatbotControlLabel = (
     conversation: ChatbotConversationPayload,
-    copy: ChatbotWorkbenchBlockBaseCopy,
+    copy: ChatbotWorkbenchBlockCopy,
     pending: boolean,
 ): string => {
     if (conversation.handoffState === "human") return pending ? copy.returnPending : copy.humanOwned

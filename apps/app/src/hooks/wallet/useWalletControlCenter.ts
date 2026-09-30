@@ -10,20 +10,20 @@ import { useQueryMyWalletSwr } from "../swr/queries/useQueryMyWalletSwr"
 import { useQueryMyWalletTransactionsSwr } from "../swr/queries/useQueryMyWalletTransactionsSwr"
 import { createWalletOverlayViews } from "@/modules/wallet/wallet-center/overlay-views"
 import { createWalletSectionViews } from "@/modules/wallet/wallet-center/views"
-import { readStored, removeStored, TOP_UP_SESSION_KEY, writeStored } from "@/modules/browser-storage"
+import { removeStored, TOP_UP_SESSION_KEY, writeStored } from "@/modules/browser-storage"
 import { parseTopUpSession, readWalletWaypoint } from "@/modules/wallet/wallet-center/waypoint"
 import { parseCheckoutFields } from "@/modules/wallet/wallet-center/waypoint.guards"
 import { initialTopUpInteractionState, type InvoicePaymentState, type TopUpInteractionState } from "@/modules/wallet/wallet-center/interaction"
 import type { WalletControlCenterViewProps, WalletPageState } from "@/modules/wallet/wallet-center/types"
 import { BILLING_CURRENCY } from "@/modules/config"
-import { DEFAULT_LOCALE } from "@/modules/i18n"
-
-const subscribeTopUpSession = (onChange: () => void): (() => void) => {
-    window.addEventListener("storage", onChange)
-    return () => window.removeEventListener("storage", onChange)
-}
-const readTopUpSessionRaw = (): string | null => readStored("session", TOP_UP_SESSION_KEY)
-const readTopUpSessionServer = (): string | null => null
+import {
+    readTopUpSessionRaw,
+    readTopUpSessionServer,
+    subscribeTopUpSession,
+    walletAmount,
+    walletDay,
+    walletRoute,
+} from "@/modules/wallet/wallet-center/formatting"
 
 /** Own wallet data, view projection and payment actions for the connected Wallet block. */
 export const useWalletControlCenter = (pageState: WalletPageState): WalletControlCenterViewProps => {
@@ -33,7 +33,7 @@ export const useWalletControlCenter = (pageState: WalletPageState): WalletContro
     const pathname = usePathname()
     const searchParams = useSearchParams()
     const storedTopUp = useSyncExternalStore(subscribeTopUpSession, readTopUpSessionRaw, readTopUpSessionServer)
-    const route = (path: string) => (locale === DEFAULT_LOCALE ? path : `/${locale}${path}`)
+    const route = (path: string) => walletRoute(path, locale)
     const waypoint = readWalletWaypoint(searchParams.toString(), locale)
     const wallet = useQueryMyWalletSwr()
     const invoices = useQueryMyInvoicesSwr()
@@ -48,18 +48,8 @@ export const useWalletControlCenter = (pageState: WalletPageState): WalletContro
     const refresh = async () => {
         await Promise.all([wallet.mutate(), invoices.mutate(), transactions.mutate()])
     }
-    const amount = (amountVnd: number) =>
-        format.number(amountVnd, {
-            style: "currency",
-            currency: BILLING_CURRENCY,
-            maximumFractionDigits: 0,
-        })
-    const day = (iso: string) =>
-        format.dateTime(new Date(iso), {
-            day: "2-digit",
-            month: "2-digit",
-            year: "numeric",
-        })
+    const amount = (amountVnd: number) => walletAmount(format, amountVnd, BILLING_CURRENCY)
+    const day = (iso: string) => walletDay(format, iso)
     const sections = createWalletSectionViews({
         walletAnswer,
         invoicesAnswer,
@@ -111,8 +101,14 @@ export const useWalletControlCenter = (pageState: WalletPageState): WalletContro
             cancelUrl: `${returnUrl}?status=cancelled`,
         })
         if (!answer.ok) {
-            setTopUp((current) => ({ ...current, error: answer.reason, pending: false }))
-            return
+            const message =
+                answer.kind === "not-found"
+                    ? t("wallet.checkoutInvalid")
+                    : answer.kind === "invalid"
+                      ? t("wallet.topUpInvalid")
+                      : t("wallet.topUpUnavailable")
+            setTopUp((current) => ({ ...current, error: message, pending: false }))
+            return answer
         }
         setTopUp((current) => ({ ...current, checkout: answer.data }))
         writeStored(
@@ -124,14 +120,14 @@ export const useWalletControlCenter = (pageState: WalletPageState): WalletContro
                 referenceId: answer.data.referenceId,
             }),
         )
-        const form = document.createElement("form")
-        form.method = "POST"
-        form.action = answer.data.checkoutUrl
         const fields = parseCheckoutFields(answer.data.checkoutFields)
-        if (fields === null) {
+        if (fields === null || answer.data.checkoutUrl === null) {
             setTopUp((current) => ({ ...current, error: t("wallet.checkoutInvalid"), pending: false }))
             return
         }
+        const form = document.createElement("form")
+        form.method = "POST"
+        form.action = answer.data.checkoutUrl
         Object.entries(fields).forEach(([name, value]) => {
             const input = document.createElement("input")
             input.type = "hidden"

@@ -239,7 +239,7 @@ export const ChatbotWorkbenchBlockBase = (props: ChatbotWorkbenchBlockBaseProps)
             </div>
         )
     return (
-        <section aria-label={data.copy.title}>
+        <SurfaceCard ariaLabel={data.copy.title}>
             <div className={CHATBOT_TITLE_CLASS_NAME}>
                 <Heading level={2}>{data.copy.title}</Heading>
                 <Text size="sm" tone="muted">
@@ -294,6 +294,6 @@ export const ChatbotWorkbenchBlockBase = (props: ChatbotWorkbenchBlockBaseProps)
                     railWidth="standard"
                 />
             </div>
-        </section>
+        </SurfaceCard>
     )
 }

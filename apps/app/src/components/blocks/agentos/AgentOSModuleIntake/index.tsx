@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { useTranslations } from "next-intl"
+import type { FailureKind } from "@nivo/api"
 import { useRouter } from "@/hooks/i18n"
 import { useMutateStartAgentosCustomModuleIntakeSwr } from "@/hooks/swr"
 import { moduleStudio } from "@/modules/routes"
@@ -14,10 +15,25 @@ type AgentOSModuleIntakeProps = {
 export const AgentOSModuleIntake = (props: AgentOSModuleIntakeProps) => {
     const { workspaceId }: AgentOSModuleIntakeProps = props
     const t = useTranslations("console.agentos.modules.intake")
+    const queryT = useTranslations("console.query")
     const router = useRouter()
     const startIntake = useMutateStartAgentosCustomModuleIntakeSwr(workspaceId)
     const [goal, setGoal] = useState("")
     const [error, setError] = useState<string>()
+    const failureText = (kind: FailureKind): string => {
+        switch (kind) {
+            case "refused":
+                return queryT("signInRequired")
+            case "forbidden":
+                return queryT("forbidden")
+            case "not-found":
+                return queryT("notFound")
+            case "invalid":
+                return queryT("invalid")
+            case "unavailable":
+                return queryT("actionUnavailable")
+        }
+    }
     const submit = async () => {
         setError(undefined)
         try {
@@ -25,13 +41,29 @@ export const AgentOSModuleIntake = (props: AgentOSModuleIntakeProps) => {
                 goal: goal.trim(),
                 idempotencyKey: `nivo-fe:${crypto.randomUUID()}`,
             })
-            if (!result.ok) {
-                setError(t("refused"))
+            if (result.ok) {
+                router.push(moduleStudio(workspaceId, result.data.module.id))
                 return
             }
-            router.push(moduleStudio(workspaceId, result.data.module.id))
+            switch (result.kind) {
+                case "refused":
+                    setError(failureText(result.kind))
+                    return
+                case "forbidden":
+                    setError(failureText(result.kind))
+                    return
+                case "not-found":
+                    setError(failureText(result.kind))
+                    return
+                case "invalid":
+                    setError(failureText(result.kind))
+                    return
+                case "unavailable":
+                    setError(failureText(result.kind))
+                    return
+            }
         } catch {
-            setError(t("refused"))
+            setError(queryT("actionUnavailable"))
         }
     }
     return (

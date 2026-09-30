@@ -1,6 +1,7 @@
 /** Runtime parsers for the generated expert-site document payloads. */
 
 import { isNullableString, isOneOf, isRecord, isString, parseEach } from "@nivo/api"
+import { ExpertDeploymentStatus, ExpertProvisionStatus, ExpertSiteStatus } from "./__generated__/core"
 import type {
     CreateExpertSiteMutation,
     MyExpertSiteDeploymentQuery,
@@ -16,8 +17,14 @@ const parseExpertSiteRow = (
     isString(value.id) &&
     isString(value.slug) &&
     isNullableString(value.customDomain) &&
-    isOneOf(value.provisionStatus, ["not_provisioned", "provisioning", "awaiting_dns", "ready", "failed"]) &&
-    isOneOf(value.status, ["draft", "live", "suspended"])
+    isOneOf(value.provisionStatus, [
+        ExpertProvisionStatus.NotProvisioned,
+        ExpertProvisionStatus.Provisioning,
+        ExpertProvisionStatus.AwaitingDns,
+        ExpertProvisionStatus.Ready,
+        ExpertProvisionStatus.Failed,
+    ]) &&
+    isOneOf(value.status, [ExpertSiteStatus.Draft, ExpertSiteStatus.Live, ExpertSiteStatus.Suspended])
         ? {
               id: value.id,
               slug: value.slug,
@@ -46,7 +53,7 @@ export const parsePublishedExpertSite = (
     isRecord(input) &&
     isString(input.id) &&
     isString(input.slug) &&
-    isOneOf(input.status, ["draft", "live", "suspended"])
+    isOneOf(input.status, [ExpertSiteStatus.Draft, ExpertSiteStatus.Live, ExpertSiteStatus.Suspended])
         ? { id: input.id, slug: input.slug, status: input.status }
         : null
 
@@ -62,6 +69,15 @@ export const parseProvisionedExpertSite = (
 export const parseExpertDeploymentSnapshot = (
     input: unknown,
 ): NonNullable<MyExpertSiteDeploymentQuery["myExpertSiteDeployment"]["data"]> | null =>
-    isRecord(input) && isString(input.id) && isString(input.status) && isString(input.publicHost)
+    isRecord(input) &&
+    isString(input.id) &&
+    isOneOf(input.status, [
+        ExpertDeploymentStatus.Building,
+        ExpertDeploymentStatus.Failed,
+        ExpertDeploymentStatus.Pending,
+        ExpertDeploymentStatus.Running,
+        ExpertDeploymentStatus.Stopped,
+    ]) &&
+    isString(input.publicHost)
         ? { id: input.id, status: input.status, publicHost: input.publicHost }
         : null

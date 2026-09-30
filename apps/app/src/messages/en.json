@@ -2508,6 +2508,7 @@
       "notFound": "This could not be found.",
       "invalid": "This request was declined.",
       "unavailable": "This could not be loaded. Check your connection and try again.",
+      "actionUnavailable": "This action could not be completed. Check your connection and try again.",
       "retry": "Try again"
     },
     "attentionGroup": "Needs your attention"

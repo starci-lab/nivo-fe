@@ -176,6 +176,14 @@ export const phaseFromPurchase = (
             return purchase.readiness.state === "unavailable"
                 ? { phase: "provisioning_unknown", orderId, subject: productName, detail, reason: copy.flow("failedLoad") }
                 : { phase: "preparing", orderId, workspaceId: null, subject: productName, detail }
+        default:
+            return {
+                phase: "provisioning_unknown",
+                orderId,
+                subject: productName,
+                detail,
+                reason: stateLabel(purchase.state),
+            }
     }
 }
 

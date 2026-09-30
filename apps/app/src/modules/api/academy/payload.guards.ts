@@ -193,7 +193,18 @@ export const parseAcademyWebhookStatus = (input: unknown): AcademyWebhookStatusT
 export const parseAcademyWebhookSecretResult = (input: unknown): AcademyWebhookSecretResultType | null => {
     if (!isRecord(input) || !isString(input.signingSecret)) return null
     const webhook = parseAcademyWebhookStatus(input)
-    return webhook === null ? null : { ...webhook, signingSecret: input.signingSecret }
+    return webhook === null
+        ? null
+        : {
+              id: webhook.id,
+              endpoint: webhook.endpoint,
+              events: webhook.events,
+              enabled: webhook.enabled,
+              version: webhook.version,
+              lastDeliveryStatus: webhook.lastDeliveryStatus,
+              lastDeliveredAt: webhook.lastDeliveredAt,
+              signingSecret: input.signingSecret,
+          }
 }
 
 /** Parse one custom-domain state record, the `data` of `setAcademyCustomDomain`. */
@@ -293,4 +304,3 @@ export const parseAcademyZaloAuthorization = (input: unknown): BeginAcademyZaloA
     isRecord(input) && isString(input.authorizationUrl) && isString(input.expiresAt)
         ? { authorizationUrl: input.authorizationUrl, expiresAt: input.expiresAt }
         : null
-

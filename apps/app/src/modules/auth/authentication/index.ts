@@ -1,6 +1,11 @@
 
 
 import { DEFAULT_AUTHENTICATED_LANDING } from "@/modules/auth"
+import {
+    AuthConclusionReason,
+    type ContinueBrokeredSignInPayload,
+    type ExchangeOauthCodePayload,
+} from "@/modules/api/__generated__/core"
 
 /** The visible stage of the authentication journey. */
 export type AuthPhase = "details" | "code" | "done" | "twoFactor" | "notice"

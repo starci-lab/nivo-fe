@@ -1,6 +1,6 @@
 import { LoadingRegion } from "@/components/blocks/loading/LoadingRegion"
 import type { ReactNode } from "react"
-import { Badge, Button, EmptyNotice, Input, SurfaceCard, Text } from "@starci/grammar/common"
+import { Badge, Button, EmptyNotice, Form, Input, SurfaceCard, Text } from "@starci/grammar/common"
 import { ChoiceTabs } from "@nivo/ui"
 import type { SalesDecisionValue } from "@/modules/api/sales"
 import type { useSalesDecision } from "@/hooks/agentos"
@@ -94,7 +94,7 @@ export const SalesDecisionProposalCard = (props: SalesDecisionProposalCardProps)
     return (
         <SurfaceCard label={t("proposal.label")} fact={model === null ? undefined : statusText(model.status, t)}>
             {region(proposal.standing, t("proposal.empty"), t("proposal.emptyHint"), model === null ? null : facts(model), t)}
-            <form onSubmit={(event) => event.preventDefault()}>
+            <Form onSubmit={() => undefined}>
                 <FieldStack>
                     <Input
                         id="sales-decision-request"
@@ -116,7 +116,7 @@ export const SalesDecisionProposalCard = (props: SalesDecisionProposalCardProps)
                         </Button>
                     </ActionRow>
                 </FieldStack>
-            </form>
+            </Form>
             <Text size="xs" tone="muted">
                 {t("proposal.notAnEffect")}
             </Text>
@@ -135,10 +135,7 @@ export const SalesDecisionAnswerCard = (props: SalesDecisionAnswerCardProps) => 
     const model = proposal.model
     return (
         <SurfaceCard label={t("answer.label")} fact={model === null ? undefined : statusText(model.status, t)}>
-            <form onSubmit={(event) => {
-                event.preventDefault()
-                answer.onSubmit()
-            }}>
+            <Form onSubmit={answer.onSubmit}>
                 <div className={SALES_DECISION_FORM_GRID_CLASS_NAME}>
                     <div className={SALES_DECISION_FORM_FULL_SPAN_CLASS_NAME}>
                         <FieldStack>
@@ -194,7 +191,7 @@ export const SalesDecisionAnswerCard = (props: SalesDecisionAnswerCardProps) => 
                         </FieldStack>
                     </div>
                 </div>
-            </form>
+            </Form>
             {model === null || model.status === "pending" ? (
                 <Text size="xs" tone="muted">
                     {t("answer.pendingNote")}

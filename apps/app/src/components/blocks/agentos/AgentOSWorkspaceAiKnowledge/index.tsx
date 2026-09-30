@@ -1,6 +1,4 @@
 
-import type { MyAgentosAiKnowledgeReadinessData } from "@/modules/api/__generated__/core"
-
 "use client"
 import {
     useMutateReindexAgentWorkspaceKnowledgeSwr,
@@ -9,74 +7,37 @@ import {
 } from "@/hooks/swr"
 import { useQueryNoticeData } from "@/hooks/query"
 import { nivoQueryReading } from "@/modules/query"
+import type { FailureKind } from "@nivo/api"
 import { useFormatter, useTranslations } from "next-intl"
 import { useState } from "react"
 import type { Formatter } from "../../../../modules/i18n/formatter"
-import { AgentOSWorkspaceAiKnowledgeBase, type AgentOSWorkspaceAiKnowledgeViewProps } from "./component"
+import { AgentOSWorkspaceAiKnowledgeBase } from "./component"
+import {
+    agentOSWorkspaceAiKnowledgeFailureMessage,
+    resolveAgentOSWorkspaceAiKnowledgeAction,
+    resolveAgentOSWorkspaceAiKnowledgeState,
+    type AgentOSWorkspaceAiKnowledgeAction,
+} from "./ai-knowledge.shared"
+
+export {
+    agentOSWorkspaceAiKnowledgeFailureMessage,
+    resolveAgentOSWorkspaceAiKnowledgeAction,
+    resolveAgentOSWorkspaceAiKnowledgeState,
+} from "./ai-knowledge.shared"
+export type { AgentOSWorkspaceAiKnowledgeAction } from "./ai-knowledge.shared"
 /** Exact workspace identity whose AI and knowledge readiness is owned by this block. */
 export type AgentOSWorkspaceAiKnowledgeProps = {
     readonly workspaceId: string
-}
-/** Browser-local lifecycle for the bounded readiness or recovery operation started by this page. */
-export type AgentOSWorkspaceAiKnowledgeAction = {
-    readonly kind: "testing" | "recovering" | "success"
-    readonly operationId: string | null
-} | null
-/** Complete only the exact operation receipt returned to this browser action. */
-export const resolveAgentOSWorkspaceAiKnowledgeAction = (
-    action: AgentOSWorkspaceAiKnowledgeAction,
-    readiness: MyAgentosAiKnowledgeReadinessData | null | undefined,
-): AgentOSWorkspaceAiKnowledgeAction => {
-    if (
-        action === null ||
-        action.kind === "success" ||
-        action.operationId === null ||
-        readiness === undefined ||
-        readiness === null
-    )
-        return action
-    if (
-        action.kind === "testing" &&
-        readiness.readinessOperationId === action.operationId &&
-        readiness.readinessStatus !== "testing"
-    ) {
-        return readiness.aiReady
-            ? {
-                  kind: "success",
-                  operationId: null,
-              }
-            : null
-    }
-    if (action.kind === "recovering" && readiness.knowledgeRecoveryOperationId === action.operationId) {
-        return {
-            kind: "success",
-            operationId: null,
-        }
-    }
-    return action
-}
-/** Resolve the visible state from the server lifecycle plus only the action started by this page. */
-export const resolveAgentOSWorkspaceAiKnowledgeState = (
-    readiness: MyAgentosAiKnowledgeReadinessData | null | undefined,
-    action: AgentOSWorkspaceAiKnowledgeAction,
-    actionRefused: boolean,
-): AgentOSWorkspaceAiKnowledgeViewProps["state"] => {
-    if (readiness === null || actionRefused) return "refused"
-    if (action?.kind === "testing" || readiness?.readinessStatus === "testing") return "testing"
-    if (action?.kind === "recovering") return "recovering"
-    if (action?.kind === "success") return "success"
-    if (readiness === undefined) return "loading"
-    if (readiness.credentialStatus !== "configured") return "key-configuring"
-    return readiness.aiReady ? "ready" : "refused"
 }
 /** Own workspace AI readiness reads, bounded tests, recovery dispatch and operation polling. */
 export const AgentOSWorkspaceAiKnowledge = (props: AgentOSWorkspaceAiKnowledgeProps) => {
     const { workspaceId }: AgentOSWorkspaceAiKnowledgeProps = props
     const t = useTranslations("console.agentos.workspace.aiKnowledge")
+    const queryT = useTranslations("console.query")
     const noticeOf = useQueryNoticeData()
     const format: Formatter = useFormatter()
     const [action, setAction] = useState<AgentOSWorkspaceAiKnowledgeAction>(null)
-    const [actionRefused, setActionRefused] = useState(false)
+    const [actionFailure, setActionFailure] = useState<FailureKind>()
     const [recoveryFromRefused, setRecoveryFromRefused] = useState(false)
     const runReadinessTest = useMutateRunAgentosAiReadinessTestSwr(workspaceId)
     const reindexKnowledge = useMutateReindexAgentWorkspaceKnowledgeSwr(workspaceId)
@@ -88,55 +49,99 @@ export const AgentOSWorkspaceAiKnowledge = (props: AgentOSWorkspaceAiKnowledgePr
     const readiness = reading.status === "ready" ? reading.data : undefined
     const visibleAction = resolveAgentOSWorkspaceAiKnowledgeAction(action, readiness)
     if (visibleAction !== action) setAction(visibleAction)
+    const failAction = (kind: FailureKind) => setActionFailure(kind)
     const run = async () => {
         setRecoveryFromRefused(false)
-        setActionRefused(false)
+        setActionFailure(undefined)
         setAction({
             kind: "testing",
             operationId: null,
         })
         const result = await runReadinessTest.trigger(crypto.randomUUID())
-        if (!result.ok) {
-            setActionRefused(true)
-            setAction(null)
+        if (result.ok) {
+            setAction({
+                kind: "testing",
+                operationId: result.data.operationId,
+            })
             return
         }
-        setAction({
-            kind: "testing",
-            operationId: result.data.operationId,
-        })
+        switch (result.kind) {
+            case "refused":
+                failAction(result.kind)
+                setAction(null)
+                return
+            case "forbidden":
+                failAction(result.kind)
+                setAction(null)
+                return
+            case "not-found":
+                failAction(result.kind)
+                setAction(null)
+                return
+            case "invalid":
+                failAction(result.kind)
+                setAction(null)
+                return
+            case "unavailable":
+                failAction(result.kind)
+                setAction(null)
+                return
+        }
     }
     const recover = async () => {
         setRecoveryFromRefused(
-            resolveAgentOSWorkspaceAiKnowledgeState(readiness, visibleAction, actionRefused) === "refused",
+            resolveAgentOSWorkspaceAiKnowledgeState(readiness, visibleAction, actionFailure !== undefined) === "refused",
         )
-        setActionRefused(false)
+        setActionFailure(undefined)
         setAction({
             kind: "recovering",
             operationId: null,
         })
         const result = await reindexKnowledge.trigger(crypto.randomUUID())
-        if (!result.ok) {
-            setActionRefused(true)
-            setAction(null)
+        if (result.ok) {
+            setAction({
+                kind: "recovering",
+                operationId: result.data.operationId,
+            })
             return
         }
-        setAction({
-            kind: "recovering",
-            operationId: result.data.operationId,
-        })
+        switch (result.kind) {
+            case "refused":
+                failAction(result.kind)
+                setAction(null)
+                return
+            case "forbidden":
+                failAction(result.kind)
+                setAction(null)
+                return
+            case "not-found":
+                failAction(result.kind)
+                setAction(null)
+                return
+            case "invalid":
+                failAction(result.kind)
+                setAction(null)
+                return
+            case "unavailable":
+                failAction(result.kind)
+                setAction(null)
+                return
+        }
     }
     const state =
         reading.status === "failed"
             ? "failed"
-            : resolveAgentOSWorkspaceAiKnowledgeState(readiness, visibleAction, actionRefused)
+            : resolveAgentOSWorkspaceAiKnowledgeState(readiness, visibleAction, actionFailure !== undefined)
     const labels = {
         sectionHeading: t("sectionHeading"),
         title: t("title"),
         description: t("description"),
         ready: t("ready"),
         testing: t("testing"),
-        refused: t("refused"),
+        refused:
+            actionFailure === undefined
+                ? t("refused")
+                : queryT(agentOSWorkspaceAiKnowledgeFailureMessage(actionFailure)),
         provider: t("provider"),
         model: t("model"),
         embedding: t("embedding"),

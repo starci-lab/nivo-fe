@@ -5,6 +5,7 @@ import { useMutateForgotPasswordVerifyOtpSwr } from "@/hooks/swr/mutations/useMu
 import { useMutateSignUpResendSwr } from "@/hooks/swr/mutations/useMutateSignUpResendSwr"
 import { useMutateSignUpVerifyOtpSwr } from "@/hooks/swr/mutations/useMutateSignUpVerifyOtpSwr"
 import type { AuthCode, AuthMode } from "@/components/blocks/auth/AuthenticationPanel"
+import type { OtpChallenge } from "@/modules/api/__generated__/core"
 
 import { noticeForConclusion } from "@/modules/auth/authentication"
 import type { Session } from "@/modules/auth/session"
@@ -71,34 +72,38 @@ export const useAuthenticationCode = ({
                 if (!result.ok) {
                     if (result.kind === "unavailable") {
                         hesitate(t("signUp.undecided"))
+                    } else {
+                        refuse(t("signUp.codeRefused"))
+                    }
+                } else {
+                    if (result.data.requiresTwoFactor) {
+                        activateTwoFactor(result.data.twoFactorToken)
                         return
                     }
-                    refuse(t("signUp.codeRefused"))
-                    return
-                }
-                if (result.data.requiresTwoFactor) {
-                    activateTwoFactor(result.data.twoFactorToken)
-                    return
-                }
-                if (result.data.conclusion !== null) {
-                    const notice = noticeForConclusion(result.data.conclusion.reason)
-                    if (notice !== null) {
-                        showNotice(notice)
+                    if (result.data.conclusion !== null) {
+                        const notice = noticeForConclusion(result.data.conclusion.reason)
+                        if (notice !== null) {
+                            showNotice(notice)
+                            return
+                        }
+                        markDone()
                         return
                     }
+                    if (result.data.undecided !== null) {
+                        hesitate(t("signUp.undecided"))
+                        return
+                    }
+                    if (result.data.accessToken === null) {
+                        refuse(t("signUp.codeRefused"))
+                        return
+                    }
+                    session.adopt({
+                        accessToken: result.data.accessToken,
+                        requiresTwoFactor: result.data.requiresTwoFactor,
+                        twoFactorToken: result.data.twoFactorToken,
+                    })
                     markDone()
-                    return
                 }
-                if (result.data.undecided !== null) {
-                    hesitate(t("signUp.undecided"))
-                    return
-                }
-                if (result.data.accessToken === null) {
-                    refuse(t("signUp.codeRefused"))
-                    return
-                }
-                session.adopt(result.data)
-                markDone()
                 return
             }
 
@@ -108,13 +113,13 @@ export const useAuthenticationCode = ({
             if (!result.ok) {
                 if (result.kind === "unavailable") {
                     hesitate(t("signUp.undecided"))
-                    return
+                } else {
+                    refuse(t("forgotPassword.codeRefused"))
                 }
-                refuse(t("forgotPassword.codeRefused"))
-                return
+            } else {
+                clearFeedback()
+                markDone()
             }
-            clearFeedback()
-            markDone()
         },
         [
             activateTwoFactor,
@@ -140,13 +145,13 @@ export const useAuthenticationCode = ({
         )
         if (!result.ok) {
             refuse(t("resendRefused"))
-            return
+        } else {
+            setChallenge(result.data)
+            setTtlMinutes(Math.max(1, Math.round(result.data.expiresInSeconds / 60)))
+            setCooldownSeconds(60)
+            clearFeedback()
+            hesitate(t("resentLabel"))
         }
-        setChallenge(result.data)
-        setTtlMinutes(Math.max(1, Math.round(result.data.expiresInSeconds / 60)))
-        setCooldownSeconds(60)
-        clearFeedback()
-        hesitate(t("resentLabel"))
     }, [challenge, clearFeedback, forgotResend, hesitate, mode, refuse, runPending, signUpResend, t])
 
     return { challenge, email, ttlMinutes, cooldownSeconds, start, clear, submit, resend }

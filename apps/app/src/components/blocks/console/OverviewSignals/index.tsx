@@ -5,44 +5,23 @@ import type { DomainFieldsFragment } from "@/modules/api/__generated__/core"
 import { useFormatter, useTranslations } from "next-intl"
 import { useNow } from "@/hooks/time"
 import { useOverviewData } from "@/hooks/overview"
+import { useQueryNoticeData } from "@/hooks/query"
 
 import { BILLING_CURRENCY } from "@/modules/config"
 import { OverviewSignalsBase, type OverviewSignalsCell } from "./component"
+import {
+    dueTone,
+    expiryTone,
+    OVERVIEW_SIGNAL_STATUS_KEY,
+    OVERVIEW_SIGNAL_STATUS_TONE,
+    signalReading,
+} from "./signals.shared"
 
 /** Public API role for OverviewSignalsProps. */
 export type OverviewSignalsProps = {
     readonly label: string
 }
 export type { OverviewSignalsCell } from "./component"
-const STATUS_KEY: Readonly<Record<string, string | undefined>> = {
-    not_provisioned: "status.notProvisioned",
-    provisioning: "status.provisioning",
-    awaiting_dns: "status.awaitingDns",
-    ready: "status.ready",
-    failed: "status.failed",
-    active: "status.active",
-    suspended: "status.suspended",
-}
-const NAMED_REFUSALS = new Set([
-    "EXPERT_SITE_NOT_FOUND_EXCEPTION",
-    "EXPERT_SITE_AMBIGUOUS_FOR_VIEWER_EXCEPTION",
-    "AGENT_WORKSPACE_NOT_FOUND_EXCEPTION",
-    "POD_REGISTRATION_MISSING_EXCEPTION",
-])
-const STATUS_TONE: Readonly<Record<string, "warning" | "danger" | undefined>> = {
-    awaiting_dns: "warning",
-    suspended: "warning",
-    failed: "danger",
-}
-const EXPIRY_NOTICE_DAYS = 30
-const DAY_IN_MS = 86400000
-const expiryTone = (expiresAt: string | null, now: number | null): "warning" | undefined => {
-    if (expiresAt === null || now === null) return undefined
-    const remainingDays = (new Date(expiresAt).getTime() - now) / DAY_IN_MS
-    return remainingDays <= EXPIRY_NOTICE_DAYS ? "warning" : undefined
-}
-const dueTone = (dueAt: string, now: number | null): "danger" | undefined =>
-    now !== null && new Date(dueAt).getTime() < now ? "danger" : undefined
 
 /** Connect the account signal band to the shared overview answers. */
 export const OverviewSignals = (props: OverviewSignalsProps) => {
@@ -50,13 +29,12 @@ export const OverviewSignals = (props: OverviewSignalsProps) => {
     const data = useOverviewData()
     const now = useNow()
     const t = useTranslations("console")
+    const noticeOf = useQueryNoticeData()
     const format = useFormatter()
     const statusLabel = (value: string) => {
-        const key = STATUS_KEY[value]
+        const key = OVERVIEW_SIGNAL_STATUS_KEY[value]
         return key === undefined ? t("status.unknown") : t(key)
     }
-    const refusal = (code: string | undefined) =>
-        code !== undefined && NAMED_REFUSALS.has(code) ? t(`refusal.${code}`) : t("refusal.unknown")
     const money = (value: number) =>
         format.number(value, {
             style: "currency",
@@ -82,18 +60,24 @@ export const OverviewSignals = (props: OverviewSignalsProps) => {
         status: "",
         isSkeleton: true,
     })
-    const failed = (id: string, cellLabel: string, code: string | undefined): OverviewSignalsCell => ({
-        id,
-        label: cellLabel,
-        value: "—",
-        status: refusal(code),
-    })
+    const failed = (id: string, cellLabel: string, failure: NivoQueryFailure): OverviewSignalsCell => {
+        const notice = noticeOf(failure)
+        const detail = notice.description ?? notice.retryLabel ?? notice.signIn?.label
+        return {
+            id: `${id}:${failure.kind}`,
+            label: cellLabel,
+            value: notice.message,
+            status: detail ?? "",
+            badgeTone: "danger",
+        }
+    }
     const apps = (() => {
-        if (data.apps === null) return pending("apps", t("apps.title"))
-        if (!data.apps.ok) return failed("apps", t("apps.title"), data.apps.code)
+        const reading = signalReading(data.apps)
+        if (reading.status === "resting") return pending("apps", t("apps.title"))
+        if (reading.status === "failed") return failed("apps", t("apps.title"), reading.failure)
         const first =
-            data.apps.data.find((site) => ["awaiting_dns", "failed", "suspended"].includes(site.provisionStatus)) ??
-            data.apps.data[0]
+            reading.data.find((site) => ["awaiting_dns", "failed", "suspended"].includes(site.provisionStatus)) ??
+            reading.data[0]
         return first === undefined
             ? {
                   id: "apps",
@@ -106,14 +90,16 @@ export const OverviewSignals = (props: OverviewSignalsProps) => {
                   label: t("apps.title"),
                   value: first.slug,
                   status: statusLabel(first.provisionStatus),
-                  badgeTone: STATUS_TONE[first.provisionStatus],
+                  badgeTone: OVERVIEW_SIGNAL_STATUS_TONE[first.provisionStatus],
                   emphasis: "accent" as const,
               }
     })()
     const agent = (() => {
-        if (data.workspaces === null || data.pod === null) return pending("agentos", t("agentos.title"))
-        if (!data.workspaces.ok) return failed("agentos", t("agentos.title"), data.workspaces.code)
-        const first = data.workspaces.data[0]
+        const workspaces = signalReading(data.workspaces)
+        const pod = signalReading(data.pod)
+        if (workspaces.status === "resting" || pod.status === "resting") return pending("agentos", t("agentos.title"))
+        if (workspaces.status === "failed") return failed("agentos", t("agentos.title"), workspaces.failure)
+        const first = workspaces.data[0]
         if (first === undefined)
             return {
                 id: "agentos",
@@ -123,10 +109,13 @@ export const OverviewSignals = (props: OverviewSignalsProps) => {
             }
         let status: string
         let badgeTone: "warning" | "danger" | undefined
-        if (data.pod.ok) {
-            status = data.pod.data.reachable ? t("agentos.podReachable") : t("agentos.podUnreachable")
-            badgeTone = data.pod.data.reachable ? undefined : "danger"
-        } else status = refusal(data.pod.code)
+        if (pod.status === "ready") {
+            status = pod.data.reachable ? t("agentos.podReachable") : t("agentos.podUnreachable")
+            badgeTone = pod.data.reachable ? undefined : "danger"
+        } else {
+            status = noticeOf(pod.failure).message
+            badgeTone = "danger"
+        }
         return {
             id: "agentos",
             label: t("agentos.title"),
@@ -136,9 +125,10 @@ export const OverviewSignals = (props: OverviewSignalsProps) => {
         }
     })()
     const domains = (() => {
-        if (data.domains === null) return pending("domains", t("domains.title"))
-        if (!data.domains.ok) return failed("domains", t("domains.title"), data.domains.code)
-        const first = data.domains.data[0]
+        const reading = signalReading(data.domains)
+        if (reading.status === "resting") return pending("domains", t("domains.title"))
+        if (reading.status === "failed") return failed("domains", t("domains.title"), reading.failure)
+        const first = reading.data[0]
         return first === undefined
             ? {
                   id: "domains",
@@ -155,20 +145,34 @@ export const OverviewSignals = (props: OverviewSignalsProps) => {
               }
     })()
     const wallet = (() => {
-        if (data.wallet === null || data.invoices === null) return pending("wallet", t("wallet.title"))
-        if (!data.wallet.ok) return failed("wallet", t("wallet.title"), data.wallet.code)
-        const unpaid = data.invoices.ok ? data.invoices.data.find((invoice) => invoice.status === "unpaid") : undefined
+        const walletReading = signalReading(data.wallet)
+        const invoiceReading = signalReading(data.invoices)
+        if (walletReading.status === "resting" || invoiceReading.status === "resting")
+            return pending("wallet", t("wallet.title"))
+        if (walletReading.status === "failed") return failed("wallet", t("wallet.title"), walletReading.failure)
+        const unpaid =
+            invoiceReading.status === "ready"
+                ? invoiceReading.data.find((invoice) => invoice.status === "unpaid")
+                : undefined
+        const invoiceFailure = invoiceReading.status === "failed" ? noticeOf(invoiceReading.failure) : undefined
         return {
             id: "wallet",
             label: t("wallet.title"),
-            value: money(data.wallet.data.balanceVnd),
+            value: money(walletReading.data.balanceVnd),
             status:
-                unpaid === undefined
+                invoiceFailure !== undefined
+                    ? invoiceFailure.message
+                    : unpaid === undefined
                     ? t("wallet.noUnpaid")
                     : `${money(unpaid.amountVnd)} · ${t("wallet.dueAt", {
                           date: day(unpaid.dueAt),
                       })}`,
-            badgeTone: unpaid === undefined ? undefined : dueTone(unpaid.dueAt, now),
+            badgeTone:
+                invoiceFailure !== undefined
+                    ? "danger"
+                    : unpaid === undefined
+                      ? undefined
+                      : dueTone(unpaid.dueAt, now),
             emphasis: "accent" as const,
         }
     })()

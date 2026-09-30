@@ -22,7 +22,8 @@ const workspaceTabFor = (pathname: string, modulesRoute: string): "overview" | "
  * route tabs above every nested workspace and installed-module route. Sibling purchase and
  * creation routes live outside this segment, so they never enter this header.
  */
-export const AgentOSWorkspaceChrome = ({ children }: AgentOSWorkspaceChromeProps) => {
+export const AgentOSWorkspaceChrome = (props: AgentOSWorkspaceChromeProps) => {
+    const { children }: AgentOSWorkspaceChromeProps = props
     const { workspaceId } = useParams<{ readonly workspaceId: string }>()
     const t = useTranslations("console.agentos")
     const pathname = usePathname()

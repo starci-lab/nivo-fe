@@ -86,7 +86,15 @@ export const parseSignInPayload = (input: unknown): Core.SignInPayload | null =>
     const undecided = parseNullable(input.undecided, parseAuthUndecided)
     if (undecided === undefined) return null
     const base = authBase(input)
-    return base === null ? null : { ...base, destination: input.destination, undecided }
+    return base === null
+        ? null
+        : {
+              accessToken: base.accessToken,
+              requiresTwoFactor: base.requiresTwoFactor,
+              twoFactorToken: base.twoFactorToken,
+              destination: input.destination,
+              undecided,
+          }
 }
 
 /** Parse spending a sign-up code: the session fields, the conclusion and the undecided result. */
@@ -96,7 +104,15 @@ export const parseSignUpVerifyOtpPayload = (input: unknown): Core.SignUpVerifyOt
     const undecided = parseNullable(input.undecided, parseAuthUndecided)
     if (conclusion === undefined || undecided === undefined) return null
     const base = authBase(input)
-    return base === null ? null : { ...base, conclusion, undecided }
+    return base === null
+        ? null
+        : {
+              accessToken: base.accessToken,
+              requiresTwoFactor: base.requiresTwoFactor,
+              twoFactorToken: base.twoFactorToken,
+              conclusion,
+              undecided,
+          }
 }
 
 /** Parse trading a provider callback: the session fields, the brokered undecided, the email refusal. */
@@ -105,7 +121,15 @@ export const parseExchangeOauthCodePayload = (input: unknown): Core.ExchangeOaut
     const undecided = parseNullable(input.undecided, parseAuthBrokeredUndecided)
     if (undecided === undefined) return null
     const base = authBase(input)
-    return base === null ? null : { ...base, undecided, providerEmailRefused: input.providerEmailRefused }
+    return base === null
+        ? null
+        : {
+              accessToken: base.accessToken,
+              requiresTwoFactor: base.requiresTwoFactor,
+              twoFactorToken: base.twoFactorToken,
+              undecided,
+              providerEmailRefused: input.providerEmailRefused,
+          }
 }
 
 /** Parse repeating a held brokered proof: the session fields, the plain undecided, the email refusal. */
@@ -114,7 +138,15 @@ export const parseContinueBrokeredSignInPayload = (input: unknown): Core.Continu
     const undecided = parseNullable(input.undecided, parseAuthUndecided)
     if (undecided === undefined) return null
     const base = authBase(input)
-    return base === null ? null : { ...base, undecided, providerEmailRefused: input.providerEmailRefused }
+    return base === null
+        ? null
+        : {
+              accessToken: base.accessToken,
+              requiresTwoFactor: base.requiresTwoFactor,
+              twoFactorToken: base.twoFactorToken,
+              undecided,
+              providerEmailRefused: input.providerEmailRefused,
+          }
 }
 
 /** Parse a mailed-code challenge. */

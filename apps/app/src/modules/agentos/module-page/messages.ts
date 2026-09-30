@@ -1,6 +1,8 @@
 
 import type { MyAgentosModuleRuntimeQuery } from "@/modules/api/__generated__/core"
 
+import type { AgentosRuntimeManifestView, AgentosRuntimeMessageTreeView } from "@/modules/api/agentos-module-runtime"
+import { isAgentosRuntimeWidgetNode } from "@/modules/api/agentos-runtime-tree.guards"
 import type { ExecuteMessage } from "../../../components/blocks/agentos/ExecuteChatBlock"
 import type { ExecuteSession } from "../../../components/blocks/agentos/ExecuteSessionRailBlock"
 import type { SetupMessage, SetupRevision } from "../../../components/blocks/agentos/PrivateSetupChatBlock"
@@ -8,6 +10,16 @@ import type { SetupMessage, SetupRevision } from "../../../components/blocks/age
 import type { Formatter } from "../../i18n/formatter"
 import type { ModulePageCopy } from "../module-page-copy"
 import { executeSessionTitleFor } from "./sessions"
+
+const messageRoleOf = (role: string): SetupMessage["role"] | null => {
+    if (role === "user" || role === "assistant" || role === "system") return role
+    return null
+}
+
+const setupRevisionStatusOf = (status: string): SetupRevision["status"] | null => {
+    if (status === "open" || status === "ready" || status === "completed" || status === "superseded") return status
+    return null
+}
 
 /** The setup conversation lines belonging to one selected session. */
 export const setupMessagesFor = (
@@ -18,28 +30,18 @@ export const setupMessagesFor = (
         ? []
         : runtime.messages
               .filter((message) => message.sessionId === selectedSetup.id)
-              .map(({ id, role, content }) => ({
-                  id,
-                  role,
-                  content,
-              }))
+              .flatMap(({ id, role, content }) => {
+                  const mappedRole = messageRoleOf(role)
+                  return mappedRole === null ? [] : [{ id, role: mappedRole, content }]
+              })
 
 /** The revision rail entries: only sessions that carry a numbered revision and a status. */
 export const setupRevisionsFor = (runtime: NonNullable<MyAgentosModuleRuntimeQuery["myAgentosModuleRuntime"]["data"]>): ReadonlyArray<SetupRevision> =>
-    runtime.setupSessions
-        .filter(
-            (
-                item,
-            ): item is typeof item & {
-                setupRevision: number
-                setupStatus: NonNullable<typeof item.setupStatus>
-            } => item.setupRevision !== null && item.setupStatus !== null,
-        )
-        .map((item) => ({
-            id: item.id,
-            revision: item.setupRevision,
-            status: item.setupStatus,
-        }))
+    runtime.setupSessions.flatMap((item) => {
+        if (item.setupRevision === null || item.setupStatus === null) return []
+        const status = setupRevisionStatusOf(item.setupStatus)
+        return status === null ? [] : [{ id: item.id, revision: item.setupRevision, status }]
+    })
 
 /** Whether any setup session is still open: starting a new revision is allowed only while none is. */
 export const setupOpenFor = (runtime: NonNullable<MyAgentosModuleRuntimeQuery["myAgentosModuleRuntime"]["data"]>): boolean =>
@@ -64,10 +66,11 @@ export const executeSessionsFor = (
 /** The conversation lines of one selected execute session, with bound context and widget state. */
 export const executeMessagesFor = (
     runtime: NonNullable<MyAgentosModuleRuntimeQuery["myAgentosModuleRuntime"]["data"]>,
-    selectedSession: NonNullable<MyAgentosModuleRuntimeQuery["myAgentosModuleRuntime"]["data"]>["setupSessions"][number] | null,
+    selectedSession: NonNullable<MyAgentosModuleRuntimeQuery["myAgentosModuleRuntime"]["data"]>["executeSessions"][number] | null,
     copy: ModulePageCopy,
 ): ReadonlyArray<ExecuteMessage> => {
     if (selectedSession === null) return []
+    const manifest: AgentosRuntimeManifestView = runtime.installation.runtimeManifest
     const contextById = new Map(runtime.contextVersions.map((context) => [context.id, context.version]))
     const widgetByMessage = new Map(runtime.widgets.map((widget) => [widget.messageId, widget]))
     const taskById = new Map((runtime.tasks ?? []).map((task) => [task.id, task]))
@@ -78,35 +81,38 @@ export const executeMessagesFor = (
             const registration =
                 widget === undefined
                     ? undefined
-                    : runtime.installation.runtimeManifest.widgets.find(
+                    : manifest.widgets.find(
                           (candidate) =>
                               candidate.component === widget.rootComponent &&
                               candidate.version === widget.rootVersion,
                       )
+            const messageTree: AgentosRuntimeMessageTreeView | null = message.messageTree
             const contextVersion =
                 message.contextVersionId === null ? undefined : contextById.get(message.contextVersionId)
             const task = message.taskId === null ? undefined : taskById.get(message.taskId)
+            const rawNode: unknown = widget?.tree
+            const node = isAgentosRuntimeWidgetNode(rawNode) ? rawNode : undefined
             return {
                 id: message.id,
-                role: message.role,
+                role: messageRoleOf(message.role) ?? "system",
                 content: message.content,
-                messageTree: message.messageTree,
+                messageTree,
                 contextLabel:
                     contextVersion === undefined
                         ? copy.shell.noContextApplied
                         : copy.shell.boundContext({ version: contextVersion }),
                 widget:
-                    widget === undefined
+                    widget === undefined || node === undefined
                         ? undefined
                         : {
                               id: widget.id,
                               node:
                                   task === undefined
-                                      ? widget.tree
+                                      ? node
                                       : {
-                                            ...widget.tree,
+                                            ...node,
                                             props: {
-                                                ...widget.tree.props,
+                                                ...node.props,
                                                 expectedVersion: task.expectedVersion,
                                             },
                                         },

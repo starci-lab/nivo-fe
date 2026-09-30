@@ -63,7 +63,7 @@ export const useModuleSettings = (input: ModuleSettingsInput) => {
     const currentModelProfile = stringSetting(settings.modelProfile, "nivo-default")
     const currentConfirmation =
         typeof settings.requireConfirmation === "boolean" ? settings.requireConfirmation : true
-    const currentOperatingMode = runtime?.installation.operatingMode ?? "assist"
+    const currentOperatingMode = runtime?.installation.operatingMode === "autopilot" ? "autopilot" : "assist"
     const currentChannelAccountRef = runtime?.installation.channelAccountRef ?? null
     const credentialRevision = JSON.stringify(
         runtime?.credentials.map((credential) => [credential.providerKey, credential.status, credential.maskedHint]) ??

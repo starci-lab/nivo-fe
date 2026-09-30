@@ -2,6 +2,7 @@
 import { useFormatter, useTranslations } from "next-intl"
 import { fleetResourceHref } from "../../components/blocks/provisioning/FleetRow"
 import { useQueryCatalogItemsSwr } from "../swr/queries/useQueryCatalogItemsSwr"
+import { CatalogCategory } from "@/modules/api/__generated__/core"
 import { useQueryMyCatalogOrdersSwr } from "../swr/queries/useQueryMyCatalogOrdersSwr"
 import { useQueryMyExpertSitesSwr } from "../swr/queries/useQueryMyExpertSitesSwr"
 import { useQueryMyInstancesSwr } from "../swr/queries/useQueryMyInstancesSwr"
@@ -23,7 +24,7 @@ export const useAppsDashboard = () => {
     const sites = useQueryMyExpertSitesSwr()
     const instances = useQueryMyInstancesSwr()
     const orders = useQueryMyCatalogOrdersSwr()
-    const catalogue = useQueryCatalogItemsSwr("site_from_template")
+    const catalogue = useQueryCatalogItemsSwr(CatalogCategory.SiteFromTemplate)
     const money = (amountVnd: number) =>
         format.number(amountVnd, { style: "currency", currency: BILLING_CURRENCY, maximumFractionDigits: 0 })
     const copy: AppsDashboardCopy = {
