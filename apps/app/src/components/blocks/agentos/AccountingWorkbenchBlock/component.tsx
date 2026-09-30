@@ -34,7 +34,7 @@ import {
     type AccountingSurfaceStanding,
     type AccountingTranslation,
 } from "@/modules/accounting/accounting-workbench"
-import { WorkbenchRail } from "../WorkbenchRail"
+import { WorkbenchRail, type WorkbenchSharedCopy } from "../WorkbenchRail"
 import {
     ACCOUNTING_ACTION_ROW_CLASS_NAME,
     ACCOUNTING_FIELD_STACK_CLASS_NAME,
@@ -47,7 +47,10 @@ import {
 } from "./classNames"
 
 /** The settled view the render half draws; the connected owner resolves everything it shows. */
-type AccountingWorkbenchBlockData = { readonly view: ReturnType<typeof useAccountingWorkbench> }
+type AccountingWorkbenchBlockData = {
+    readonly view: ReturnType<typeof useAccountingWorkbench>
+    readonly shared: WorkbenchSharedCopy
+}
 type AccountingWorkbenchBlockProps = { readonly props: AccountingWorkbenchBlockData }
 type ChildrenProps = { readonly children: ReactNode }
 type StatusNoticeProps = { readonly notice: AccountingNotice | null }
@@ -184,7 +187,7 @@ const ScopeLine = ({ scopeReady, scopeStanding, t }: ScopeLineProps) => {
 
 /** Render the complete responsive Accounting workbench from a settled controller view. */
 export const AccountingWorkbenchBlockBase = (props: AccountingWorkbenchBlockProps) => {
-    const { view } = props.props
+    const { view, shared } = props.props
     const {
         t,
         scopeReady,
@@ -213,7 +216,7 @@ export const AccountingWorkbenchBlockBase = (props: AccountingWorkbenchBlockProp
         if (standing === "unavailable")
             return (
                 <div role="alert">
-                    <EmptyNotice message={t("surfaceUnavailable")} description={t("nothingChanged")} />
+                    <EmptyNotice message={shared.surfaceUnavailable} description={t("nothingChanged")} />
                 </div>
             )
         if (standing === "empty") return <EmptyNotice message={empty} description={emptyHint} />
@@ -307,7 +310,7 @@ export const AccountingWorkbenchBlockBase = (props: AccountingWorkbenchBlockProp
                             isPending={view.overview.isFetching}
                             onPress={view.overview.loadMore}
                         >
-                            {t("overview.loadMore")}
+                            {shared.loadMore}
                         </Button>
                     )}
                 </FieldStack>

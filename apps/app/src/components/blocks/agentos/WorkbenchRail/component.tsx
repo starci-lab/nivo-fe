@@ -13,3 +13,6 @@ type WorkbenchRailCardProps = {
 export const WorkbenchRailCard = ({ props }: WorkbenchRailCardProps) => (
     <SurfaceCard label={props.label}>{props.children}</SurfaceCard>
 )
+
+/** The copy both workbenches share, resolved once by their connected owners. */
+export type WorkbenchSharedCopy = { readonly loadMore: string; readonly surfaceUnavailable: string }

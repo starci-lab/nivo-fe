@@ -16,6 +16,7 @@ const copy = createPurchaseStatusCopy(
             throw error
         },
     }),
+    enMessages.console.provisioningFlows.connecting,
 )
 const mark: IconSource = () => null
 const head = {

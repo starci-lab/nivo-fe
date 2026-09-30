@@ -15,9 +15,10 @@ export type AccountingWorkbenchBlockProps = {
 /** Connect the Accounting workbench to its resolved installation scope and render the settled view. */
 export const AccountingWorkbenchBlock = (props: AccountingWorkbenchBlockProps) => {
     const translate = useTranslations("console.agentos.modules.runtime.workbench.accountingWorkbench")
+    const shared = useTranslations("console.agentos.modules.runtime.workbench.shared")
     const locale = useLocale()
     const view = useAccountingWorkbench(props.moduleId, locale, (key, values) =>
         translate(key, translationValuesForNextIntl(values)),
     )
-    return <AccountingWorkbenchBlockBase props={{ view }} />
+    return <AccountingWorkbenchBlockBase props={{ view, shared: { loadMore: shared("loadMore"), surfaceUnavailable: shared("surfaceUnavailable") } }} />
 }

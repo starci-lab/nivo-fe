@@ -795,7 +795,6 @@
         "attemptLabel": "Lần thử",
         "attemptFact": "Lần thử {attempt}",
         "changeOffer": "Đổi gói",
-        "realtimeReconnect": "Đang nối lại tiến trình trực tiếp. Snapshot đã lưu vẫn là nguồn sự thật.",
         "stateDone": "xong",
         "stateRunning": "đang chạy",
         "stateQueued": "chờ",
@@ -1670,7 +1669,6 @@
               "reload": "Đọc lại",
               "revision": "bản sửa đổi {value}",
               "evidenceRefsHint": "Các định danh bằng chứng, cách nhau bằng dấu phẩy",
-              "surfaceUnavailable": "Thao tác không trả lời được",
               "nothingChanged": "Không có gì bị thay đổi, nên không có gì ở đây lỗi thời.",
               "standing": {
                 "loading": "Đang đọc bề mặt Sales…",
@@ -1701,7 +1699,6 @@
                 "list": "Cần xử lý",
                 "covered": "{count} trong trang này",
                 "observedAt": "Quan sát lúc {at}",
-                "loadMore": "Đọc trang tiếp theo",
                 "empty": "Không có cơ hội nào cần chú ý trong trang này",
                 "emptyHint": "Chỉ những dòng có trạng thái công việc là đang chờ hoặc cần chú ý mới xuất hiện ở đây."
               },
@@ -1873,7 +1870,6 @@
               "reload": "Đọc lại",
               "revision": "bản {value}",
               "evidenceIdsHint": "Nhiều mã bằng chứng, cách nhau bằng dấu phẩy",
-              "surfaceUnavailable": "Thao tác không trả lời được",
               "nothingChanged": "Không có gì bị thay đổi, nên ở đây không có gì lỗi thời.",
               "standing": {
                 "loading": "Đang đọc bề mặt Kế toán…",
@@ -1896,7 +1892,6 @@
                 "attention": "Cần chú ý: {codes}",
                 "sourceCoverage": "{count} mã bằng chứng nguồn đứng sau kỳ này",
                 "partial": "Đầy đủ một phần vì: {reasons}",
-                "loadMore": "Đọc trang tiếp theo",
                 "measureAbsent": "Kỳ này không đo chỉ tiêu này",
                 "measureUnknown": "Không đo được: {reason}",
                 "measureCovered": "trên {count} kết quả",
@@ -2144,7 +2139,11 @@
             "genericNotice": "Đăng ký ComponentType tin cậy khác theo khóa bàn làm việc để mở rộng giao diện mà không chỉnh sửa khung.",
             "unavailable": "Chưa đăng ký bàn làm việc",
             "unavailableNotice": "Trò chuyện vẫn khả dụng. Bàn làm việc bị chặn an toàn vì khóa này chưa đăng ký ComponentType tin cậy.",
-            "title": "Bàn làm việc"
+            "title": "Bàn làm việc",
+            "shared": {
+              "loadMore": "Đọc trang tiếp theo",
+              "surfaceUnavailable": "Thao tác không trả lời được"
+            }
           },
           "labels": {
             "field": "Trường: {key}",

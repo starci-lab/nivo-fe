@@ -795,7 +795,6 @@
         "attemptLabel": "Attempt",
         "attemptFact": "Attempt {attempt}",
         "changeOffer": "Change offer",
-        "realtimeReconnect": "Reconnecting live progress. The saved snapshot remains authoritative.",
         "stateDone": "done",
         "stateRunning": "running",
         "stateQueued": "queued",
@@ -1670,7 +1669,6 @@
               "reload": "Re-read",
               "revision": "revision {value}",
               "evidenceRefsHint": "Comma separated evidence identities",
-              "surfaceUnavailable": "The operation could not answer",
               "nothingChanged": "Nothing was changed, so nothing here is out of date.",
               "standing": {
                 "loading": "Reading the Sales surface…",
@@ -1701,7 +1699,6 @@
                 "list": "Needs handling",
                 "covered": "{count} in this page",
                 "observedAt": "Observed {at}",
-                "loadMore": "Read the next page",
                 "empty": "No opportunity needs attention in this page",
                 "emptyHint": "Only the pipeline rows whose operational work state is waiting or attention appear here."
               },
@@ -1873,7 +1870,6 @@
               "reload": "Re-read",
               "revision": "revision {value}",
               "evidenceIdsHint": "Comma separated evidence identities",
-              "surfaceUnavailable": "The operation could not answer",
               "nothingChanged": "Nothing was changed, so nothing here is out of date.",
               "standing": {
                 "loading": "Reading the Accounting surface…",
@@ -1896,7 +1892,6 @@
                 "attention": "Needs attention: {codes}",
                 "sourceCoverage": "{count} source evidence identities behind this period",
                 "partial": "Partly covered because: {reasons}",
-                "loadMore": "Read the next page",
                 "measureAbsent": "Not measured by this period",
                 "measureUnknown": "Not measured: {reason}",
                 "measureCovered": "over {count} results",
@@ -2144,7 +2139,11 @@
             "genericNotice": "Register another trusted ComponentType under the workbench key to extend this surface without editing the shell.",
             "unavailable": "No registered workbench",
             "unavailableNotice": "Chat remains available. The workbench failed closed because this key has no trusted ComponentType registration.",
-            "title": "Workbench"
+            "title": "Workbench",
+            "shared": {
+              "loadMore": "Read the next page",
+              "surfaceUnavailable": "The operation could not answer"
+            }
           },
           "labels": {
             "field": "Field: {key}",

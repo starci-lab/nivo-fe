@@ -2,6 +2,8 @@ import type { ReactNode } from "react"
 import { Text } from "@starci/grammar/common"
 import { WorkbenchRailCard } from "./component"
 
+export type { WorkbenchSharedCopy } from "./component"
+
 /** Props and resolved copy for the shared scope, command notice, and optional rail cards. */
 type WorkbenchRailProps = {
     readonly props: {

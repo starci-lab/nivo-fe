@@ -280,8 +280,11 @@ const DISPOSITIONS = [
     "ready",
 ] as const
 
-/** Resolve the purchase-status copy without letting the view name catalog keys. */
-export const createPurchaseStatusCopy = (t: PurchaseStatusTranslator): PurchaseStatusCopy => {
+/**
+ * Resolve the purchase-status copy without letting the view name catalog keys. The reconnect sentence is the
+ * provisioning flows' own (`provisioningFlows.connecting`), handed in by the connected owner so it lives once.
+ */
+export const createPurchaseStatusCopy = (t: PurchaseStatusTranslator, realtimeReconnect: string): PurchaseStatusCopy => {
     const kebab = (value: string): string =>
         value.replace(/-([a-z])/g, (_match, letter: string) => letter.toUpperCase())
     return {
@@ -398,7 +401,7 @@ export const createPurchaseStatusCopy = (t: PurchaseStatusTranslator): PurchaseS
         ownerLabel: t("ownerLabel"),
         attemptLabel: t("attemptLabel"),
         changeOffer: t("changeOffer"),
-        realtimeReconnect: t("realtimeReconnect"),
+        realtimeReconnect,
         stateDone: t("stateDone"),
         stateRunning: t("stateRunning"),
         stateQueued: t("stateQueued"),

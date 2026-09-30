@@ -27,6 +27,7 @@ const copy = createPurchaseStatusCopy(
             throw error
         },
     }),
+    enMessages.console.provisioningFlows.connecting,
 )
 
 describe("usePurchaseStatusActions", () => {

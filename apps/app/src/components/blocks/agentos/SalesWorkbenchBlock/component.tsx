@@ -30,7 +30,7 @@ import {
     type SalesSurfaceStanding,
     type SalesTranslation,
 } from "@/modules/sales/sales-workbench"
-import { WorkbenchRail } from "../WorkbenchRail"
+import { WorkbenchRail, type WorkbenchSharedCopy } from "../WorkbenchRail"
 import {
     SALES_ACTION_ROW_CLASS_NAME,
     SALES_FIELD_STACK_CLASS_NAME,
@@ -42,7 +42,11 @@ import {
 } from "./classNames"
 
 /** The settled view the render half draws; the connected owner resolves everything it shows. */
-type SalesWorkbenchBlockData = { readonly view: ReturnType<typeof useSalesWorkbench>; readonly format: Formatter }
+type SalesWorkbenchBlockData = {
+    readonly view: ReturnType<typeof useSalesWorkbench>
+    readonly format: Formatter
+    readonly shared: WorkbenchSharedCopy
+}
 /** The view's three direct-call mutations; every other member crosses as a value prop. */
 type SalesWorkbenchBlockActions = {
     readonly selectOpportunity: (opportunityId: string) => void
@@ -133,7 +137,7 @@ const ScopeLine = ({ scopeReady, scopeStanding, t }: ScopeLineProps) => {
 
 /** Render the complete responsive Sales workbench from a settled controller view. */
 export const SalesWorkbenchBlockBase = (props: SalesWorkbenchBlockProps) => {
-    const { view, format } = props.props
+    const { view, format, shared } = props.props
     const { selectOpportunity, setFactKind, setOutcome } = props.on
     const { t, scopeReady, scopeStanding, notice } = view
     const stop = (handler: () => void) => (event: FormSubmit) => {
@@ -153,7 +157,7 @@ export const SalesWorkbenchBlockBase = (props: SalesWorkbenchBlockProps) => {
         if (standing === "unavailable")
             return (
                 <div role="alert">
-                    <EmptyNotice message={t("surfaceUnavailable")} description={t("nothingChanged")} />
+                    <EmptyNotice message={shared.surfaceUnavailable} description={t("nothingChanged")} />
                 </div>
             )
         if (standing === "empty") return <EmptyNotice message={empty} description={emptyHint} />
@@ -299,7 +303,7 @@ export const SalesWorkbenchBlockBase = (props: SalesWorkbenchBlockProps) => {
                             isPending={view.attention.isLoading}
                             onPress={view.attention.loadMore}
                         >
-                            {t("attention.loadMore")}
+                            {shared.loadMore}
                         </Button>
                     )}
                 </FieldStack>,

@@ -28,6 +28,7 @@ const messageFor = (source: Catalog, key: string): string => {
     }
     return typeof node === "string" ? node : key
 }
+const shared = en.console.agentos.modules.runtime.workbench.shared
 const translate = (key: string, values?: Readonly<Record<string, string | number | undefined>>): string =>
     Object.entries(values ?? {}).reduce(
         (text, [name, value]) => text.replaceAll(`{${name}}`, String(value)),
@@ -281,7 +282,7 @@ const view = (overrides: SalesWorkbenchViewOverrides = {}): SalesWorkbenchView =
 const renderBlock = (input: SalesWorkbenchViewOverrides = {}) => {
     const rendered: ReactElement = (
         <SalesWorkbenchBlockBase
-            props={{ view: view(input), format: formatter }}
+            props={{ view: view(input), format: formatter, shared }}
             on={{
                 selectOpportunity: () => undefined,
                 setFactKind: () => undefined,
@@ -360,7 +361,7 @@ describe("SalesWorkbenchBlockBase", () => {
             closure: { standing: "unavailable", model: null },
         })
         const text = container.textContent ?? ""
-        expect(text).toContain(translate("surfaceUnavailable"))
+        expect(text).toContain(shared.surfaceUnavailable)
         expect(text).toContain(translate("nothingChanged"))
         expect(text).not.toContain("Northstar Retail")
         expect(text).not.toContain(translate("workState.attention"))

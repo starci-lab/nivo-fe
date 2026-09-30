@@ -22,11 +22,12 @@ const PurchaseStatusFlow = ({ purchaseId, surface }: PurchaseStatusFlowProps) =>
     const format = useFormatter()
     const locale = useLocale()
     const t = useTranslations("console.agentos.purchaseStatus")
+    const provisioning = useTranslations("console.provisioningFlows")
     const queries = usePurchaseStatusQueries(purchaseId)
     const answer = queries.data
     const statusOutcome = answer !== undefined && answer.ok ? answer.data : null
     const statusPurchase = purchaseOf(statusOutcome)
-    const copy = useMemo(() => createPurchaseStatusCopy(t), [t])
+    const copy = useMemo(() => createPurchaseStatusCopy(t, provisioning("connecting")), [t, provisioning])
     const links = useMemo(
         () => ({
             workspaces: getPathname({ locale, href: "/agentos/workspaces" }),

@@ -26,6 +26,7 @@ const messageFor = (source: Catalog, key: string): string => {
     }
     return typeof node === "string" ? node : key
 }
+const shared = en.console.agentos.modules.runtime.workbench.shared
 const translate = (key: string, values?: Readonly<Record<string, string | number | undefined>>): string =>
     Object.entries(values ?? {}).reduce(
         (text, [name, value]) => text.replaceAll(`{${name}}`, String(value)),
@@ -265,7 +266,7 @@ const view = (overrides: AccountingWorkbenchViewOverrides = {}): AccountingWorkb
     }
 }
 const renderBlock = (input: AccountingWorkbenchViewOverrides = {}): string => {
-    const rendered: ReactElement = <AccountingWorkbenchBlockBase props={{ view: view(input) }} />
+    const rendered: ReactElement = <AccountingWorkbenchBlockBase props={{ view: view(input), shared }} />
     return render(rendered).container.textContent ?? ""
 }
 
@@ -275,12 +276,12 @@ describe("AccountingWorkbenchBlockBase", () => {
     })
 
     it("names the period and currency controls from both locale catalogues", () => {
-        const english = render(<AccountingWorkbenchBlockBase props={{ view: view() }} />)
+        const english = render(<AccountingWorkbenchBlockBase props={{ view: view(), shared }} />)
         expect(screen.getByRole("textbox", { name: messageFor(catalog, "overview.period") })).toHaveValue("2026-09")
         expect(screen.getByRole("button", { name: messageFor(catalog, "overview.currency") })).toBeInTheDocument()
         english.unmount()
 
-        render(<AccountingWorkbenchBlockBase props={{ view: view({ locale: "vi", t: translateVi }) }} />)
+        render(<AccountingWorkbenchBlockBase props={{ view: view({ locale: "vi", t: translateVi }), shared }} />)
         expect(screen.getByRole("textbox", { name: messageFor(vietnamese, "overview.period") })).toHaveValue(
             "2026-09",
         )
@@ -449,7 +450,7 @@ describe("AccountingWorkbenchBlockBase", () => {
         const loading = renderBlock({ overview: { standing: "loading" } })
         expect(loading).not.toContain(translate("overview.measureCovered", { count: 1 }))
         expect(renderBlock({ overview: { standing: "denied" } })).toContain(translate("refusal.forbidden"))
-        expect(renderBlock({ overview: { standing: "unavailable" } })).toContain(translate("surfaceUnavailable"))
+        expect(renderBlock({ overview: { standing: "unavailable" } })).toContain(shared.surfaceUnavailable)
         const empty = renderBlock({ overview: { standing: "empty", model: null } })
         expect(empty).toContain(translate("overview.empty"))
         expect(empty).not.toContain(translate("overview.measureCovered", { count: 1 }))
