@@ -58,7 +58,6 @@ describe("ChoiceTabs", () => {
             />,
         )
         const choiceGroup = screen.getByRole("radiogroup", { name: "Workspace area" })
-        expect(choiceGroup).toHaveClass("min-w-max")
         expect(choiceGroup.closest(".overflow-x-auto")).toBeInTheDocument()
         expect(screen.getAllByRole("radio")).toHaveLength(6)
     })

@@ -28,6 +28,7 @@ import {
     accountingPartialReasonKey,
     accountingRoutineStateKey,
     accountingTreatmentKey,
+    type AccountingMeasureReading,
     type AccountingNotice,
     type AccountingSurfaceStanding,
     type AccountingTranslation,
@@ -66,6 +67,10 @@ const ActionRow = ({ children }: ChildrenProps) => (
  * known. One unknown reason withholds the total and names the reason: a partial sum printed as a
  * period figure is a number nobody measured.
  */
+const isKnownReading = (
+    reading: AccountingMeasureReading,
+): reading is { readonly amountMinor: number; readonly currency: string } => "amountMinor" in reading
+
 const measureBand = (
     items: ReadonlyArray<AccountingSummaryItemPayload>,
     kind: string,
@@ -79,7 +84,7 @@ const measureBand = (
     if (readings.length === 0) return null
     const unknown = readings.find((reading): reading is { readonly reasonCode: string } => "reasonCode" in reading)
     if (unknown !== undefined) return unknown
-    const known = readings as ReadonlyArray<{ readonly amountMinor: number; readonly currency: string }>
+    const known = readings.filter(isKnownReading)
     const [firstKnown] = known
     return firstKnown === undefined
         ? null

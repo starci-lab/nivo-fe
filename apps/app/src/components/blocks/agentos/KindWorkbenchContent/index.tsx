@@ -35,8 +35,8 @@ const WorkbenchContentView = ({ title, caption, facts, notice }: WorkbenchConten
             </Text>
         </div>
         <div>
-            {facts.map((fact, index) => (
-                <div key={index}>
+            {facts.map((fact) => (
+                <div key={fact.id}>
                     <Text size="sm">{fact.label}</Text>
                     <Text size="sm" weight="semibold">
                         {fact.value}

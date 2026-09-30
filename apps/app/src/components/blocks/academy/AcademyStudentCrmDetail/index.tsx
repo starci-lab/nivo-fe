@@ -15,6 +15,19 @@ type AcademyStudentCrmDetailProps = {
     readonly on: AcademyStudentCrmActions
 }
 
+type CourseProgressProps = { readonly course: AcademyStudentDetail["courses"][number] }
+
+const CourseProgress = ({ course }: CourseProgressProps) => (
+    <LabelledProgressRow
+        props={{
+            id: course.slug,
+            title: course.title,
+            percent: course.total === 0 ? 0 : Math.round((course.completed / course.total) * 100),
+            percentText: `${course.completed}/${course.total}`,
+        }}
+    />
+)
+
 const DetailCard = ({ detailState, detail, detailNotice, labels }: AcademyStudentCrmDetailProps) => {
     if (detailState === "idle") return null
     if (detailState === "answered" && detail !== undefined) {
@@ -23,11 +36,8 @@ const DetailCard = ({ detailState, detail, detailNotice, labels }: AcademyStuden
                 <div>
                     {detail.courses.length === 0 ? (
                         <LabelledProgressRow props={{ id: "no-course", title: labels.courseSlug, percent: 0, percentText: "0/0" }} />
-                    ) : detail.courses.map((course, index) => (
-                        <LabelledProgressRow
-                            key={index}
-                            props={{ id: course.slug, title: course.title, percent: course.total === 0 ? 0 : Math.round((course.completed / course.total) * 100), percentText: `${course.completed}/${course.total}` }}
-                        />
+                    ) : detail.courses.map((course) => (
+                        <CourseProgress key={course.slug} course={course} />
                     ))}
                 </div>
             </SurfaceCard>

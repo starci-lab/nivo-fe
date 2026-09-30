@@ -24,12 +24,12 @@ export const ExecuteChatTranscript = (props: ExecuteChatTranscriptProps) => {
     const { copy, messages, registry, onWidgetAction }: ExecuteChatTranscriptProps = props
     return (
         <div className={EXECUTE_CHAT_TRANSCRIPT_CLASS_NAME}>
-            {messages.map((message, index) => {
+            {messages.map((message) => {
                 const payload = message.widget
                 const Widget =
                     payload === undefined ? undefined : registry[`${payload.node.component}@${payload.node.version}`]
                 return (
-                    <div key={index}>
+                    <div key={message.id}>
                         <Text size="xs" tone="muted" weight="semibold">
                             {actorLabel(message.role, copy)}
                         </Text>

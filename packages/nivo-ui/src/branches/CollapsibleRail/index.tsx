@@ -42,7 +42,6 @@ export const CollapsibleRail = <R extends object, C extends object, T extends ob
         flexDirection: "column",
         minHeight: "100%",
         overflow: "hidden",
-        borderInlineEnd: "1px solid var(--separator)",
         gap: "1.5rem",
         padding: collapsed ? "1.5rem 0.625rem" : "1.5rem",
     }

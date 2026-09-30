@@ -3,6 +3,8 @@ import { NivoIcon } from "@nivo/ui"
 import { useLocalizedHref } from "../../../../hooks"
 import { CLASS_NAMES as C } from "./classNames"
 
+const NEXT_CHIP_ICON = { name: "next", usage: "chip" } as const
+
 type ExplorePath = { readonly label: string; readonly href: string }
 type ExplorePathGridProps = { readonly label: string; readonly paths: ReadonlyArray<ExplorePath> }
 
@@ -20,7 +22,7 @@ const ExplorePathGrid = ({ label, paths }: ExplorePathGridProps) => {
                     >
                         <span className={C.actionContent}>
                             {path.label}
-                            <NivoIcon key="next" props={{ name: "next", usage: "chip" }} />
+                            <NivoIcon key="next" props={NEXT_CHIP_ICON} />
                         </span>
                     </TextAction>
                 </div>

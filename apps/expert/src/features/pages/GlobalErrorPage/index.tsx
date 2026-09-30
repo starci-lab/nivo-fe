@@ -26,9 +26,12 @@ export const readGlobalErrorLocale = (pathname: string | null): Locale => toLoca
  * import would put the whole catalogue there. The catalogue chunk is only requested when the root
  * layout has already failed.
  */
-const loadBoundaryCopy = async (locale: Locale): Promise<BoundaryCopy> =>
-    ((await import(`../../../messages/${locale}.json`)) as { readonly default: { readonly boundary: BoundaryCopy } })
-        .default.boundary
+const loadBoundaryCopy = async (locale: Locale): Promise<BoundaryCopy> => {
+    const catalogue: { readonly default: { readonly boundary: BoundaryCopy } } = await import(
+        `../../../messages/${locale}.json`
+    )
+    return catalogue.default.boundary
+}
 
 /** A stale bundle is repaired by fetching the new document, which the boundary's in-place retry cannot do. */
 const reloadDocument = () => window.location.reload()

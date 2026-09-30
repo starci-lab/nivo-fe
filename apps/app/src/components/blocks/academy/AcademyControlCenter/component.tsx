@@ -92,7 +92,10 @@ export const AcademyControlCenterBase = (props: AcademyControlCenterProps) => {
                     variant: "primary",
                 }}
                 on={{
-                    select: (key) => selectMode(key as AcademyControlCenterMode),
+                    select: (key) => {
+                        const tab = labels.tabs.find((candidate) => candidate.id === key)
+                        if (tab !== undefined) selectMode(tab.id)
+                    },
                 }}
             />
             {sections}

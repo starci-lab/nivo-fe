@@ -1,4 +1,4 @@
-import { Fragment, type ReactNode } from "react"
+import { Children, type ReactNode } from "react"
 import { SurfaceCard, Button, Heading, Text } from "@starci/grammar/common"
 
 type BandParts = ReadonlyArray<ReactNode>
@@ -14,7 +14,7 @@ type BandProps = {
 }
 
 const Band = ({ alt = false, parts }: BandProps) => {
-    const column = <div>{parts.map((part, index) => <Fragment key={index}>{part}</Fragment>)}</div>
+    const column = <div>{Children.toArray(parts)}</div>
     return alt ? <div>{column}</div> : <div>{column}</div>
 }
 

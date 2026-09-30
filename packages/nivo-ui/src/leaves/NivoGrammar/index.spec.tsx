@@ -9,7 +9,7 @@ describe("NIVO_GRAMMAR", () => {
     it("stamps the family attribute its stylesheet is scoped to", () => {
         const { container } = render(<NivoGrammarRoot>content</NivoGrammarRoot>)
 
-        const root = container.querySelector(".grammar-common-root")
+        const root = container.querySelector("[data-grammar-family]")
         expect(root).toHaveAttribute("data-grammar-family", "nivo")
         expect(root).toHaveTextContent("content")
     })
@@ -17,7 +17,7 @@ describe("NIVO_GRAMMAR", () => {
     it("carries the family root through every theme the provider can resolve", () => {
         for (const theme of ["light", "dark", "system"] as const) {
             const { container } = render(<NivoGrammarRoot theme={theme}>content</NivoGrammarRoot>)
-            const root = container.querySelector(".grammar-common-root")
+            const root = container.querySelector("[data-grammar-family]")
 
             expect(root).toHaveAttribute("data-grammar-family", "nivo")
             expect(root).toHaveAttribute("data-grammar-theme", theme)

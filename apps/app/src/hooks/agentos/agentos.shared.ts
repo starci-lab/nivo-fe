@@ -226,10 +226,10 @@ export const runShellReads = async (
     const receiptOutcomes = await Promise.all(
         receiptReads.map(async (read) => {
             if (read.identity.kind !== "receiver")
-                return { read, outcome: { kind: "unsupported" } as ShellSourceOutcome }
+                return { read, outcome: { kind: "unsupported" } satisfies ShellSourceOutcome }
             const commandId = commandIdFor(operations.current, read.identity.installationId, read.identity.intentId)
             if (commandId === null || instanceId.length === 0)
-                return { read, outcome: { kind: "unsupported" } as ShellSourceOutcome }
+                return { read, outcome: { kind: "unsupported" } satisfies ShellSourceOutcome }
             const outcome = await readAgentosShellCommandReceipt(accessToken, {
                 workspaceId,
                 instanceId,
@@ -242,7 +242,10 @@ export const runShellReads = async (
             return { read, outcome: outcomeForReceipt(outcome) }
         }),
     )
-    if (receiptOutcomes.some((entry) => entry.outcome === null)) {
+    const settledReceipts = receiptOutcomes.flatMap((entry) =>
+        entry.outcome === null ? [] : [{ read: entry.read, outcome: entry.outcome }],
+    )
+    if (settledReceipts.length !== receiptOutcomes.length) {
         dispatch((current) => [{ type: "require-sign-in", sessionEpoch: current.sessionEpoch + 1 }])
         return
     }
@@ -250,8 +253,7 @@ export const runShellReads = async (
     if (overviewOutcome !== null)
         for (const read of overviewReads)
             outcomes.set(formatShellSourceIdentity(read.identity), outcomeForRead(overviewOutcome, read))
-    for (const entry of receiptOutcomes)
-        outcomes.set(formatShellSourceIdentity(entry.read.identity), entry.outcome as ShellSourceOutcome)
+    for (const entry of settledReceipts) outcomes.set(formatShellSourceIdentity(entry.read.identity), entry.outcome)
     dispatch((current) =>
         reads.flatMap((read) => {
             const outcome = outcomes.get(formatShellSourceIdentity(read.identity))

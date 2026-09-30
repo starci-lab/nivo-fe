@@ -129,8 +129,14 @@ export const graphql = async <T>(
             reason: envelope.error || envelope.message,
         }
     }
+    if (envelope.data === null) {
+        return {
+            ok: false,
+            reason: "empty response",
+        }
+    }
     return {
         ok: true,
-        data: envelope.data as T,
+        data: envelope.data,
     }
 }

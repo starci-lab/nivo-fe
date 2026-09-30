@@ -16,6 +16,28 @@ const leadField = (form: FormData, field: string): string => {
     return typeof value === "string" ? value : ""
 }
 
+type LeadFieldRowProps = {
+    readonly id: string
+    readonly label: string
+    readonly kind: "text" | "tel"
+    readonly locked: boolean
+}
+
+const LeadFieldRow = ({ id, label, kind, locked }: LeadFieldRowProps) => (
+    <div>
+        <Label props={{ htmlFor: id, content: label }} />
+        <input
+            id={id}
+            name={id}
+            type={kind}
+            placeholder={label}
+            required
+            disabled={locked}
+            className={LEAD_INPUT_CLASS_NAME}
+        />
+    </div>
+)
+
 const leadForm = (
     fields: ReadonlyArray<LeadField>,
     status: LeadStatus,
@@ -28,18 +50,7 @@ const leadForm = (
         <form onSubmit={onSubmit}>
             <div>
                 {fields.map(([id, label, kind]) => (
-                    <div key={id}>
-                        <Label props={{ htmlFor: id, content: label }} />
-                        <input
-                            id={id}
-                            name={id}
-                            type={kind}
-                            placeholder={label}
-                            required
-                            disabled={locked}
-                            className={LEAD_INPUT_CLASS_NAME}
-                        />
-                    </div>
+                    <LeadFieldRow key={id} id={id} label={label} kind={kind} locked={locked} />
                 ))}
                 <Button variant="primary" type="submit" isDisabled={locked}>
                     {status === "sending" ? sendingLabel : submitLabel}

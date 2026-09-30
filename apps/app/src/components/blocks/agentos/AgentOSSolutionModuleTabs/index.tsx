@@ -21,6 +21,26 @@ const loadingCards: ReadonlyArray<AgentOSSolutionModuleCenterViewProps["cards"][
     actionLabel: "",
 }))
 
+type ModuleCardProps = {
+    readonly card: AgentOSSolutionModuleCenterViewProps["cards"][number]
+    readonly pendingId?: string
+    readonly isLoading: boolean
+    readonly onPress: (id: string) => void
+}
+
+const ModuleCard = ({ card, pendingId, isLoading, onPress }: ModuleCardProps) => (
+    <StatusActionCard
+        props={{
+            ...card,
+            isPending: pendingId === card.id,
+            disabled: card.disabled === true || pendingId !== undefined,
+            actionTarget: card.actionHref === undefined ? undefined : "_self",
+        }}
+        on={{ press: () => onPress(card.id) }}
+        isLoading={isLoading}
+    />
+)
+
 /** Draw the selected catalog or installation mode from settled projections. */
 export const AgentOSSolutionModuleTabs = (props: AgentOSSolutionModuleTabsProps) => {
     const { view, on } = props
@@ -44,16 +64,12 @@ export const AgentOSSolutionModuleTabs = (props: AgentOSSolutionModuleTabsProps)
             <SurfaceCard label={view.sectionLabel} frame="frameless">
                 <div className={SOLUTION_TABS_CARD_LIST_CLASS_NAME}>
                     {(view.state === "resting" ? loadingCards : view.cards).map((card) => (
-                        <StatusActionCard
+                        <ModuleCard
                             key={card.id}
-                            props={{
-                                ...card,
-                                isPending: view.pendingId === card.id,
-                                disabled: card.disabled === true || view.pendingId !== undefined,
-                                actionTarget: card.actionHref === undefined ? undefined : "_self",
-                            }}
-                            on={{ press: () => on.onPressCard(card.id) }}
+                            card={card}
+                            pendingId={view.pendingId}
                             isLoading={view.state === "resting"}
+                            onPress={on.onPressCard}
                         />
                     ))}
                 </div>
@@ -64,7 +80,12 @@ export const AgentOSSolutionModuleTabs = (props: AgentOSSolutionModuleTabsProps)
         <>
             <ChoiceTabs
                 props={{ label: view.modesLabel, selectedKey: view.mode, tabs: view.modes }}
-                on={{ select: (key) => on.onSelectMode(key as "catalog" | "installed") }}
+                on={{
+                    select: (key) => {
+                        const mode = view.modes.find((candidate) => candidate.id === key)
+                        if (mode !== undefined) on.onSelectMode(mode.id)
+                    },
+                }}
             />
             {body()}
             {view.outcome === undefined ? null : (

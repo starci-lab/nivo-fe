@@ -62,9 +62,7 @@ const valueLabel = (value: unknown): string => {
 }
 
 const readableKey = (key: string, copy: ExecuteChatBlockCopy): string => {
-    const known = Object.prototype.hasOwnProperty.call(FIELD_KEYS, key)
-        ? FIELD_KEYS[key as keyof typeof FIELD_KEYS]
-        : undefined
+    const known = Object.values(FIELD_KEYS).find((name) => name === key)
     return known === undefined ? copy.labels.field({ key }) : copy.fields[known]
 }
 
@@ -75,8 +73,8 @@ const immediateActions = (
 ) =>
     payload.actions
         .filter((action) => action.inputKeys.length === 0)
-        .map((action, index) => (
-            <Button key={index} variant="secondary" onPress={() => onAction?.(payload.id, action.key, {})}>
+        .map((action) => (
+            <Button key={action.key} variant="secondary" onPress={() => onAction?.(payload.id, action.key, {})}>
                 {copy.labels.action({ key: action.key })}
             </Button>
         ))
@@ -93,8 +91,8 @@ const StructuredWidget = ({ copy, payload, onAction }: TrustedWidgetComponentPro
             </div>
             {facts.length === 0 ? undefined : (
                 <div>
-                    {facts.map(([key, value], index) => (
-                        <div key={index}>
+                    {facts.map(([key, value]) => (
+                        <div key={key}>
                             <Text size="sm">{copy.labels.field({ key })}</Text>
                             <Text size="sm">{valueLabel(value)}</Text>
                         </div>
@@ -144,8 +142,8 @@ const OperationWidget = ({ copy, payload, onAction }: TrustedWidgetComponentProp
                 </Text>
             </div>
             <div>
-                {facts.map(([key, value], index) => (
-                    <div key={index}>
+                {facts.map(([key, value]) => (
+                    <div key={key}>
                         <Text size="sm">{readableKey(key, copy)}</Text>
                         <Text size="sm" weight="semibold">
                             {valueLabel(value)}

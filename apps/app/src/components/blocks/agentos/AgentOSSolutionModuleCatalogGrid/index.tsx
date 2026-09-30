@@ -19,23 +19,33 @@ const loadingCards: ReadonlyArray<AgentOSSolutionModuleCard> = ["module-loading-
     actionLabel: "",
 }))
 
+type CatalogCardProps = {
+    readonly card: AgentOSSolutionModuleCard
+    readonly pendingId?: string
+    readonly isLoading: boolean
+    readonly onPress: (id: string) => void
+}
+
+const CatalogCard = ({ card, pendingId, isLoading, onPress }: CatalogCardProps) => (
+    <StatusActionCard
+        props={{
+            ...card,
+            isPending: pendingId === card.id,
+            disabled: card.disabled === true || pendingId !== undefined,
+            actionTarget: card.actionHref === undefined ? undefined : "_self",
+        }}
+        on={{ press: () => onPress(card.id) }}
+        isLoading={isLoading}
+    />
+)
+
 /** Draw the catalogue cards and their loading placeholders. */
 export const AgentOSSolutionModuleCatalogGrid = (props: AgentOSSolutionModuleCatalogGridProps) => {
     const { cards, loading, pendingId, onPressCard }: AgentOSSolutionModuleCatalogGridProps = props
     return (
         <div className={SOLUTION_CATALOG_GRID_CLASS_NAME} data-contract="GAP-4">
             {(loading ? loadingCards : cards).map((card) => (
-                <StatusActionCard
-                    key={card.id}
-                    props={{
-                        ...card,
-                        isPending: pendingId === card.id,
-                        disabled: card.disabled === true || pendingId !== undefined,
-                        actionTarget: card.actionHref === undefined ? undefined : "_self",
-                    }}
-                    on={{ press: () => onPressCard(card.id) }}
-                    isLoading={loading}
-                />
+                <CatalogCard key={card.id} card={card} pendingId={pendingId} isLoading={loading} onPress={onPressCard} />
             ))}
         </div>
     )

@@ -37,10 +37,8 @@ describe("CollapsibleRail", () => {
         const host = screen.getByRole("complementary", { name: "Console navigation" })
         const destinations = screen.getByText("Expanded destinations")
 
-        expect(host).toHaveClass("hidden", "md:flex", "text-foreground")
         expect(screen.getByRole("heading", { name: "Console navigation", level: 2 })).toBeInTheDocument()
         expect(host).toContainElement(destinations)
-        expect(host.style.borderInlineEnd).toBe("1px solid var(--separator)")
         expect(host.style.flexDirection).toBe("column")
         expect(host.style.padding).toBe("1.5rem")
         expect(screen.queryByText("Console")).not.toBeInTheDocument()

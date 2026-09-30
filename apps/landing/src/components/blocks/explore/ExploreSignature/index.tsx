@@ -1,6 +1,8 @@
 import { NivoIcon } from "@nivo/ui"
 import { CLASS_NAMES as C } from "./classNames"
 
+const NEXT_CHIP_ICON = { name: "next", usage: "chip" } as const
+
 type ExploreSignatureProps = {
     readonly title: string
     readonly label: string
@@ -18,7 +20,7 @@ const ExploreSignature = ({ title, label, sequence }: ExploreSignatureProps) => 
             {sequence.map((item, index) => (
                 <span className={C.item} key={item}>
                     {item}
-                    {index < sequence.length - 1 ? <NivoIcon props={{ name: "next", usage: "chip" }} /> : null}
+                    {index < sequence.length - 1 ? <NivoIcon props={NEXT_CHIP_ICON} /> : null}
                 </span>
             ))}
         </div>

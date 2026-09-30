@@ -3,6 +3,8 @@ import { NivoIcon } from "@nivo/ui"
 import { useLocalizedHref } from "../../../../hooks"
 import { CLASS_NAMES as C } from "./classNames"
 
+const NEXT_CHIP_ICON = { name: "next", usage: "chip" } as const
+
 type ExploreAction = { readonly label: string; readonly href: string }
 type ExploreHeroProps = {
     readonly id: string
@@ -15,6 +17,12 @@ type ExploreHeroProps = {
     readonly modelSteps: ReadonlyArray<string>
     readonly visual?: "trust" | "ecosystem" | "ideas"
 }
+
+type ModelStepIconProps = { readonly name: "complete" | "search" | "code" }
+
+const ModelStepIcon = ({ name }: ModelStepIconProps) => (
+    <NivoIcon props={{ name, usage: "heading" }} />
+)
 
 /** Shared discovery hero and its short visual model. */
 const ExploreHero = (props: ExploreHeroProps) => {
@@ -40,7 +48,7 @@ const ExploreHero = (props: ExploreHeroProps) => {
                                 href={href(props.primary.href)}
                                 variant="primary"
                                 size="lg"
-                                endContent={<NivoIcon props={{ name: "next", usage: "chip" }} />}
+                                endContent={<NivoIcon props={NEXT_CHIP_ICON} />}
                             >
                                 {props.primary.label}
                             </Button>
@@ -51,7 +59,7 @@ const ExploreHero = (props: ExploreHeroProps) => {
                                     href={href(props.secondary.href)}
                                     variant="secondary"
                                     size="lg"
-                                    endContent={<NivoIcon props={{ name: "next", usage: "chip" }} />}
+                                    endContent={<NivoIcon props={NEXT_CHIP_ICON} />}
                                 >
                                     {props.secondary.label}
                                 </Button>
@@ -84,22 +92,20 @@ const ExploreHero = (props: ExploreHeroProps) => {
                             >
                                 <span className={C.modelIndex}>{String(index + 1).padStart(2, "0")}</span>
                                 <span className={C.modelIcon} aria-hidden="true">
-                                    <NivoIcon
-                                        props={{
-                                            name:
-                                                index === props.modelSteps.length - 1
-                                                    ? "complete"
-                                                    : index === 0
-                                                      ? "search"
-                                                      : "code",
-                                            usage: "heading",
-                                        }}
+                                    <ModelStepIcon
+                                        name={
+                                            index === props.modelSteps.length - 1
+                                                ? "complete"
+                                                : index === 0
+                                                  ? "search"
+                                                  : "code"
+                                        }
                                     />
                                 </span>
                                 <strong className={C.modelStepTitle}>{step}</strong>
                                 {index < props.modelSteps.length - 1 ? (
                                     <span className={C.modelNext} aria-hidden="true">
-                                        <NivoIcon props={{ name: "next", usage: "chip" }} />
+                                        <NivoIcon props={NEXT_CHIP_ICON} />
                                     </span>
                                 ) : null}
                             </li>

@@ -13,10 +13,12 @@ type AcademyStudentCrmRosterProps = {
     readonly on: AcademyStudentCrmActions
 }
 
+const RESTING_AVATAR = { size: "md" } as const
+
 const restingRows = (labels: AcademyStudentCrmLabels) =>
     [0, 1, 2].map((item) => (
         <div key={item}>
-            <Avatar props={{ size: "md" }} isLoading />
+            <Avatar props={RESTING_AVATAR} isLoading />
             <div>
                 <TextAction size="sm" isSkeleton>{""}</TextAction>
                 <Text isSkeleton>{""}</Text>
@@ -25,20 +27,28 @@ const restingRows = (labels: AcademyStudentCrmLabels) =>
         </div>
     ))
 
-const studentRows = (students: ReadonlyArray<AcademyStudent>, labels: AcademyStudentCrmLabels, on: AcademyStudentCrmActions) =>
-    students.map((student, index) => (
-        <div key={index}>
-            <Avatar props={{ name: student.name, size: "md" }} />
-            <div>
-                <TextAction size="sm" onPress={() => on.openStudent(student.id)}>{student.name}</TextAction>
-                <Text size="xs" tone="muted">{student.email}</Text>
-            </div>
-            <Badge tone={student.status === "active" ? "success" : "danger"}>
-                {student.status === "active" ? labels.active : labels.banned}
-            </Badge>
-            <CoreButton size="sm" onPress={() => on.openStudent(student.id)}>{labels.open}</CoreButton>
+type StudentRowProps = {
+    readonly student: AcademyStudent
+    readonly labels: AcademyStudentCrmLabels
+    readonly on: AcademyStudentCrmActions
+}
+
+const StudentRow = ({ student, labels, on }: StudentRowProps) => (
+    <div>
+        <Avatar props={{ name: student.name, size: "md" }} />
+        <div>
+            <TextAction size="sm" onPress={() => on.openStudent(student.id)}>{student.name}</TextAction>
+            <Text size="xs" tone="muted">{student.email}</Text>
         </div>
-    ))
+        <Badge tone={student.status === "active" ? "success" : "danger"}>
+            {student.status === "active" ? labels.active : labels.banned}
+        </Badge>
+        <CoreButton size="sm" onPress={() => on.openStudent(student.id)}>{labels.open}</CoreButton>
+    </div>
+)
+
+const studentRows = (students: ReadonlyArray<AcademyStudent>, labels: AcademyStudentCrmLabels, on: AcademyStudentCrmActions) =>
+    students.map((student) => <StudentRow key={student.id} student={student} labels={labels} on={on} />)
 
 /** Draw the student roster and its empty, loading, and failure states. */
 export const AcademyStudentCrmRoster = (props: AcademyStudentCrmRosterProps) => {

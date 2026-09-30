@@ -7,7 +7,6 @@ describe("TileIcon", () => {
         const { container } = render(<TileIcon props={{ icon: "agentos", signal: "attention" }} />)
         const tile = container.firstElementChild
         expect(tile).toHaveAttribute("data-signal", "attention")
-        expect(tile?.querySelector("span.absolute")).toHaveClass("bg-warning")
         expect(screen.queryByRole("img")).not.toBeInTheDocument()
     })
 

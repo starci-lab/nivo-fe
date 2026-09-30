@@ -6,7 +6,6 @@
 import { GROUP_CHAT_FORM_STACK_CLASS_NAME, GROUP_CHAT_FORM_STACK_COMPACT_CLASS_NAME } from "./classNames"
 import { Button, Input, RadioGroup, Text } from "@starci/grammar/common"
 import { COLLAB_HUMAN_ROLES } from "../../../../modules/collab/group-chat/model.guards"
-import type { CollabHumanRole } from "../../../../modules/api/collab"
 
 /** Props for the role-gated invitation form shared by the member rail and the compact sheet. */
 type InviteFormProps = {
@@ -46,7 +45,10 @@ export const InviteForm = (props: InviteFormProps) => {
                 value={view.invite.role}
                 orientation="horizontal"
                 isDisabled={view.invite.pending}
-                onValueChange={(role) => on.changeInviteRole(role as CollabHumanRole)}
+                onValueChange={(value) => {
+                    const role = COLLAB_HUMAN_ROLES.find((candidate) => candidate === value)
+                    if (role !== undefined) on.changeInviteRole(role)
+                }}
             />
             <Text size="xs" tone="muted">
                 {labels.invite.hint}

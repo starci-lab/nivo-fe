@@ -13,6 +13,8 @@ import { SiteMain } from "../../layouts/SiteShell"
 import { useLocalizedHref } from "../../../hooks"
 import { SITE_LINKS } from "../../../modules/landing/site"
 
+const NEXT_CHIP_ICON = { name: "next", usage: "chip" } as const
+
 const ACTORS = [
     { id: "customers", href: SITE_LINKS.applications, future: false },
     { id: "partners", href: `${SITE_LINKS.contact}?intent=partnership`, future: false },
@@ -89,7 +91,7 @@ const EcosystemPage = () => {
                                     <TextAction
                                         href={href(actor.href)}
                                         appearance="route"
-                                        endContent={<NivoIcon props={{ name: "next", usage: "chip" }} />}
+                                        endContent={<NivoIcon props={NEXT_CHIP_ICON} />}
                                     >
                                         {ecosystem(`actors.items.${actor.id}.action`)}
                                     </TextAction>
@@ -126,7 +128,7 @@ const EcosystemPage = () => {
                     <TextAction
                         href={href(SITE_LINKS.trust)}
                         appearance="route"
-                        endContent={<NivoIcon props={{ name: "next", usage: "chip" }} />}
+                        endContent={<NivoIcon props={NEXT_CHIP_ICON} />}
                     >
                         {links("trust")}
                     </TextAction>

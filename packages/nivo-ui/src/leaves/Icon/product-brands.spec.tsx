@@ -12,7 +12,7 @@ describe("product-brands", () => {
         )
         const paths = container.querySelectorAll("path")
         expect(paths.length).toBeGreaterThan(1)
-        expect(paths[0]).toHaveAttribute("fill", "#4285f4")
+        expect(paths[0]).toHaveAttribute("fill", "var(--brand-google-blue)")
         expect(container.querySelectorAll("svg")[1]).toHaveAttribute("fill", "currentColor")
     })
 })

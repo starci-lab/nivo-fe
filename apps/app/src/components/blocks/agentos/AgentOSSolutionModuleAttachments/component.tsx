@@ -158,8 +158,8 @@ export const AgentOSSolutionModuleAttachmentsBase = (props: AgentOSSolutionModul
                                 )}
                             </div>
                             <div>
-                                {stages.map((step, index) => (
-                                    <LifecycleStep key={index} props={step} isLoading={status === "loading"} />
+                                {stages.map((step) => (
+                                    <LifecycleStep key={step.ordinal} props={step} isLoading={status === "loading"} />
                                 ))}
                             </div>
                         </div>

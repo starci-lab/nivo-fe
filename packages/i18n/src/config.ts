@@ -12,7 +12,7 @@ export const createI18nConfig = <const Locales extends readonly [string, ...stri
     type Locale = Locales[number]
 
     const toLocale = (value: unknown): Locale =>
-        settings.locales.includes(value as Locale) ? (value as Locale) : settings.defaultLocale
+        settings.locales.find((locale) => locale === value) ?? settings.defaultLocale
 
     const toLocaleFromPathname = (pathname: string | null): Locale => toLocale(pathname?.split("/")[1])
 

@@ -93,3 +93,14 @@
 
     --surface-shadow: 0 0 0 0 transparent inset;
 }
+
+/*
+ * Google's mark is defined by its own colours in both themes, so these four values are the provider's,
+ * not the brand's: they sit outside the theme blocks and are read only by the mark that carries the attribute.
+ */
+[data-brand-mark="google"] {
+    --brand-google-blue: #4285f4;
+    --brand-google-green: #34a853;
+    --brand-google-yellow: #fbbc05;
+    --brand-google-red: #ea4335;
+}

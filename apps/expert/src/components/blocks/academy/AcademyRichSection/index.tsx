@@ -9,6 +9,12 @@ import { QUOTE_CLASS_NAME } from "./classNames"
 type RichSection = Extract<AcademySection, { readonly kind: "instructor" | "stats" | "testimonials" | "gallery" | "courses" }>
 type AcademyRichSectionProps = { readonly section: RichSection; readonly imageState: AcademySectionImageState }
 
+type TestimonialAvatarProps = { readonly name: string; readonly src?: string }
+
+const TestimonialAvatar = ({ name, src }: TestimonialAvatarProps) => (
+    <Avatar props={{ name, src, size: "sm" }} />
+)
+
 /** Draw authored collections and the course catalog with their shared image and card leaves. */
 export const AcademyRichSection = (props: AcademyRichSectionProps) => {
     const section = props.section
@@ -56,7 +62,7 @@ export const AcademyRichSection = (props: AcademyRichSectionProps) => {
                                 {claimPanel({
                                     voice: (
                                         <div>
-                                            <Avatar props={{ name: testimonial.name, src: testimonial.avatarUrl, size: "sm" }} />
+                                            <TestimonialAvatar name={testimonial.name} src={testimonial.avatarUrl} />
                                             {subjectOverCaption(
                                                 <Text size="sm" weight="medium">{testimonial.name}</Text>,
                                                 testimonial.role,

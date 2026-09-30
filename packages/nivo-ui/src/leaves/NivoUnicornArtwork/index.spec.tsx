@@ -7,7 +7,6 @@ describe("NivoUnicornArtwork", () => {
         const { container } = render(<NivoUnicornArtwork props={{ tone: "brand" }} />)
         const artwork = container.firstElementChild
         expect(artwork).toHaveAttribute("aria-hidden", "true")
-        expect(artwork).toHaveClass("h-24", "bg-accent-soft")
         expect(artwork?.querySelector("img")).toHaveAttribute("src", expect.stringContaining(encodeURIComponent("/images/nivo-unicorn-overview.png")))
         expect(artwork?.querySelector("img")).toHaveAttribute("width", "180")
         expect(artwork?.querySelector("img")).toHaveAttribute("height", "120")

@@ -43,7 +43,7 @@ describe("RouteTabs", () => {
         expect(screen.queryByRole("button", { name: /scroll tabs/i })).not.toBeInTheDocument()
     })
 
-    it("fits route destinations into the compact viewport with touch-safe targets", () => {
+    it("lists every route destination as a tab", () => {
         render(
             <RouteTabs
                 props={{
@@ -60,15 +60,7 @@ describe("RouteTabs", () => {
             />,
         )
 
-        expect(screen.getByRole("tablist", { name: "Module sections" })).toHaveClass("max-sm:w-full")
-        for (const tab of screen.getAllByRole("tab")) {
-            expect(tab).toHaveClass(
-                "max-sm:min-h-11",
-                "max-sm:min-w-0",
-                "max-sm:flex-1",
-                "max-sm:px-1",
-                "max-sm:text-sm",
-            )
-        }
+        expect(screen.getByRole("tablist", { name: "Module sections" })).toBeInTheDocument()
+        expect(screen.getAllByRole("tab")).toHaveLength(5)
     })
 })

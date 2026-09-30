@@ -64,5 +64,9 @@ describe("expert graphql transport", () => {
             ),
         )
         await expect(graphql("query Refused")).resolves.toEqual({ ok: false, reason: "NO_ACCESS" })
+        fetchMock.mockResolvedValueOnce(
+            new Response(JSON.stringify({ data: { operation: { success: true, data: null, message: "ok" } } })),
+        )
+        await expect(graphql("query NoPayload")).resolves.toEqual({ ok: false, reason: "empty response" })
     })
 })
