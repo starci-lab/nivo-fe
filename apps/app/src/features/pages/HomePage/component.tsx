@@ -4,6 +4,7 @@ import { CONTENT_CLASS_NAME, ROOT_CLASS_NAME } from "./classNames"
 
 /** The settled copy the home page draws. */
 type HomePageBaseData = {
+    readonly brandLabel: string
     readonly description: string
 }
 
@@ -32,7 +33,7 @@ export const HomePageBase = (props: HomePageProps) => {
         <main id="main-content" tabIndex={-1} className={ROOT_CLASS_NAME}>
             <div className={CONTENT_CLASS_NAME}>
                 <NivoIcon props={{ name: "brand", usage: "heading" }} />
-                <Heading level={1}>{"nivo app"}</Heading>
+                <Heading level={1}>{data.brandLabel}</Heading>
                 <Text size="sm">{data.description}</Text>
             </div>
         </main>

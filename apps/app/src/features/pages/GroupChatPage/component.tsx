@@ -11,7 +11,6 @@ import {
     GROUP_CHAT_HEADER_BAND_COMPACT_CLASS_NAME,
     GROUP_CHAT_HEADER_COMPACT_ROW_CLASS_NAME,
     GROUP_CHAT_HEADER_ACTIONS_CLASS_NAME,
-    GROUP_CHAT_DAY_SELECT_CLASS_NAME,
     GROUP_CHAT_WORKSPACE_WRAP_CLASS_NAME,
     GROUP_CHAT_RAIL_ASIDE_DECISION_CLASS_NAME,
     GROUP_CHAT_RAIL_ASIDE_INVITE_CLASS_NAME,
@@ -56,6 +55,7 @@ import {
     ChatWorkspace,
     EmptyNotice,
     PageContainer,
+    Select,
     SectionHeader,
     SurfaceCard,
     Tabs,
@@ -156,13 +156,14 @@ export const GroupChatPageBase = (props: GroupChatPageBaseProps) => {
                 className={GROUP_CHAT_HEADER_BAND_CLASS_NAME}
                 action={
                     <div className={GROUP_CHAT_HEADER_ACTIONS_CLASS_NAME}>
-                        <select
-                            className={GROUP_CHAT_DAY_SELECT_CLASS_NAME}
-                            aria-label={labels.today}
-                            defaultValue="today"
-                        >
-                            <option value="today">{labels.today}</option>
-                        </select>
+                        <Select
+                            name="group-chat-day"
+                            label={labels.today}
+                            isLabelHidden
+                            isReadOnly
+                            options={[{ id: "today", label: labels.today }]}
+                            value="today"
+                        />
                     </div>
                 }
             />

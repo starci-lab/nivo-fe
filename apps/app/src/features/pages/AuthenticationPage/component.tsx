@@ -37,6 +37,8 @@ type AuthenticationPageViewProps = {
     readonly panel: AuthenticationPanelProps
     /** Everything offered below the surface, in reading order. */
     readonly exits: ReadonlyArray<AuthenticationPageExit>
+    /** The catalogue-resolved brand name announced by the lockup. */
+    readonly brandLabel: string
 }
 
 const showsMascot = (panel: AuthenticationPanelProps): boolean => {
@@ -51,14 +53,14 @@ const showsMascot = (panel: AuthenticationPanelProps): boolean => {
 
 /** Draw the authentication screen. */
 export const AuthenticationPageView = (props: AuthenticationPageViewProps) => {
-    const { panel, exits }: AuthenticationPageViewProps = props
+    const { panel, exits, brandLabel }: AuthenticationPageViewProps = props
     const panelIdentity =
         panel.state === "details" || panel.state === "code" ? `${panel.state}:${panel.props.mode}` : panel.state
 
     return (
         <main id="main-content" tabIndex={-1} className={AUTH_PAGE_CLASS_NAME}>
             <section aria-label={panel.props.title} className={AUTH_TASK_COLUMN_CLASS_NAME}>
-                <NivoBrand props={{ label: "Nivo", variant: "lockup", scale: "navbar" }} />
+                <NivoBrand props={{ label: brandLabel, variant: "lockup", scale: "navbar" }} />
 
                 <div className={AUTH_HEADING_CLASS_NAME}>
                     <Heading level={1} scale="display">

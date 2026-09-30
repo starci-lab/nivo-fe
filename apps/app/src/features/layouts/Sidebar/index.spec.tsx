@@ -1,6 +1,8 @@
 import { cleanup, fireEvent, render, screen, within } from "@testing-library/react"
+import { NextIntlClientProvider } from "next-intl"
 import userEvent from "@testing-library/user-event"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
+import { expectNoA11yViolations } from "@/testing/axe"
 import enMessages from "@/messages/en.json"
 import viMessages from "@/messages/vi.json"
 
@@ -12,6 +14,13 @@ vi.mock("@/hooks", () => ({
     useRouter: () => ({ push }),
 }))
 import { Sidebar } from "."
+
+const renderSidebar = (mode?: "desktop" | "mobile") =>
+    render(
+        <NextIntlClientProvider locale="en" messages={enMessages}>
+            {mode === undefined ? <Sidebar /> : <Sidebar mode={mode} />}
+        </NextIntlClientProvider>,
+    )
 
 /** The owner-ruled console registry: key -> route, in rail order. */
 const REGISTRY = [
@@ -27,7 +36,7 @@ describe("Sidebar", () => {
     afterEach(cleanup)
 
     it("projects exactly the shell rev 17 destinations through Grammar Sidebar", () => {
-        render(<Sidebar />)
+        renderSidebar()
         const options = screen.getAllByRole("option")
         expect(options.map((option) => option.textContent)).toEqual(
             REGISTRY.map(([key]) => enMessages.console.nav[key]),
@@ -39,7 +48,7 @@ describe("Sidebar", () => {
     })
 
     it("routes every destination to its shell rev 17 target", () => {
-        render(<Sidebar />)
+        renderSidebar()
         expect(screen.getByRole("option", { name: enMessages.console.nav.overview })).toHaveAttribute(
             "aria-selected",
             "true",
@@ -76,7 +85,7 @@ describe("Sidebar", () => {
     })
 
     it("keeps packages and the route-less settings item out of the mobile drawer too", async () => {
-        render(<Sidebar mode="mobile" />)
+        renderSidebar("mobile")
         fireEvent.click(screen.getByRole("button", { name: enMessages.console.openMenu }))
         const dialog = await screen.findByRole("dialog")
         expect(within(dialog).getAllByRole("option")).toHaveLength(5)
@@ -85,7 +94,7 @@ describe("Sidebar", () => {
     })
 
     it("closes the mobile drawer only after a routable destination is activated", async () => {
-        render(<Sidebar mode="mobile" />)
+        renderSidebar("mobile")
         fireEvent.click(screen.getByRole("button", { name: enMessages.console.openMenu }))
         const dialog = await screen.findByRole("dialog")
 
@@ -96,7 +105,7 @@ describe("Sidebar", () => {
 
     it("preserves keyboard traversal and activation through the listbox", async () => {
         const user = userEvent.setup()
-        render(<Sidebar />)
+        renderSidebar()
         await user.tab()
         await user.tab()
         expect(screen.getByRole("option", { name: enMessages.console.nav.overview })).toHaveFocus()
@@ -104,5 +113,10 @@ describe("Sidebar", () => {
         expect(screen.getByRole("option", { name: enMessages.console.nav.chat })).toHaveFocus()
         await user.keyboard("{Enter}")
         expect(push).toHaveBeenCalledWith("/chat")
+    })
+
+    it("has no axe violations in the real navigation", async () => {
+        const { container } = renderSidebar()
+        await expectNoA11yViolations(container)
     })
 })

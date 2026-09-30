@@ -24,5 +24,6 @@ export type HomePageProps = { readonly [key: string]: never }
 export const HomePage = (props: HomePageProps) => {
     void props
     const t = useTranslations("app")
-    return <HomePageBase props={{ description: t("description") }} />
+    const consoleCopy = useTranslations("console")
+    return <HomePageBase props={{ brandLabel: consoleCopy("brand"), description: t("description") }} />
 }

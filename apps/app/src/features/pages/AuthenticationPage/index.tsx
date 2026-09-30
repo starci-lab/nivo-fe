@@ -27,6 +27,7 @@ type AuthenticationPageConnectedProps = {
 
 const AuthenticationPageConnected = ({ sessionEnding }: AuthenticationPageConnectedProps) => {
     const translateAuthentication = useTranslations("authentication")
+    const translateConsole = useTranslations("console")
     const router = useRouter()
     const pathname = usePathname()
     const session = useSession()
@@ -132,7 +133,7 @@ const AuthenticationPageConnected = ({ sessionEnding }: AuthenticationPageConnec
         return [prompt]
     })()
 
-    return <AuthenticationPageView panel={panel} exits={exits} />
+    return <AuthenticationPageView panel={panel} exits={exits} brandLabel={translateConsole("brand")} />
 }
 
 /** Keep the live address reader under its required Suspense boundary. */

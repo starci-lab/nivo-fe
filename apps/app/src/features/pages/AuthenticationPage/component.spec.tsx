@@ -1,5 +1,6 @@
 import { fireEvent, render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
+import enMessages from "@/messages/en.json"
 import type { AuthDetailsCopy, AuthNoticeCopy } from "@/components/blocks/auth/AuthenticationPanel"
 
 import { AuthenticationPageView } from "./component"
@@ -53,12 +54,13 @@ describe("AuthenticationPageView", () => {
     it("puts one surface under an external heading, and the exits outside it", () => {
         const { container } = render(
             <AuthenticationPageView
+                brandLabel={enMessages.console.brand}
                 panel={{ state: "details", props: details, on: { submitDetails: vi.fn() } }}
                 exits={[{ question: "No account yet?", action: "Create one", onPress: vi.fn() }]}
             />,
         )
         expect(screen.getByRole("heading", { level: 1, name: "Sign in" })).toBeInTheDocument()
-        expect(screen.getByRole("img", { name: "Nivo" })).toBeInTheDocument()
+        expect(screen.getByRole("img", { name: enMessages.console.brand })).toBeInTheDocument()
         expect(screen.getByLabelText("Email")).toBeInTheDocument()
         expect(screen.getByRole("region", { name: "Sign in" })).toBeInTheDocument()
 
@@ -82,7 +84,11 @@ describe("AuthenticationPageView", () => {
     it("keys the panel by step and journey so switching mode remounts uncontrolled fields", () => {
         const exits: [] = []
         const { rerender } = render(
-            <AuthenticationPageView panel={{ state: "details", props: details, on: {} }} exits={exits} />,
+            <AuthenticationPageView
+                brandLabel={enMessages.console.brand}
+                panel={{ state: "details", props: details, on: {} }}
+                exits={exits}
+            />,
         )
         // Typed through the event path rather than assigned: an uncontrolled field only proves it
         // was remounted if the value it lost was one a reader could actually have put there.
@@ -90,6 +96,7 @@ describe("AuthenticationPageView", () => {
         expect((screen.getByLabelText("Email") as HTMLInputElement).value).toBe("reader@example.test")
         rerender(
             <AuthenticationPageView
+                brandLabel={enMessages.console.brand}
                 panel={{ state: "details", props: { ...details, mode: "signUp" }, on: {} }}
                 exits={exits}
             />,
@@ -98,14 +105,24 @@ describe("AuthenticationPageView", () => {
     })
 
     it("draws the settled notice tree and labels its region from the resolved title", () => {
-        render(<AuthenticationPageView panel={{ state: "done", props: notice, on: { onward: vi.fn() } }} exits={[]} />)
+        render(
+            <AuthenticationPageView
+                brandLabel={enMessages.console.brand}
+                panel={{ state: "done", props: notice, on: { onward: vi.fn() } }}
+                exits={[]}
+            />,
+        )
         expect(screen.getByRole("heading", { level: 2, name: "You're in" })).toBeInTheDocument()
         expect(screen.getByRole("button", { name: "Continue" })).toBeInTheDocument()
     })
 
     it("reserves the mascot for sign-in-ready alone, and keeps it decorative", () => {
         const { container, rerender } = render(
-            <AuthenticationPageView panel={{ state: "details", props: details, on: {} }} exits={[]} />,
+            <AuthenticationPageView
+                brandLabel={enMessages.console.brand}
+                panel={{ state: "details", props: details, on: {} }}
+                exits={[]}
+            />,
         )
         const artwork = container.querySelector("aside")
         expect(artwork).not.toBeNull()
@@ -119,6 +136,7 @@ describe("AuthenticationPageView", () => {
          */
         rerender(
             <AuthenticationPageView
+                brandLabel={enMessages.console.brand}
                 panel={{
                     state: "details",
                     props: { ...details, statusMessage: "That email or password is not right.", isError: true },
@@ -129,7 +147,13 @@ describe("AuthenticationPageView", () => {
         )
         expect(container.querySelector("aside")).toBeNull()
 
-        rerender(<AuthenticationPageView panel={{ state: "notice", props: notice, on: {} }} exits={[]} />)
+        rerender(
+            <AuthenticationPageView
+                brandLabel={enMessages.console.brand}
+                panel={{ state: "notice", props: notice, on: {} }}
+                exits={[]}
+            />,
+        )
         expect(container.querySelector("aside")).toBeNull()
     })
 })

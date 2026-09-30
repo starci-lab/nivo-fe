@@ -1,5 +1,3 @@
-"use client"
-
 import { useTranslations } from "next-intl"
 import type { SidebarGroup } from "@starci/grammar/common"
 import { IconSource } from "@nivo/ui"

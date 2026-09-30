@@ -20,10 +20,10 @@ const openSans = Open_Sans({
  * @returns The document metadata.
  */
 export const generateMetadata = async (): Promise<Metadata> => {
-    const t = await getTranslations("app")
+    const [app, consoleCopy] = await Promise.all([getTranslations("app"), getTranslations("console")])
     return {
-        title: "nivo Console",
-        description: t("description"),
+        title: `${consoleCopy("brand")} ${consoleCopy("title")}`,
+        description: app("description"),
     }
 }
 

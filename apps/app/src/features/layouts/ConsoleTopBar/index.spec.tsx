@@ -1,5 +1,7 @@
 import { cleanup, render, screen } from "@testing-library/react"
+import { NextIntlClientProvider } from "next-intl"
 import { afterEach, describe, expect, it, vi } from "vitest"
+import { expectNoA11yViolations } from "@/testing/axe"
 import type * as NivoUI from "@nivo/ui"
 
 vi.mock("@/components/blocks/locale/LanguageMenu", () => ({
@@ -16,11 +18,18 @@ vi.mock("@/components/blocks/auth/AccountMenu", () => ({
 import { ConsoleTopBar } from "."
 import en from "@/messages/en.json"
 
+const renderWithMessages = () =>
+    render(
+        <NextIntlClientProvider locale="en" messages={en}>
+            <ConsoleTopBar />
+        </NextIntlClientProvider>,
+    )
+
 describe("ConsoleTopBar", () => {
     afterEach(cleanup)
 
     it("renders one capability-backed global navbar and no unsupported actions", () => {
-        render(<ConsoleTopBar />)
+        renderWithMessages()
 
         expect(screen.getAllByRole("banner")).toHaveLength(1)
         expect(screen.queryAllByRole("navigation")).toHaveLength(0)
@@ -36,12 +45,17 @@ describe("ConsoleTopBar", () => {
     })
 
     it("mounts no compact drawer trigger - the shell's compactNavigation owns that band", () => {
-        render(<ConsoleTopBar />)
+        renderWithMessages()
 
         expect(screen.queryByText("drawer")).not.toBeInTheDocument()
         expect(screen.queryByRole("button", { name: en.console.openMenu })).toBeNull()
         const compact = document.querySelector("[data-grammar-navigation-feature-nav-compact-navigation]")
         expect(compact).not.toBeNull()
         expect(compact).toBeEmptyDOMElement()
+    })
+
+    it("has no axe violations in the real top bar", async () => {
+        const { container } = renderWithMessages()
+        await expectNoA11yViolations(container)
     })
 })

@@ -2,7 +2,6 @@ import { fireEvent, render, screen } from "@testing-library/react"
 import type { ComponentProps } from "react"
 import { describe, expect, it, vi } from "vitest"
 import { AgentOSModuleCollectionPageBase } from "./component"
-import { MODULE_COLLECTION_GRID_CLASS_NAME, MODULE_COLLECTION_PAGE_CLASS_NAME } from "./classNames"
 
 type PageProps = ComponentProps<typeof AgentOSModuleCollectionPageBase>
 type ShellView = PageProps["props"]["shell"]
@@ -235,13 +234,11 @@ describe("AgentOSModuleCollectionPageBase", () => {
         expect(screen.getByText("Sales Copilot")).toBeInTheDocument()
     })
 
-    it("keeps the resolved rhythm on the page and collection owners without a second main landmark", () => {
+    it("keeps one page heading and named collection region without a nested main landmark", () => {
         const shell = shellView({ state: "installed-empty", inventoryEmpty: true })
         const { view } = renderPage(shell)
-        const page = view.container.querySelector("[data-contract='GAP-5']")
-        const collection = view.container.querySelector("[data-contract='GAP-4']")
-        expect(page?.className).toBe(MODULE_COLLECTION_PAGE_CLASS_NAME)
-        expect(collection?.className).toBe(MODULE_COLLECTION_GRID_CLASS_NAME)
+        expect(screen.getByRole("heading", { level: 1, name: labels.title })).toBeInTheDocument()
+        expect(screen.getByRole("region", { name: labels.title })).toBeInTheDocument()
         expect(view.container.querySelector("main")).toBeNull()
     })
 })

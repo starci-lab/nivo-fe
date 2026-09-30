@@ -1,5 +1,3 @@
-"use client"
-
 import { useTranslations } from "next-intl"
 import { ThemeToggle } from "@nivo/ui"
 import { AccountMenu } from "@/components/blocks/auth/AccountMenu"

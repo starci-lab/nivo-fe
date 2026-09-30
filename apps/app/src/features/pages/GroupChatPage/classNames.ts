@@ -1,4 +1,4 @@
-﻿import { cn } from "@heroui/react"
+import { cn } from "@heroui/react"
 
 /** Page column: the bounded Office/Tasks workbench is the single content block. */
 export const GROUP_CHAT_PAGE_CLASS_NAME = cn("flex", "min-w-0", "flex-col")
@@ -11,7 +11,7 @@ export const GROUP_CHAT_PAGE_CLASS_NAME = cn("flex", "min-w-0", "flex-col")
  * conversation scroll, the pinned composer and the docked member sheet inside
  * the viewport instead of the document's flow.
  */
-const GROUP_CHAT_WORKSPACE_HOST_CLASS_NAME = cn(
+export const GROUP_CHAT_WORKSPACE_HOST_CLASS_NAME = cn(
     "flex",
     "h-[calc(100dvh-13.5rem)]",
     "min-h-0",
@@ -109,17 +109,6 @@ export const GROUP_CHAT_HEADER_COMPACT_ROW_CLASS_NAME = cn(
 /** Trailing controls inside the workspace header band. */
 export const GROUP_CHAT_HEADER_ACTIONS_CLASS_NAME = cn("flex", "items-center", "gap-2")
 
-/** The compact day indicator reads like the accepted direction's quiet select. */
-export const GROUP_CHAT_DAY_SELECT_CLASS_NAME = cn(
-    "h-8",
-    "rounded-lg",
-    "border",
-    "border-separator",
-    "bg-surface",
-    "px-2",
-    "text-xs",
-    "text-muted-foreground",
-)
 
 /**
  * The flexible workspace region inside the card: ChatWorkspace owns the
@@ -138,7 +127,7 @@ export const GROUP_CHAT_WORKSPACE_WRAP_CLASS_NAME = cn(
 )
 
 /** The persistent member rail: a fixed-width column beside the workbench card. */
-const GROUP_CHAT_RAIL_ASIDE_CLASS_NAME = cn(
+export const GROUP_CHAT_RAIL_ASIDE_CLASS_NAME = cn(
     "hidden",
     "w-80",
     "flex-none",
