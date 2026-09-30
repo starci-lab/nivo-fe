@@ -203,7 +203,7 @@
     "@sonar/scan": "^5.0.0",
     "@starci/eslint-canon-fe": "7.0.0",
     "@starci/grammar": "0.7.2",
-    "@starci/hfs": "2.0.0",
+    "@starci/hfs": "2.0.1",
     "@starci/prettier-config": "1.0.0",
     "@starci/stylelint-canon": "2.0.0",
     "@starci/tsconfig": "2.0.0",
