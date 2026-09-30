@@ -15,6 +15,7 @@ type AgentOSModuleStudioPageProps = {
 export const AgentOSModuleStudioPage = (props: AgentOSModuleStudioPageProps) => {
     const { workspaceId, moduleId }: AgentOSModuleStudioPageProps = props
     const t = useTranslations("console.agentos.modules.studioPage")
+    const createPage = useTranslations("console.agentos.modules.createPage")
     const router = useRouter()
     const query = useQueryMyAgentosCustomModuleStudioSwr(workspaceId, moduleId)
     const reading = nivoQueryReading(query.data)
@@ -33,7 +34,7 @@ export const AgentOSModuleStudioPage = (props: AgentOSModuleStudioPageProps) => 
                     moduleId: moduleId,
                     labels: {
                         path: t("path"),
-                        modules: t("modules"),
+                        modules: createPage("modules"),
                         title: studio?.module.name ?? t("title"),
                         description: t("description"),
                         eyebrow: t("eyebrow"),

@@ -385,7 +385,7 @@ export const accountingAvailabilityKey = (availability: string): string =>
 
 /** A closed partial-coverage reason's message key. */
 const ACCOUNTING_PARTIAL_REASON_KEYS = {
-    "missing-occurred-on": "partialReason.missingOccurredOn",
+    "missing-occurred-on": "attention.missingOccurredOn",
     "missing-measure-coverage": "partialReason.missingMeasureCoverage",
     "stale-source": "partialReason.staleSource",
     "unavailable-source": "partialReason.unavailableSource",

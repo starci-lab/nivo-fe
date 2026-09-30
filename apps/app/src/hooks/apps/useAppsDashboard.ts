@@ -58,7 +58,7 @@ export const useAppsDashboard = () => {
         title: t("apps.title"),
         lede: t("apps.lede"),
         buildAppLabel: t("apps.buildApp"),
-        attentionGroupLabel: t("apps.attentionGroup"),
+        attentionGroupLabel: t("attentionGroup"),
         steadyGroupLabel: t("apps.steadyGroup"),
         owned: ownedSectionFor(sites.data, instances.data, orders.data, catalogue.data, ACADEMY_HOST_SUFFIX, copy),
         catalogue: catalogueSectionFor(catalogue.data, money, copy),

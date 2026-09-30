@@ -92,8 +92,8 @@ export const buildGroupChatLabels = (
         receiptPending: t("card.receiptPending"),
         receiptRefused: t("card.receiptRefused"),
         reference: (ref, moduleName) => t("card.reference", { ref, moduleName }),
-        requestedBy: (name) => t("card.requestedBy", { name }),
-        assignedTo: (name) => t("card.assignedTo", { name }),
+        requestedBy: (name) => t("tasks.asker", { name }),
+        assignedTo: (name) => t("tasks.assignee", { name }),
     },
     approval: {
         needed: t("approval.needed"),

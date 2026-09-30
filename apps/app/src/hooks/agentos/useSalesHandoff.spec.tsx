@@ -48,7 +48,11 @@ vi.mock("@/hooks/swr/mutations/useMutateSalesSubmitHandoffSwr", () => ({
 
 import { useSalesHandoff } from "./useSalesHandoff"
 
-const catalog = en.agentos.sales.handoff as Readonly<Record<string, unknown>>
+const catalog = {
+    ...en.agentos.sales.handoff,
+    rail: en.agentos.sales.rail,
+    refusal: { ...en.agentos.sales.handoff.refusal, ...en.agentos.sales.rail.refusal },
+} as Readonly<Record<string, unknown>>
 const messageFor = (key: string): string => {
     let node: unknown = catalog
     for (const part of key.split(".")) {

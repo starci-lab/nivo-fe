@@ -23,6 +23,7 @@ export const useCheckoutReviewFlow = (props: CheckoutReviewFlowProps): CheckoutR
     const locale = useLocale()
     const format = useFormatter()
     const t = useTranslations("console.agentos.checkoutReview")
+    const purchaseStatus = useTranslations("console.agentos.purchaseStatus")
     const router = useRouter()
     const searchParams = useSearchParams()
     const session = useSession()
@@ -50,7 +51,7 @@ export const useCheckoutReviewFlow = (props: CheckoutReviewFlowProps): CheckoutR
         offerLabel: t("offerLabel"),
         offer: t("offer"),
         offerVersion: t("offerVersion"),
-        amount: t("amount"),
+        amount: purchaseStatus("amountLabel"),
         billingTerm: t("billingTerm"),
         renewal: t("renewal"),
         includedOutcome: t("includedOutcome"),

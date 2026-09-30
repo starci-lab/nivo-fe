@@ -4,10 +4,11 @@ import { GroupChatPage } from "@/features/pages/GroupChatPage"
 
 /** The route's document metadata: its own title and description in the request's language. */
 export const generateMetadata = async (): Promise<Metadata> => {
-    const t = await getTranslations("metadata.chat")
+    const metadata = await getTranslations("metadata.chat")
+    const page = await getTranslations("console.groupChat")
     return {
-        title: t("title"),
-        description: t("description"),
+        title: metadata("title"),
+        description: page("description"),
     }
 }
 

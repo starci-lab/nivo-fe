@@ -5,9 +5,6 @@
         "title": "Yêu cầu quyết định thương mại",
         "description": "Xem xét đề xuất đúng như bản đọc công bố, rồi ghi lại một câu trả lời.",
         "rail": {
-          "scope": "Phạm vi bản cài đặt",
-          "scopeReady": "Đã xác định địa chỉ bản cài đặt.",
-          "installation": "Không gian làm việc {workspace}, bản cài đặt {installation}",
           "notice": "Câu trả lời gần nhất",
           "noticeEmpty": "Chưa gửi câu trả lời nào từ màn hình này."
         },
@@ -25,8 +22,6 @@
           "conflict": "Đề xuất đã thay đổi kể từ khi bạn mở.",
           "unavailable": "Sales hiện không trả lời yêu cầu quyết định này.",
           "unattested": "Câu trả lời có thể chưa được ghi. Đọc lại yêu cầu trước khi trả lời.",
-          "unreachable": "Không kết nối được tới Sales.",
-          "malformed": "Sales trả lời bằng dữ liệu màn hình này không đọc được.",
           "unsettled": "Câu trả lời chưa chốt: yêu cầu vẫn đọc là chưa trả lời."
         },
         "proposal": {
@@ -67,9 +62,6 @@
         "title": "Bàn giao cho Kế toán",
         "description": "Gửi bàn giao đã chuẩn bị, và chỉ hiện đúng những gì biên nhận Kế toán công bố.",
         "rail": {
-          "scope": "Phạm vi bản cài đặt",
-          "scopeReady": "Đã xác định địa chỉ bản cài đặt.",
-          "installation": "Không gian làm việc {workspace}, bản cài đặt {installation}",
           "notice": "Lần gửi gần nhất",
           "noticeEmpty": "Chưa gửi bàn giao nào từ màn hình này."
         },
@@ -87,8 +79,6 @@
           "conflict": "Bàn giao đã thay đổi kể từ khi bạn mở.",
           "unavailable": "Sales hiện không trả lời bàn giao này.",
           "unattested": "Việc gửi có thể chưa được ghi. Hãy tra lại chính bàn giao này trước khi gửi lại.",
-          "unreachable": "Không kết nối được tới Sales.",
-          "malformed": "Sales trả lời bằng dữ liệu màn hình này không đọc được.",
           "unsettled": "Việc gửi chưa chốt: bàn giao vẫn đọc là đã chuẩn bị."
         },
         "status": {
@@ -126,6 +116,15 @@
           "lookupOnly": "Lần thử có thể đã bắt đầu: chỉ tra lại chính định danh bàn giao này là an toàn, không gửi mới.",
           "note": "Lần gửi chỉ được hiện khi bàn giao đọc lại có nó.",
           "settled": "Bàn giao đọc lại có lần gửi: {status}."
+        }
+      },
+      "rail": {
+        "scope": "Phạm vi bản cài đặt",
+        "scopeReady": "Đã xác định địa chỉ bản cài đặt.",
+        "installation": "Không gian làm việc {workspace}, bản cài đặt {installation}",
+        "refusal": {
+          "malformed": "Sales trả lời bằng dữ liệu màn hình này không đọc được.",
+          "unreachable": "Không kết nối được tới Sales."
         }
       }
     }
@@ -294,7 +293,6 @@
         "description": "Kết thúc các phiên Nivo hiện tại trên mọi trình duyệt. Bạn vẫn có thể đăng nhập lại sau.",
         "scopeNote": "Trình duyệt này cũng sẽ đăng xuất.",
         "cancel": "Hủy",
-        "confirm": "Đăng xuất khỏi mọi trình duyệt",
         "pending": "Đang kết thúc các phiên trên mọi trình duyệt…"
       },
       "administratorEnding": {
@@ -405,9 +403,7 @@
         "receiptReported": "Module đã báo cáo",
         "receiptPending": "Chưa có báo cáo",
         "receiptRefused": "Module từ chối",
-        "reference": "{ref} • {moduleName}",
-        "requestedBy": "Người yêu cầu: {name}",
-        "assignedTo": "Người được giao: {name}"
+        "reference": "{ref} • {moduleName}"
       },
       "approval": {
         "needed": "Cần phê duyệt",
@@ -529,7 +525,6 @@
       "viewDns": "Xem bản ghi",
       "orderInProgress": "đơn đã thanh toán · đang dựng",
       "priceTier": "{tier} · {price}",
-      "attentionGroup": "Cần bạn xử lý",
       "steadyGroup": "Đang chạy và đang dựng"
     },
     "agentos": {
@@ -543,7 +538,6 @@
         "offerLabel": "Ưu đãi đã chốt",
         "offer": "Ưu đãi",
         "offerVersion": "Phiên bản ưu đãi",
-        "amount": "Số tiền và đơn vị tiền tệ",
         "billingTerm": "Kỳ thanh toán",
         "renewal": "Gia hạn",
         "includedOutcome": "Kết quả bao gồm",
@@ -853,13 +847,11 @@
         "runningCaption": "Sẵn sàng vận hành",
         "attention": "Cần xử lý",
         "attentionCaption": "Cần quyết định của chủ sở hữu",
-        "attentionGroup": "Cần bạn xử lý",
         "steadyGroup": "Đang chạy và khởi tạo",
         "status": "Trạng thái"
       },
       "businessDashboard": {
         "workspaceLabel": "Workspace vận hành",
-        "workspaceReference": "Mã workspace {id}",
         "workspaceFallback": "Workspace của doanh nghiệp",
         "loading": "Đang đọc workspace đã liên kết với doanh nghiệp.",
         "empty": "Doanh nghiệp chưa có workspace. Chọn một gói để bắt đầu.",
@@ -1119,7 +1111,6 @@
           "checkedAt": "Danh sách được kiểm tra lúc {time}",
           "installedIn": "Đã cài trong {name}",
           "browseCatalog": "Xem mô-đun khả dụng",
-          "installFlow": "Đi đến quy trình cài đặt riêng",
           "runtimeLine": "Runtime: {value}",
           "runtimeProvisioned": "Đã được cấp",
           "runtimeNotProvisioned": "Chưa được cấp",
@@ -1135,7 +1126,6 @@
         },
         "studioPage": {
           "path": "Đường dẫn trình tạo module",
-          "modules": "Quay lại module",
           "title": "Trình tạo module",
           "description": "Tiếp tục hội thoại đã lưu, bổ sung tài liệu và duyệt đúng phiên bản trước khi xuất bản.",
           "eyebrow": "Module tùy chỉnh có thể tiếp tục",
@@ -1807,7 +1797,6 @@
                 "revisionHint": "Bản sửa đổi mà lần đóng này được bảo vệ tại đó",
                 "close": "Ghi nhận đóng",
                 "settled": "Cơ hội {opportunity} đã chốt ở trạng thái {status}.",
-                "empty": "Chưa đọc cơ hội nào",
                 "emptyHint": "Việc đóng được ghi nhận trên chính cơ hội đang hiển thị trạng thái đã ghi.",
                 "openNote": "Cơ hội vẫn đang mở; chưa có việc đóng nào được ghi nhận.",
                 "closedAt": "Đã đóng lúc {at}"
@@ -1929,7 +1918,6 @@
                 "other": "Chỉ tiêu khác"
               },
               "partialReason": {
-                "missingOccurredOn": "một kết quả thiếu ngày phát sinh",
                 "missingMeasureCoverage": "một chỉ tiêu thiếu phạm vi đo",
                 "staleSource": "một nguồn đã cũ",
                 "unavailableSource": "một nguồn không khả dụng"
@@ -2325,8 +2313,7 @@
           },
           "zalo": {
             "title": "Zalo OA",
-            "description": "Kết nối OA bằng phiên OAuth ngắn hạn do Nivo cấp.",
-            "formLabel": "Kết nối Zalo OA"
+            "description": "Kết nối OA bằng phiên OAuth ngắn hạn do Nivo cấp."
           },
           "ga4": {
             "title": "Google Analytics",
@@ -2518,7 +2505,8 @@
       "invalid": "Yêu cầu đã bị từ chối.",
       "unavailable": "Không tải được nội dung này. Kiểm tra kết nối rồi thử lại.",
       "retry": "Thử lại"
-    }
+    },
+    "attentionGroup": "Cần bạn xử lý"
   },
   "boundary": {
     "error": {
@@ -2544,24 +2532,20 @@
   },
   "metadata": {
     "home": {
-      "title": "Trang chủ — nivo Console",
-      "description": "Bảng điều khiển cấp phát và vận hành."
+      "title": "Trang chủ — nivo Console"
     },
     "notFound": {
-      "title": "Không tìm thấy trang — nivo Console",
-      "description": "Địa chỉ này không tồn tại hoặc đã được chuyển."
+      "title": "Không tìm thấy trang — nivo Console"
     },
     "authentication": {
       "title": "Đăng nhập — nivo Console",
       "description": "Đăng nhập, mở tài khoản hoặc đặt lại mật khẩu."
     },
     "overview": {
-      "title": "Tổng quan — nivo Console",
-      "description": "Mọi thứ tài khoản đang chạy, và một việc nên làm tiếp theo."
+      "title": "Tổng quan — nivo Console"
     },
     "chat": {
-      "title": "Trò chuyện — nivo Console",
-      "description": "Trao đổi, phối hợp và cập nhật công việc của Workspace."
+      "title": "Trò chuyện — nivo Console"
     },
     "wallet": {
       "title": "Ví — nivo Console",
@@ -2576,20 +2560,17 @@
       "description": "Kết quả trả về từ cổng thanh toán sau khi nạp ví."
     },
     "apps": {
-      "title": "Ứng dụng — nivo Console",
-      "description": "Mỗi ứng dụng dựng từ một mẫu và có vòng đời riêng."
+      "title": "Ứng dụng — nivo Console"
     },
     "appCreate": {
-      "title": "Tạo ứng dụng mẫu — nivo Console",
-      "description": "Cấu hình mẫu đã chọn trước khi site có định danh persisted."
+      "title": "Tạo ứng dụng mẫu — nivo Console"
     },
     "appSite": {
       "title": "Trung tâm học viện — nivo Console",
       "description": "Màn hình quản trị của một site học viện chuyên gia."
     },
     "appProvisioning": {
-      "title": "Cấp phát ứng dụng mẫu — nivo Console",
-      "description": "Theo dõi site đã persisted này tới khi stack độc lập sẵn sàng."
+      "title": "Cấp phát ứng dụng mẫu — nivo Console"
     },
     "agentos": {
       "title": "AgentOS — nivo Console",
@@ -2612,8 +2593,7 @@
       "description": "Chọn một offer và khởi tạo workspace AgentOS mới."
     },
     "agentosWorkspaceCheckout": {
-      "title": "Thanh toán đơn mua workspace — nivo Console",
-      "description": "Xác nhận các điều khoản nháp đã chốt trước khi yêu cầu thanh toán."
+      "title": "Thanh toán đơn mua workspace — nivo Console"
     },
     "agentosPurchase": {
       "title": "Đơn mua workspace — nivo Console",

@@ -23,6 +23,7 @@ import { isAcademyIntegrationProviderId } from "../../modules/academy/integratio
 /** Own provider queries, write-only forms, and post-save feedback. */
 export const useAcademyIntegrationCenter = (siteId: string): AcademyIntegrationCenterViewProps => {
     const t = useTranslations("console.academyControlCenter.integrations")
+    const chatbot = useTranslations("console.agentos.modules.runtime.chatbot")
     const query = useQueryMyAcademyIntegrationsSwr(siteId)
     const integrationMutation = useMutateAcademyIntegrationSwr(siteId)
     const reading = nivoQueryReading(query.data)
@@ -124,7 +125,10 @@ export const useAcademyIntegrationCenter = (siteId: string): AcademyIntegrationC
                     ? undefined
                     : {
                           id: selectedId,
-                          label: t(`providers.${selectedId}.formLabel`),
+                          label:
+                              selectedId === "zalo"
+                                  ? chatbot("connectZalo")
+                                  : t(`providers.${selectedId}.formLabel`),
                           fields: fieldsOf(selectedId),
                           submitLabel: selectedId === "zalo" ? t("authorize") : t("save"),
                           revealLabel: t("reveal"),

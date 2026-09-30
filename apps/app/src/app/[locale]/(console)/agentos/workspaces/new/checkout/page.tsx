@@ -4,10 +4,11 @@ import { AgentOSWorkspaceCheckoutPage } from "@/features/pages/AgentOSWorkspaceC
 
 /** The route's document metadata: its own title and description in the request's language. */
 export const generateMetadata = async (): Promise<Metadata> => {
-    const t = await getTranslations("metadata.agentosWorkspaceCheckout")
+    const metadata = await getTranslations("metadata.agentosWorkspaceCheckout")
+    const page = await getTranslations("console.agentos.checkoutReview")
     return {
-        title: t("title"),
-        description: t("description"),
+        title: metadata("title"),
+        description: page("description"),
     }
 }
 

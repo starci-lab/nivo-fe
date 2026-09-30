@@ -100,7 +100,11 @@ vi.mock("@/hooks", () => ({
 import { SalesHandoffBlock } from "."
 
 type Catalog = Readonly<Record<string, unknown>>
-const catalog = enMessages.agentos.sales.handoff as Catalog
+const catalog = {
+    ...enMessages.agentos.sales.handoff,
+    rail: enMessages.agentos.sales.rail,
+    refusal: { ...enMessages.agentos.sales.handoff.refusal, ...enMessages.agentos.sales.rail.refusal },
+} as Catalog
 const messageFor = (key: string): string => {
     let node: unknown = catalog
     for (const part of key.split(".")) {

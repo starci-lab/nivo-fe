@@ -5,9 +5,6 @@
         "title": "Commercial decision request",
         "description": "Review the proposal exactly as the read discloses it, then record one answer.",
         "rail": {
-          "scope": "Installation scope",
-          "scopeReady": "Installation address resolved.",
-          "installation": "Workspace {workspace}, installation {installation}",
           "notice": "Last answer",
           "noticeEmpty": "No answer has been sent from this screen."
         },
@@ -25,8 +22,6 @@
           "conflict": "The proposal moved on since you opened it.",
           "unavailable": "Sales is not answering this decision request right now.",
           "unattested": "The answer may not have been recorded. Read the request again before answering.",
-          "unreachable": "Sales could not be reached.",
-          "malformed": "Sales answered with something this screen cannot read.",
           "unsettled": "The answer did not settle: the request still reads as unanswered."
         },
         "proposal": {
@@ -67,9 +62,6 @@
         "title": "Accounting handoff",
         "description": "Submit the prepared handoff, and show only what the Accounting receipt discloses.",
         "rail": {
-          "scope": "Installation scope",
-          "scopeReady": "Installation address resolved.",
-          "installation": "Workspace {workspace}, installation {installation}",
           "notice": "Last submission",
           "noticeEmpty": "No handoff has been submitted from this screen."
         },
@@ -87,8 +79,6 @@
           "conflict": "The handoff moved on since you opened it.",
           "unavailable": "Sales is not answering this handoff right now.",
           "unattested": "The submission may not have been recorded. Look this handoff up again before resubmitting.",
-          "unreachable": "Sales could not be reached.",
-          "malformed": "Sales answered with something this screen cannot read.",
           "unsettled": "The submission did not settle: the handoff still reads as prepared."
         },
         "status": {
@@ -126,6 +116,15 @@
           "lookupOnly": "The attempt may have started: only a lookup of this same handoff identity is safe, never a new submission.",
           "note": "The submission is shown only when the handoff reads back with it.",
           "settled": "The handoff reads back with the submission: {status}."
+        }
+      },
+      "rail": {
+        "scope": "Installation scope",
+        "scopeReady": "Installation address resolved.",
+        "installation": "Workspace {workspace}, installation {installation}",
+        "refusal": {
+          "malformed": "Sales answered with something this screen cannot read.",
+          "unreachable": "Sales could not be reached."
         }
       }
     }
@@ -294,7 +293,6 @@
         "description": "End your current Nivo sessions on every browser. Your login stays available for a fresh sign-in.",
         "scopeNote": "This includes this browser.",
         "cancel": "Cancel",
-        "confirm": "Sign out everywhere",
         "pending": "Ending your sessions on every browser…"
       },
       "administratorEnding": {
@@ -405,9 +403,7 @@
         "receiptReported": "Module reported",
         "receiptPending": "No report yet",
         "receiptRefused": "Module refused",
-        "reference": "{ref} • {moduleName}",
-        "requestedBy": "Asked by {name}",
-        "assignedTo": "Assigned to {name}"
+        "reference": "{ref} • {moduleName}"
       },
       "approval": {
         "needed": "Approval needed",
@@ -529,7 +525,6 @@
       "viewDns": "View record",
       "orderInProgress": "paid order · being built",
       "priceTier": "{tier} · {price}",
-      "attentionGroup": "Needs your attention",
       "steadyGroup": "Running and building"
     },
     "agentos": {
@@ -543,7 +538,6 @@
         "offerLabel": "Frozen offer",
         "offer": "Offer",
         "offerVersion": "Offer version",
-        "amount": "Amount and currency",
         "billingTerm": "Billing term",
         "renewal": "Renewal",
         "includedOutcome": "Included outcome",
@@ -853,13 +847,11 @@
         "runningCaption": "Ready to operate now",
         "attention": "Needs attention",
         "attentionCaption": "Requires an owner decision",
-        "attentionGroup": "Needs your attention",
         "steadyGroup": "Running and starting up",
         "status": "Status"
       },
       "businessDashboard": {
         "workspaceLabel": "Operating workspace",
-        "workspaceReference": "Workspace ID {id}",
         "workspaceFallback": "Business workspace",
         "loading": "Reading the workspace linked to this business.",
         "empty": "This business has no workspace yet. Choose a package to begin.",
@@ -1119,7 +1111,6 @@
           "checkedAt": "The list was checked at {time}",
           "installedIn": "Installed in {name}",
           "browseCatalog": "View available modules",
-          "installFlow": "Go to the dedicated install flow",
           "runtimeLine": "Runtime: {value}",
           "runtimeProvisioned": "Provisioned",
           "runtimeNotProvisioned": "Not provisioned",
@@ -1135,7 +1126,6 @@
         },
         "studioPage": {
           "path": "Module studio path",
-          "modules": "Back to modules",
           "title": "Module studio",
           "description": "Continue the saved conversation, add documents, and review the exact version before publishing.",
           "eyebrow": "Resumable custom module",
@@ -1807,7 +1797,6 @@
                 "revisionHint": "The revision this close is guarded at",
                 "close": "Record closure",
                 "settled": "The opportunity {opportunity} settled as {status}.",
-                "empty": "No opportunity is read yet",
                 "emptyHint": "A closure is recorded against the opportunity whose committed state is shown.",
                 "openNote": "The opportunity is still open; no closure has been recorded.",
                 "closedAt": "Closed {at}"
@@ -1929,7 +1918,6 @@
                 "other": "Other measure"
               },
               "partialReason": {
-                "missingOccurredOn": "a result has no occurred-on date",
                 "missingMeasureCoverage": "a measure has no coverage",
                 "staleSource": "a source is stale",
                 "unavailableSource": "a source is unavailable"
@@ -2325,8 +2313,7 @@
           },
           "zalo": {
             "title": "Zalo OA",
-            "description": "Connect an OA through a short-lived Nivo OAuth session.",
-            "formLabel": "Connect Zalo OA"
+            "description": "Connect an OA through a short-lived Nivo OAuth session."
           },
           "ga4": {
             "title": "Google Analytics",
@@ -2518,7 +2505,8 @@
       "invalid": "This request was declined.",
       "unavailable": "This could not be loaded. Check your connection and try again.",
       "retry": "Try again"
-    }
+    },
+    "attentionGroup": "Needs your attention"
   },
   "boundary": {
     "error": {
@@ -2544,24 +2532,20 @@
   },
   "metadata": {
     "home": {
-      "title": "Home — nivo Console",
-      "description": "Provisioning and operations console."
+      "title": "Home — nivo Console"
     },
     "notFound": {
-      "title": "Page not found — nivo Console",
-      "description": "This address does not exist or has moved."
+      "title": "Page not found — nivo Console"
     },
     "authentication": {
       "title": "Sign in — nivo Console",
       "description": "Sign in, open an account or reset a password."
     },
     "overview": {
-      "title": "Overview — nivo Console",
-      "description": "Everything this account runs, and the one thing to do next."
+      "title": "Overview — nivo Console"
     },
     "chat": {
-      "title": "Chat — nivo Console",
-      "description": "Collaborate, coordinate and update the Workspace's work."
+      "title": "Chat — nivo Console"
     },
     "wallet": {
       "title": "Wallet — nivo Console",
@@ -2576,20 +2560,17 @@
       "description": "The payment provider's return after a wallet top-up."
     },
     "apps": {
-      "title": "Apps — nivo Console",
-      "description": "Each app is built from a template and has a lifecycle of its own."
+      "title": "Apps — nivo Console"
     },
     "appCreate": {
-      "title": "Create template app — nivo Console",
-      "description": "Configure the selected template before a site identity exists."
+      "title": "Create template app — nivo Console"
     },
     "appSite": {
       "title": "Academy control center — nivo Console",
       "description": "The management surface of one expert academy site."
     },
     "appProvisioning": {
-      "title": "Template app provisioning — nivo Console",
-      "description": "Follow this persisted site until its isolated stack is ready."
+      "title": "Template app provisioning — nivo Console"
     },
     "agentos": {
       "title": "AgentOS — nivo Console",
@@ -2612,8 +2593,7 @@
       "description": "Choose an offer and start a new AgentOS workspace."
     },
     "agentosWorkspaceCheckout": {
-      "title": "Workspace purchase checkout — nivo Console",
-      "description": "Confirm the frozen draft terms before requesting payment."
+      "title": "Workspace purchase checkout — nivo Console"
     },
     "agentosPurchase": {
       "title": "Workspace purchase — nivo Console",

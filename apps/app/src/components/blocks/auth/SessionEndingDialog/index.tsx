@@ -89,7 +89,7 @@ export const SessionEndingDialog = (props: SessionEndingDialogProps) => {
                 description: t("account.sessionEnding.description"),
                 scopeNote: t("account.sessionEnding.scopeNote"),
                 cancelLabel: t("account.sessionEnding.cancel"),
-                confirmLabel: t("account.sessionEnding.confirm"),
+                confirmLabel: t("account.signOutEverywhere"),
                 pendingLabel: t("account.sessionEnding.pending"),
                 isPending,
                 isOpen,

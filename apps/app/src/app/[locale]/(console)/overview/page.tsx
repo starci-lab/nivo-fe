@@ -4,10 +4,11 @@ import { OverviewPage } from "@/features/pages/OverviewPage"
 
 /** The route's document metadata: its own title and description in the request's language. */
 export const generateMetadata = async (): Promise<Metadata> => {
-    const t = await getTranslations("metadata.overview")
+    const metadata = await getTranslations("metadata.overview")
+    const page = await getTranslations("console")
     return {
-        title: t("title"),
-        description: t("description"),
+        title: metadata("title"),
+        description: page("overview.lede"),
     }
 }
 

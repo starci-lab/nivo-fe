@@ -17,11 +17,12 @@ export type BusinessModulesDashboardProps = { readonly children?: never }
 export const BusinessModulesDashboard = (props: BusinessModulesDashboardProps) => {
     void props
     const t = useTranslations("console.agentos.businessDashboard")
+    const agentos = useTranslations("console.agentos")
     const router = useRouter()
     const query = useQueryMyAgentWorkspacesSwr()
     const labels: BusinessModulesDashboardLabels = {
         workspaceLabel: t("workspaceLabel"),
-        workspaceReference: (id) => t("workspaceReference", { id }),
+        workspaceReference: (id) => agentos("workspaceReference", { id }),
         loading: t("loading"),
         empty: t("empty"),
         create: t("create"),

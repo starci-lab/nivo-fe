@@ -15,8 +15,16 @@ import viMessages from "@/messages/vi.json"
  */
 
 type Catalog = Readonly<Record<string, unknown>>
-const catalog = en.agentos.sales.handoff as Catalog
-const vietnamese = viMessages.agentos.sales.handoff as Catalog
+const catalog = {
+    ...en.agentos.sales.handoff,
+    rail: en.agentos.sales.rail,
+    refusal: { ...en.agentos.sales.handoff.refusal, ...en.agentos.sales.rail.refusal },
+} as Catalog
+const vietnamese = {
+    ...viMessages.agentos.sales.handoff,
+    rail: viMessages.agentos.sales.rail,
+    refusal: { ...viMessages.agentos.sales.handoff.refusal, ...viMessages.agentos.sales.rail.refusal },
+} as Catalog
 const messageFor = (source: Catalog, key: string): string => {
     let node: unknown = source
     for (const part of key.split(".")) {

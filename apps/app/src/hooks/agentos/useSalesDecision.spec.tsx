@@ -49,7 +49,11 @@ vi.mock("@/hooks/swr/mutations/useMutateSalesDecideProposalSwr", () => ({
 
 import { useSalesDecision } from "./useSalesDecision"
 
-const catalog = en.agentos.sales.decision as Readonly<Record<string, unknown>>
+const catalog = {
+    ...en.agentos.sales.decision,
+    rail: en.agentos.sales.rail,
+    refusal: { ...en.agentos.sales.decision.refusal, ...en.agentos.sales.rail.refusal },
+} as Readonly<Record<string, unknown>>
 const messageFor = (key: string): string => {
     let node: unknown = catalog
     for (const part of key.split(".")) {

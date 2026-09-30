@@ -122,7 +122,7 @@ export const AgentOSModuleCollectionPage = (props: AgentOSModuleCollectionPagePr
                     workspace: t("workspace"),
                     title: t("title"),
                     browseCatalog: t("browseCatalog"),
-                    installFlow: t("installFlow"),
+                    installFlow: s("installEntry"),
                     runtimeProvisioned: t("runtimeProvisioned"),
                     runtimeNotProvisioned: t("runtimeNotProvisioned"),
                     runtimeUnavailable: t("runtimeUnavailable"),

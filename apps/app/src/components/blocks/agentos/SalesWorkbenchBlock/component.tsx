@@ -717,7 +717,7 @@ export const SalesWorkbenchBlockBase = (props: SalesWorkbenchBlockProps) => {
             </form>
             {region(
                 view.closure.standing,
-                t("closure.empty"),
+                t("wait.empty"),
                 t("closure.emptyHint"),
                 view.closure.model === null ? null : (
                     <FieldStack>
