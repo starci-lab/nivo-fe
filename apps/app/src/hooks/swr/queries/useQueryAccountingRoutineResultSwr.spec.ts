@@ -11,10 +11,8 @@ vi.mock("../useNivoQuery", () => ({ useNivoQuery: mocks.useNivoQuery }))
 vi.mock("@/hooks/auth/useSession", () => ({ useSession: mocks.useSession }))
 vi.mock("@/modules/api/accounting", () => mocks.api)
 
-import {
-    accountingRoutineResultQueryKey,
-    useQueryAccountingRoutineResultSwr,
-} from "./useQueryAccountingRoutineResultSwr"
+import { useQueryAccountingRoutineResultSwr } from "./useQueryAccountingRoutineResultSwr"
+import { accountingRoutineResultQueryKey } from "./queries.shared"
 
 const SCOPE = { workspaceId: "workspace-1", instanceId: "instance-1", installationId: "installation-1" }
 

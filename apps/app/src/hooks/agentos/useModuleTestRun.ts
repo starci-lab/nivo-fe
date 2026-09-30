@@ -1,8 +1,6 @@
-"use client"
-
 import { useCallback, useRef, useState } from "react"
 import type { SWRResponse } from "swr"
-import { useMutateRunAgentosModuleTestSwr } from "../swr/mutations/console"
+import { useMutateRunAgentosModuleTestSwr } from "../swr/mutations/useMutateRunAgentosModuleTestSwr"
 import { useQueryMyAgentosModuleTestRunSwr } from "../swr/queries/useQueryMyAgentosModuleTestRunSwr"
 import type { AgentosModuleTestContract, AgentosModuleTestSurface } from "../../modules/api/agentos-module-tests"
 import type { AgentosRuntimeValue } from "../../modules/api/agentos-runtime-tree"
@@ -19,7 +17,7 @@ type AgentosModuleTestTarget = {
 interface ModuleTestRunInput {
     readonly installationId: string
     readonly testContract: AgentosModuleTestContract | undefined
-    readonly testSurfaceQuery: SWRResponse<Outcome<AgentosModuleTestSurface>, Error>
+    readonly testSurfaceQuery: Pick<SWRResponse<Outcome<AgentosModuleTestSurface>, Error>, "mutate">
     readonly setPending: (pending: boolean) => void
     readonly setActionRefused: (refused: boolean) => void
 }
@@ -40,6 +38,8 @@ export const useModuleTestRun = (input: ModuleTestRunInput) => {
     const [activeRunId, setActiveRunId] = useState<string | undefined>(undefined)
     const runAttempts = useRef(0)
     const testMutation = useMutateRunAgentosModuleTestSwr(installationId)
+    const triggerTest = testMutation.trigger
+    const mutateTestSurface = testSurfaceQuery.mutate
 
     useQueryMyAgentosModuleTestRunSwr(installationId, activeRunId, {
         // The stop predicate: poll only while the run still reports itself running.
@@ -87,7 +87,7 @@ export const useModuleTestRun = (input: ModuleTestRunInput) => {
         ) => {
             setPending(true)
             setActionRefused(false)
-            const result = await testMutation.trigger({
+            const result = await triggerTest({
                 installationId,
                 ...target,
                 mode,
@@ -100,7 +100,7 @@ export const useModuleTestRun = (input: ModuleTestRunInput) => {
                 setActionRefused(true)
                 return
             }
-            await testSurfaceQuery.mutate(result, {
+            await mutateTestSurface(result, {
                 revalidate: false,
             })
             const runId = result.data.run?.id
@@ -111,7 +111,7 @@ export const useModuleTestRun = (input: ModuleTestRunInput) => {
             runAttempts.current = 0
             setActiveRunId(runId)
         },
-        [installationId, setActionRefused, setPending, testMutation.trigger, testSurfaceQuery],
+        [installationId, mutateTestSurface, setActionRefused, setPending, triggerTest],
     )
 
     return {

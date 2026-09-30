@@ -1,5 +1,3 @@
-"use client"
-
 /*
  * The AgentOS shell's navigation half (CU-SHELL-CONNECTED).
  *

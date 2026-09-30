@@ -9,10 +9,8 @@ const mocks = vi.hoisted(() => ({
 vi.mock("../useNivoQuery", () => ({ useNivoQuery: mocks.useNivoQuery }))
 vi.mock("@/modules/api/workspace-controlplane", () => mocks.api)
 
-import {
-    useQueryWorkspaceCheckoutStatusSwr,
-    workspaceCheckoutStatusQueryKey,
-} from "./useQueryWorkspaceCheckoutStatusSwr"
+import { useQueryWorkspaceCheckoutStatusSwr } from "./useQueryWorkspaceCheckoutStatusSwr"
+import { workspaceCheckoutStatusQueryKey } from "./queries.shared"
 
 describe("useQueryWorkspaceCheckoutStatusSwr", () => {
     it("keys one purchase status read by the purchase identity alone", () => {

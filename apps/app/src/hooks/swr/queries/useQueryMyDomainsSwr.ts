@@ -1,4 +1,3 @@
-"use client"
 import { myDomains } from "@/modules/api/commerce"
 import { useNivoQuery } from "../useNivoQuery"
 import { QUERY_DOMAINS_SWR_KEY } from "../swr.shared"

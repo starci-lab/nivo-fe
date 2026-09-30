@@ -1,4 +1,3 @@
-"use client"
 
 import { type LocaleReader } from "@nivo/api"
 import { setLocaleReader } from "@/modules/api/graphql"

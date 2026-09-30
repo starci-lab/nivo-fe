@@ -1,4 +1,3 @@
-"use client"
 import { myAgentosModuleInstallation } from "@/modules/api/agentos-modules"
 import { useNivoQuery } from "../useNivoQuery"
 import { QUERY_AGENTOS_MODULE_INSTALLATION_SWR_KEY } from "../swr.shared"

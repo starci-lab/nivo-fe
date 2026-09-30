@@ -23,7 +23,7 @@ vi.mock("socket.io-client", () => ({
     }),
 }))
 
-import useProvisioningRealtime from "@/hooks/realtime/useProvisioningRealtime"
+import useProvisioningRealtime from "./useProvisioningRealtime"
 
 type ProbeProps = {
     readonly token: string | null

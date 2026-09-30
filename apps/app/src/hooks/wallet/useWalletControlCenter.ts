@@ -1,6 +1,5 @@
-"use client"
 
-import { useCallback, useState, useSyncExternalStore } from "react"
+import { useState, useSyncExternalStore } from "react"
 import { useFormatter, useLocale, useTranslations } from "next-intl"
 import { useSearchParams } from "next/navigation"
 import {
@@ -48,9 +47,9 @@ export const useWalletControlCenter = (pageState: WalletPageState): WalletContro
     const movements = transactions.data
     const [invoicePayment, setInvoicePayment] = useState<InvoicePaymentState>({ pending: false, error: null })
     const [topUp, setTopUp] = useState<TopUpInteractionState>(() => initialTopUpInteractionState(pathname))
-    const refresh = useCallback(async () => {
+    const refresh = async () => {
         await Promise.all([wallet.mutate(), invoices.mutate(), transactions.mutate()])
-    }, [invoices.mutate, transactions.mutate, wallet.mutate])
+    }
     const amount = (amountVnd: number) =>
         format.number(amountVnd, {
             style: "currency",

@@ -1,4 +1,3 @@
-"use client"
 
 import { useCallback } from "react"
 import { reconcileCollabRequest, type CollabReconcileCall, type CollabReconcileOutcome } from "@/modules/api/collab"

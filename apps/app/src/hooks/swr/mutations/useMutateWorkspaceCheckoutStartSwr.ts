@@ -1,4 +1,3 @@
-"use client"
 
 import { type Outcome } from "@nivo/api"
 import {
@@ -8,7 +7,7 @@ import {
 } from "@/modules/api/workspace-controlplane"
 import { useNivoMutation } from "../useNivoMutation"
 import { MUTATION_WORKSPACE_CHECKOUT_START_SWR_KEY } from "../swr.shared"
-import { workspaceCheckoutStatusQueryKey } from "../queries/useQueryWorkspaceCheckoutStatusSwr"
+import { workspaceCheckoutStatusQueryKey } from "../queries/queries.shared"
 
 /*
  * One hook per file, one registered command per hook: the file's basename is the hook it exports,

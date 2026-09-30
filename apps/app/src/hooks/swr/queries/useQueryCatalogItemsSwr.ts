@@ -1,4 +1,3 @@
-"use client"
 import { catalogItems, type CatalogCategory } from "@/modules/api/commerce"
 import { useNivoQuery } from "../useNivoQuery"
 import { QUERY_CATALOG_ITEMS_SWR_KEY } from "../swr.shared"

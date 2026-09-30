@@ -1,5 +1,3 @@
-"use client"
-
 import { useFormatter, useLocale, useTranslations } from "next-intl"
 import { useSearchParams } from "next/navigation"
 import { useAccessToken, useQueryWorkspaceCheckoutOffersSwr, useRouter, useSession } from ".."

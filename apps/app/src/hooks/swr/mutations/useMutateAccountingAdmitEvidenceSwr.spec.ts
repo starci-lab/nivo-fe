@@ -15,7 +15,7 @@ vi.mock("../useNivoMutation", () => ({ useNivoMutation: mocks.useNivoMutation })
 vi.mock("@/hooks/auth/useSession", () => ({ useSession: mocks.useSession }))
 vi.mock("@/modules/api/accounting", () => mocks.api)
 
-import { accountingEvidenceQueryKey } from "../queries/useQueryAccountingEvidenceSwr"
+import { accountingEvidenceQueryKey } from "../queries/queries.shared"
 import { useMutateAccountingAdmitEvidenceSwr } from "./useMutateAccountingAdmitEvidenceSwr"
 
 const SCOPE = { workspaceId: "workspace-1", instanceId: "instance-1", installationId: "installation-1" }

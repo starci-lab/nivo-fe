@@ -1,12 +1,9 @@
-"use client"
 
 import { useCallback, useEffect, useRef, useState } from "react"
-import {
-    useMutateForgotPasswordInitSwr,
-    useMutateSignInSwr,
-    useMutateSignUpInitSwr,
-    useOauthReturnExchange,
-} from "@/hooks/swr/mutations/auth"
+import { useMutateForgotPasswordInitSwr } from "@/hooks/swr/mutations/useMutateForgotPasswordInitSwr"
+import { useMutateSignInSwr } from "@/hooks/swr/mutations/useMutateSignInSwr"
+import { useMutateSignUpInitSwr } from "@/hooks/swr/mutations/useMutateSignUpInitSwr"
+import { useOauthReturnExchange } from "@/hooks/swr/mutations/useOauthReturnExchange"
 import { useMutateContinueBrokeredSignInSwr } from "@/hooks/swr/mutations/useMutateContinueBrokeredSignInSwr"
 import { useRouter } from "@/hooks/i18n/useRouter"
 import { useSession } from "@/hooks/auth/useSession"

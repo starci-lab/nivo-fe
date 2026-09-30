@@ -1,6 +1,5 @@
-"use client"
-
 import { useCallback, useRef, useState } from "react"
+import { useTranslations } from "next-intl"
 import type { AgentosModuleRuntime } from "../../modules/api/agentos-module-runtime"
 import { setupSessionFor } from "../../modules/agentos/module-page/setup-draft"
 import {
@@ -26,6 +25,7 @@ interface ModuleSetupSessionInput {
  */
 export const useModuleSetupSession = (input: ModuleSetupSessionInput) => {
     const { installationId, runtime, controls } = input
+    const t = useTranslations("console.agentos.modules")
     const { pending, perform, settleRuntime } = controls
     const [selectedSetupSessionId, setSelectedSetupSessionId] = useState<string | null>(null)
     const [setupDrafts, setSetupDrafts] = useState<Record<string, string>>({})
@@ -50,7 +50,7 @@ export const useModuleSetupSession = (input: ModuleSetupSessionInput) => {
                 action: "START_SETUP_REVISION",
                 installationId,
                 idempotencyKey: idempotencyKey(),
-                title: "Setup revision",
+                title: t("runtime.setupRevisionTitle"),
             },
             false,
         ).then((result) => {
@@ -65,7 +65,7 @@ export const useModuleSetupSession = (input: ModuleSetupSessionInput) => {
             setSetupAction(null)
             setupLock.current = false
         })
-    }, [installationId, perform, pending])
+    }, [installationId, perform, pending, t])
     const sendSetupMessage = useCallback(
         async (sessionId: string, content: string) => {
             if (setupLock.current || pending) return

@@ -1,4 +1,3 @@
-"use client"
 
 import { useFormatter, useTranslations } from "next-intl"
 import { fleetResourceHref } from "../../components/blocks/provisioning/FleetRow"

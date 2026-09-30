@@ -1,13 +1,11 @@
-"use client"
-
 import { useCallback, useState } from "react"
-import {
-    useMutateReconcileChatbotDeliverySwr,
-    useMutateResolveChatbotHandoffSwr,
-    useMutateSetChatbotHandoffSwr,
-    useMutateStartChatbotZaloOauthSwr,
-} from "../swr/mutations/workspace-controlplane"
-import { useQueryChatbotWorkbenchSwr, type SupportQueryIdentity } from "../swr/queries/useQueryChatbotWorkbenchSwr"
+import { useTranslations } from "next-intl"
+import { useMutateReconcileChatbotDeliverySwr } from "../swr/mutations/useMutateReconcileChatbotDeliverySwr"
+import { useMutateResolveChatbotHandoffSwr } from "../swr/mutations/useMutateResolveChatbotHandoffSwr"
+import { useMutateSetChatbotHandoffSwr } from "../swr/mutations/useMutateSetChatbotHandoffSwr"
+import { useMutateStartChatbotZaloOauthSwr } from "../swr/mutations/useMutateStartChatbotZaloOauthSwr"
+import { type SupportQueryIdentity } from "../swr/queries/queries.shared"
+import { useQueryChatbotWorkbenchSwr } from "../swr/queries/useQueryChatbotWorkbenchSwr"
 import type { AgentosModuleRuntime } from "../../modules/api/agentos-module-runtime"
 import type { AgentosRuntimeValue } from "../../modules/api/agentos-runtime-tree"
 import { nivoQueryPayload } from "../../modules/query"
@@ -33,6 +31,7 @@ interface ModuleOperateInput {
  */
 export const useModuleOperate = (input: ModuleOperateInput) => {
     const { installationId, runtime, chatbotIdentity, controls } = input
+    const t = useTranslations("console.agentos.modules.runtime.executeChat")
     const { perform, settleRuntime } = controls
     const [selectedSessionId, setSelectedSessionId] = useState<string | null>(null)
     const [selectedSupportConversationId, setSelectedSupportConversationId] = useState<string | null>(null)
@@ -65,10 +64,10 @@ export const useModuleOperate = (input: ModuleOperateInput) => {
             action: "CREATE_EXECUTE_SESSION",
             installationId,
             idempotencyKey: idempotencyKey(),
-            title: `Conversation ${(runtimeExecuteSessions?.length ?? 0) + 1}`,
+            title: t("conversationTitle", { number: (runtimeExecuteSessions?.length ?? 0) + 1 }),
         })
         return nextRuntime?.executeSessions.find((session) => !existingIds.has(session.id))?.id ?? null
-    }, [installationId, perform, runtimeExecuteSessions])
+    }, [installationId, perform, runtimeExecuteSessions, t])
     const sendExecuteMessage = useCallback(
         async (sessionId: string, content: string) => {
             const assistantCount =

@@ -1,4 +1,3 @@
-"use client"
 
 import { signOut } from "@/modules/api/auth"
 import { useAuthMutation } from "../useAuthMutation"

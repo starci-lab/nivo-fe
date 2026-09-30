@@ -1,4 +1,3 @@
-"use client"
 
 import { endPrincipalSessions } from "@/modules/api/auth"
 import { useAuthMutation } from "../useAuthMutation"

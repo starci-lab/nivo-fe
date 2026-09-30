@@ -15,7 +15,7 @@ vi.mock("../useNivoMutation", () => ({ useNivoMutation: mocks.useNivoMutation })
 vi.mock("@/hooks/auth/useSession", () => ({ useSession: mocks.useSession }))
 vi.mock("@/modules/api/sales", () => mocks.api)
 
-import { salesOpportunityQueryKey } from "../queries/useQuerySalesOpportunitySwr"
+import { salesOpportunityQueryKey } from "../queries/queries.shared"
 import { useMutateSalesCloseSwr } from "./useMutateSalesCloseSwr"
 
 const SCOPE = { workspaceId: "workspace-1", instanceId: "instance-1", installationId: "installation-1" }

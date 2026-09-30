@@ -1361,6 +1361,7 @@
           "unknownKind": "Loại: {kind}"
         },
         "runtime": {
+          "setupRevisionTitle": "B?n s?a ??i thi?t l?p",
           "chatbot": {
             "title": "Bàn làm việc Chatbot",
             "installation": "Bản cài đặt",
@@ -1507,7 +1508,8 @@
             "placeholder": "Yêu cầu Nivo thực thi…",
             "send": "Gửi",
             "refused": "Thao tác thực thi bị từ chối; không có tin nhắn hoặc tiện ích nào được thêm.",
-            "title": "Trò chuyện thực thi"
+            "title": "Trò chuyện thực thi",
+            "conversationTitle": "Cu?c tr? chuy?n {number}"
           },
           "widgets": {
             "supportTitle": "Theo dõi hỗ trợ",
@@ -1880,6 +1882,7 @@
               },
               "overview": {
                 "label": "Báo cáo",
+                "noMeasures": "K? n?y ch?a ghi nh?n ch? ti?u n?o.",
                 "covered": "gồm {count} kết quả đã ghi",
                 "empty": "Kỳ này chưa ghi kết quả nào",
                 "emptyHint": "Hãy chọn kỳ khác, hoặc nhận bằng chứng mà kỳ này cần có.",
@@ -1892,9 +1895,7 @@
                 "attention": "Cần chú ý: {codes}",
                 "sourceCoverage": "{count} mã bằng chứng nguồn đứng sau kỳ này",
                 "partial": "Đầy đủ một phần vì: {reasons}",
-                "measureAbsent": "Kỳ này không đo chỉ tiêu này",
                 "measureUnknown": "Không đo được: {reason}",
-                "measureCovered": "trên {count} kết quả",
                 "estimate": "Số thuế là ước tính theo chính sách {currency} và loại trừ những gì chính sách đó nêu tên."
               },
               "availability": {
@@ -2263,6 +2264,10 @@
         "webhookCount": "{count} webhook",
         "webhookSecretCopied": "Webhook đã tạo; signing secret một lần đã được gửi vào clipboard.",
         "dnsTarget": "Trỏ CNAME hoặc A record phù hợp về {target}.",
+        "hints": {
+          "consentMode": "Ch?n required (b?t bu?c), granted (?? ??ng ?) ho?c denied (?? t? ch?i).",
+          "webhookEvents": "Nh?p c?c kh?a s? ki?n ???c h? tr?, ph?n t?ch b?ng d?u ph?y."
+        },
         "status": {
           "absent": "Chưa cấu hình",
           "pending": "Đang chờ",

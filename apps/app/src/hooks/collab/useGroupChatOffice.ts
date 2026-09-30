@@ -1,4 +1,3 @@
-"use client"
 
 import { useEffect, useState } from "react"
 import type { CollabHumanRole, CollabTurnNoticeItem } from "../../modules/api/collab"

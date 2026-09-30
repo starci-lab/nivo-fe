@@ -1,6 +1,4 @@
-"use client"
-
-import { useState } from "react"
+import { useState, type SetStateAction } from "react"
 import { useParams } from "next/navigation"
 import { useFormatter } from "next-intl"
 import type {
@@ -24,14 +22,6 @@ import {
 import type { AccountingCommandPayloadState } from "@/modules/api/accounting/payload.guards"
 import { nivoQueryPayload } from "@/modules/query"
 import { useQueryMyAgentWorkspaceControlCenterSwr } from "@/hooks/swr/queries/useQueryMyAgentWorkspaceControlCenterSwr"
-import { useQueryAccountingEvidenceSwr } from "@/hooks/swr/queries/useQueryAccountingEvidenceSwr"
-import { useQueryAccountingResultDetailSwr } from "@/hooks/swr/queries/useQueryAccountingResultDetailSwr"
-import { useQueryAccountingRoutineResultSwr } from "@/hooks/swr/queries/useQueryAccountingRoutineResultSwr"
-import { useQueryAccountingSummarySwr } from "@/hooks/swr/queries/useQueryAccountingSummarySwr"
-import { useMutateAccountingAdmitEvidenceSwr } from "@/hooks/swr/mutations/useMutateAccountingAdmitEvidenceSwr"
-import { useMutateAccountingCorrectSwr } from "@/hooks/swr/mutations/useMutateAccountingCorrectSwr"
-import { useMutateAccountingExceptionSwr } from "@/hooks/swr/mutations/useMutateAccountingExceptionSwr"
-import { useMutateAccountingRoutineSwr } from "@/hooks/swr/mutations/useMutateAccountingRoutineSwr"
 import {
     accountingMonthPeriod,
     accountingRefusalKey,
@@ -45,6 +35,8 @@ import {
     type AccountingTranslation,
 } from "@/modules/accounting/accounting-workbench"
 import { useWorkbenchCommand } from "./useWorkbenchCommand"
+import { useAccountingWorkbenchCommands } from "./useAccountingWorkbenchCommands"
+import { useAccountingWorkbenchReads } from "./useAccountingWorkbenchReads"
 
 /*
  * The connected Accounting workbench (impl.accounting.nivo-fe.workbench-view).
@@ -103,6 +95,42 @@ const CORRECTION_STATE_KEYS = {
 const mappedState = (mapping: Readonly<Partial<Record<string, string>>>, state: string): string | undefined =>
     mapping[state]
 
+type AccountingWorkbenchFormState = {
+    readonly periodMonth: string
+    readonly currency: string | null
+    readonly cursor: string | null
+    readonly asOfDraft: string
+    readonly asOf: string | null
+    readonly evidenceId: string
+    readonly sourceKind: string
+    readonly sourceRef: string
+    readonly sourceRevision: string
+    readonly fingerprint: string
+    readonly intakeRevision: string
+    readonly intentId: string
+    readonly itemId: string
+    readonly policyRevision: string
+    readonly evidenceIds: string
+    readonly itemRevision: string
+    readonly oldAttemptId: string
+    readonly notStartedProofRef: string
+    readonly newAttemptId: string
+    readonly exceptionId: string
+    readonly choiceCode: string
+    readonly questionReason: string
+    readonly questionEvidenceRefs: string
+    readonly exceptionRevision: string
+    readonly resultId: string
+    readonly correctionId: string
+    readonly predecessorResultId: string
+    readonly correctedAmount: string
+    readonly correctedCounterparty: string
+    readonly correctionReason: string
+    readonly correctionEvidenceRefs: string
+    readonly correctionRevision: string
+    readonly appendAttemptId: string
+}
+
 /** Own Accounting form state, the resolved installation scope, idempotent intents and readback-settled feedback. */
 export const useAccountingWorkbench = (moduleId: string, locale: string, t: AccountingTranslation) => {
     const format = useFormatter()
@@ -119,39 +147,115 @@ export const useAccountingWorkbench = (moduleId: string, locale: string, t: Acco
     const addressable = scope ?? { workspaceId: "", instanceId: "", installationId: routeInstallationId }
     const ready = scope !== null
 
-    const [periodMonth, setPeriodMonth] = useState(() => accountingUtcMonth(new Date()))
-    const [currency, setCurrency] = useState<string | null>(null)
-    const [cursor, setCursor] = useState<string | null>(null)
-    const [asOfDraft, setAsOfDraft] = useState("")
-    const [asOf, setAsOf] = useState<string | null>(null)
-    const [evidenceId, setEvidenceId] = useState("")
-    const [sourceKind, setSourceKind] = useState("")
-    const [sourceRef, setSourceRef] = useState("")
-    const [sourceRevision, setSourceRevision] = useState("")
-    const [fingerprint, setFingerprint] = useState("")
-    const [intakeRevision, setIntakeRevision] = useState("0")
-    const [intentId, setIntentId] = useState("")
-    const [itemId, setItemId] = useState("")
-    const [policyRevision, setPolicyRevision] = useState("")
-    const [evidenceIds, setEvidenceIds] = useState("")
-    const [itemRevision, setItemRevision] = useState("0")
-    const [oldAttemptId, setOldAttemptId] = useState("")
-    const [notStartedProofRef, setNotStartedProofRef] = useState("")
-    const [newAttemptId, setNewAttemptId] = useState("")
-    const [exceptionId, setExceptionId] = useState("")
-    const [choiceCode, setChoiceCode] = useState("")
-    const [questionReason, setQuestionReason] = useState("")
-    const [questionEvidenceRefs, setQuestionEvidenceRefs] = useState("")
-    const [exceptionRevision, setExceptionRevision] = useState("0")
-    const [resultId, setResultId] = useState("")
-    const [correctionId, setCorrectionId] = useState("")
-    const [predecessorResultId, setPredecessorResultId] = useState("")
-    const [correctedAmount, setCorrectedAmount] = useState("")
-    const [correctedCounterparty, setCorrectedCounterparty] = useState("")
-    const [correctionReason, setCorrectionReason] = useState("")
-    const [correctionEvidenceRefs, setCorrectionEvidenceRefs] = useState("")
-    const [correctionRevision, setCorrectionRevision] = useState("0")
-    const [appendAttemptId, setAppendAttemptId] = useState("")
+    const [form, setForm] = useState<AccountingWorkbenchFormState>(() => ({
+        periodMonth: accountingUtcMonth(new Date()),
+        currency: null,
+        cursor: null,
+        asOfDraft: "",
+        asOf: null,
+        evidenceId: "",
+        sourceKind: "",
+        sourceRef: "",
+        sourceRevision: "",
+        fingerprint: "",
+        intakeRevision: "0",
+        intentId: "",
+        itemId: "",
+        policyRevision: "",
+        evidenceIds: "",
+        itemRevision: "0",
+        oldAttemptId: "",
+        notStartedProofRef: "",
+        newAttemptId: "",
+        exceptionId: "",
+        choiceCode: "",
+        questionReason: "",
+        questionEvidenceRefs: "",
+        exceptionRevision: "0",
+        resultId: "",
+        correctionId: "",
+        predecessorResultId: "",
+        correctedAmount: "",
+        correctedCounterparty: "",
+        correctionReason: "",
+        correctionEvidenceRefs: "",
+        correctionRevision: "0",
+        appendAttemptId: "",
+    }))
+    const fieldSetter = <TField extends keyof AccountingWorkbenchFormState>(field: TField) =>
+        (action: SetStateAction<AccountingWorkbenchFormState[TField]>) =>
+            setForm((current) => {
+                const value = typeof action === "function" ? action(current[field]) : action
+                return { ...current, [field]: value }
+            })
+    const {
+        periodMonth,
+        currency,
+        cursor,
+        asOfDraft,
+        asOf,
+        evidenceId,
+        sourceKind,
+        sourceRef,
+        sourceRevision,
+        fingerprint,
+        intakeRevision,
+        intentId,
+        itemId,
+        policyRevision,
+        evidenceIds,
+        itemRevision,
+        oldAttemptId,
+        notStartedProofRef,
+        newAttemptId,
+        exceptionId,
+        choiceCode,
+        questionReason,
+        questionEvidenceRefs,
+        exceptionRevision,
+        resultId,
+        correctionId,
+        predecessorResultId,
+        correctedAmount,
+        correctedCounterparty,
+        correctionReason,
+        correctionEvidenceRefs,
+        correctionRevision,
+        appendAttemptId,
+    } = form
+    const setPeriodMonth = fieldSetter("periodMonth")
+    const setCurrency = fieldSetter("currency")
+    const setCursor = fieldSetter("cursor")
+    const setAsOfDraft = fieldSetter("asOfDraft")
+    const setAsOf = fieldSetter("asOf")
+    const setEvidenceId = fieldSetter("evidenceId")
+    const setSourceKind = fieldSetter("sourceKind")
+    const setSourceRef = fieldSetter("sourceRef")
+    const setSourceRevision = fieldSetter("sourceRevision")
+    const setFingerprint = fieldSetter("fingerprint")
+    const setIntakeRevision = fieldSetter("intakeRevision")
+    const setIntentId = fieldSetter("intentId")
+    const setItemId = fieldSetter("itemId")
+    const setPolicyRevision = fieldSetter("policyRevision")
+    const setEvidenceIds = fieldSetter("evidenceIds")
+    const setItemRevision = fieldSetter("itemRevision")
+    const setOldAttemptId = fieldSetter("oldAttemptId")
+    const setNotStartedProofRef = fieldSetter("notStartedProofRef")
+    const setNewAttemptId = fieldSetter("newAttemptId")
+    const setExceptionId = fieldSetter("exceptionId")
+    const setChoiceCode = fieldSetter("choiceCode")
+    const setQuestionReason = fieldSetter("questionReason")
+    const setQuestionEvidenceRefs = fieldSetter("questionEvidenceRefs")
+    const setExceptionRevision = fieldSetter("exceptionRevision")
+    const setResultId = fieldSetter("resultId")
+    const setCorrectionId = fieldSetter("correctionId")
+    const setPredecessorResultId = fieldSetter("predecessorResultId")
+    const setCorrectedAmount = fieldSetter("correctedAmount")
+    const setCorrectedCounterparty = fieldSetter("correctedCounterparty")
+    const setCorrectionReason = fieldSetter("correctionReason")
+    const setCorrectionEvidenceRefs = fieldSetter("correctionEvidenceRefs")
+    const setCorrectionRevision = fieldSetter("correctionRevision")
+    const setAppendAttemptId = fieldSetter("appendAttemptId")
     const workbenchCommand = useWorkbenchCommand({
         refusal: (code, reason) => t(accountingRefusalKey(code), { reason }),
         unsettled: t("refusal.unsettled"),
@@ -177,18 +281,19 @@ export const useAccountingWorkbench = (moduleId: string, locale: string, t: Acco
     const detailInput: AccountingResultDetailInput =
         asOf === null ? { action: "current", resultId } : { action: "asOf", itemId, asOf }
 
-    const summary = useQueryAccountingSummarySwr(addressable, summaryInput, ready && period !== null)
-    const evidence = useQueryAccountingEvidenceSwr(addressable, { evidenceId }, ready && evidenceId.length > 0)
-    const routine = useQueryAccountingRoutineResultSwr(addressable, { intentId }, ready && intentId.length > 0)
-    const detail = useQueryAccountingResultDetailSwr(
+    const { summary, evidence, routine, detail } = useAccountingWorkbenchReads({
         addressable,
+        summaryInput,
         detailInput,
-        ready && (asOf === null ? resultId.length > 0 : itemId.length > 0),
-    )
-    const admit = useMutateAccountingAdmitEvidenceSwr(addressable, ready)
-    const routineCommand = useMutateAccountingRoutineSwr(addressable, ready)
-    const exceptionCommand = useMutateAccountingExceptionSwr(addressable, ready)
-    const correction = useMutateAccountingCorrectSwr(addressable, ready)
+        ready,
+        periodReady: period !== null,
+        evidenceId,
+        intentId,
+        resultId,
+        asOf,
+        itemId,
+    })
+    const { admit, routineCommand, exceptionCommand, correction } = useAccountingWorkbenchCommands(addressable, ready)
 
     const summaryModel = summary.data?.ok === true ? parseAccountingSummaryReading(summary.data.data.payload) : null
     const evidenceModel = evidence.data?.ok === true ? parseAccountingEvidenceReading(evidence.data.data.payload) : null

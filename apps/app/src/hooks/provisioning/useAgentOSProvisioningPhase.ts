@@ -1,4 +1,3 @@
-"use client"
 
 import { useFormatter, useTranslations } from "next-intl"
 import { useQueryMyAgentosAiKnowledgeReadinessSwr } from "@/hooks"

@@ -1,33 +1,8 @@
-"use client"
-
-import {
-    readAccountingSummary,
-    type AccountingInstallationScope,
-    type AccountingSummaryQueryInput,
-} from "@/modules/api/accounting"
+import { readAccountingSummary, type AccountingInstallationScope, type AccountingSummaryQueryInput } from "@/modules/api/accounting"
 import { operationReadIdentity } from "@/modules/api/operation-route"
 import { useAccessToken } from "../../auth/useAccessToken"
 import { useNivoQuery } from "../useNivoQuery"
-import { type NivoQueryKey } from "../swr.shared"
-
-/* One hook per file, one registered read per hook. */
-
-/** Cache identity for one summary page inside one installation. */
-export const accountingSummaryQueryKey = (
-    scope: AccountingInstallationScope,
-    input: AccountingSummaryQueryInput,
-): NivoQueryKey => [
-    "accounting",
-    "summary",
-    scope.workspaceId,
-    scope.instanceId,
-    scope.installationId,
-    input.periodStart,
-    input.periodEndExclusive,
-    input.currency ?? "all-currencies",
-    input.pageSize,
-    input.cursor ?? "first-page",
-]
+import { accountingSummaryQueryKey } from "./queries.shared"
 
 /**
  * Read one canonical summary period with its explicit partial coverage and continuation.

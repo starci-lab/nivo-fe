@@ -9,10 +9,8 @@ const mocks = vi.hoisted(() => ({
 vi.mock("../useNivoQuery", () => ({ useNivoQuery: mocks.useNivoQuery }))
 vi.mock("@/modules/api/workspace-controlplane", () => mocks.api)
 
-import {
-    useQueryWorkspaceCheckoutOffersSwr,
-    workspaceCheckoutOffersQueryKey,
-} from "./useQueryWorkspaceCheckoutOffersSwr"
+import { useQueryWorkspaceCheckoutOffersSwr } from "./useQueryWorkspaceCheckoutOffersSwr"
+import { workspaceCheckoutOffersQueryKey } from "./queries.shared"
 
 describe("useQueryWorkspaceCheckoutOffersSwr", () => {
     it("keys one offer selection by the exact offer identity and version presented", () => {

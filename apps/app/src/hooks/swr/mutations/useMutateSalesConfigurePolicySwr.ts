@@ -1,4 +1,3 @@
-"use client"
 
 import {
     commandSalesConfigurePolicy,
@@ -8,7 +7,7 @@ import {
 import { operationMutationKey, operationAnswerNeedsRead, type OperationTrigger } from "@/modules/api/operation-route"
 import { useAccessToken } from "../../auth/useAccessToken"
 import { useNivoMutation } from "../useNivoMutation"
-import { salesPolicyQueryKey } from "../queries/useQuerySalesPolicySwr"
+import { salesPolicyQueryKey } from "../queries/queries.shared"
 
 /*
  * One hook per file, one registered command per hook.

@@ -27,7 +27,7 @@ const mocks = vi.hoisted(() => ({
     setActionRefused: vi.fn(),
 }))
 
-vi.mock("@/hooks/swr/mutations/console", () => ({
+vi.mock("@/hooks/swr/mutations/useMutateRunAgentosModuleTestSwr", () => ({
     useMutateRunAgentosModuleTestSwr: () => ({ trigger: mocks.trigger }),
 }))
 vi.mock("@/hooks/swr/queries/useQueryMyAgentosModuleTestRunSwr", () => ({
@@ -39,9 +39,9 @@ vi.mock("@/hooks/swr/queries/useQueryMyAgentosModuleTestRunSwr", () => ({
 import type { SWRResponse } from "swr"
 import { useModuleTestRun } from "./useModuleTestRun"
 
-const surfaceQuery = { mutate: mocks.surfaceMutate } as unknown as SWRResponse<
-    Outcome<AgentosModuleTestSurface>,
-    Error
+const surfaceQuery = { mutate: mocks.surfaceMutate } satisfies Pick<
+    SWRResponse<Outcome<AgentosModuleTestSurface>, Error>,
+    "mutate"
 >
 
 const input = () => ({

@@ -1,5 +1,3 @@
-"use client"
-
 /*
  * The connected AgentOS management shell (CU-SHELL-CONNECTED).
  *

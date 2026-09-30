@@ -1,4 +1,3 @@
-"use client"
 import { myAgentWorkspace } from "@/modules/api/agentos-workspaces"
 import { useNivoQuery } from "../useNivoQuery"
 import { QUERY_AGENT_WORKSPACES_SWR_KEY } from "../swr.shared"

@@ -1,29 +1,8 @@
-"use client"
-
-import {
-    readAccountingRoutineResult,
-    type AccountingInstallationScope,
-    type AccountingRoutineResultInput,
-} from "@/modules/api/accounting"
+import { readAccountingRoutineResult, type AccountingInstallationScope, type AccountingRoutineResultInput } from "@/modules/api/accounting"
 import { operationReadIdentity } from "@/modules/api/operation-route"
 import { useAccessToken } from "../../auth/useAccessToken"
 import { useNivoQuery } from "../useNivoQuery"
-import { type NivoQueryKey } from "../swr.shared"
-
-/* One hook per file, one registered read per hook. */
-
-/** Cache identity for one routine intent inside one installation. */
-export const accountingRoutineResultQueryKey = (
-    scope: AccountingInstallationScope,
-    input: AccountingRoutineResultInput,
-): NivoQueryKey => [
-    "accounting",
-    "routine-result",
-    scope.workspaceId,
-    scope.instanceId,
-    scope.installationId,
-    input.intentId,
-]
+import { accountingRoutineResultQueryKey } from "./queries.shared"
 
 /**
  * Read the stable state of one routine intent, the only read an uncertain routine is reconciled by.

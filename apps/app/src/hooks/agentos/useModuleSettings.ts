@@ -1,7 +1,5 @@
-"use client"
-
 import { useCallback, useState } from "react"
-import { useMutateConfigureAgentWorkspaceChannelSwr } from "../swr/mutations/console"
+import { useMutateConfigureAgentWorkspaceChannelSwr } from "../swr/mutations/useMutateConfigureAgentWorkspaceChannelSwr"
 import type { AgentosModuleRuntime } from "../../modules/api/agentos-module-runtime"
 import type { AgentosRuntimeValue } from "../../modules/api/agentos-runtime-tree"
 import type { AgentOSModuleView } from "../../components/blocks/agentos/ModuleRouteShellBlock"

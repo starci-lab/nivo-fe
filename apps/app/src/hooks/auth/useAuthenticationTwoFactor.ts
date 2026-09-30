@@ -1,7 +1,6 @@
-"use client"
 
 import { useCallback, useRef } from "react"
-import { useMutateVerifyTwoFactorSwr } from "@/hooks/swr/mutations/auth"
+import { useMutateVerifyTwoFactorSwr } from "@/hooks/swr/mutations/useMutateVerifyTwoFactorSwr"
 import type { AuthFactor } from "@/components/blocks/auth/AuthenticationPanel"
 import type { Session } from "@/modules/auth/session"
 import type { AuthenticationFlowControl, AuthenticationTranslate } from "./auth.shared"

@@ -1,4 +1,3 @@
-"use client"
 
 import { useState } from "react"
 import type { CollabApprovalCardView, CollabApprovalDecision, CollabTaskView, CollabTaskQuestionView } from "../../modules/api/collab"

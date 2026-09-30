@@ -1,4 +1,3 @@
-"use client"
 
 import { continueBrokeredSignIn } from "@/modules/api/auth"
 import { useAuthMutation } from "../useAuthMutation"

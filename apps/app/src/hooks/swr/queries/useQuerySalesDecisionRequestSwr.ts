@@ -1,33 +1,8 @@
-"use client"
-
-import {
-    readSalesDecisionRequest,
-    type SalesDecisionRequestRequest,
-    type SalesInstallationScope,
-} from "@/modules/api/sales"
+import { readSalesDecisionRequest, type SalesDecisionRequestRequest, type SalesInstallationScope } from "@/modules/api/sales"
 import { operationReadIdentity } from "@/modules/api/operation-route"
 import { useAccessToken } from "../../auth/useAccessToken"
 import { useNivoQuery } from "../useNivoQuery"
-import { type NivoQueryKey } from "../swr.shared"
-
-/*
- * One hook per file, one registered read per hook: this file names exactly one Sales operation, its
- * cache identity and the stable read identity the route echoes. This is the read a decision answer
- * is reconciled by, so an answered proposal is settled from its own committed state.
- */
-
-/** Cache identity for one decision request inside one installation. */
-export const salesDecisionRequestQueryKey = (
-    scope: SalesInstallationScope,
-    input: SalesDecisionRequestRequest,
-): NivoQueryKey => [
-    "sales",
-    "decision-request",
-    scope.workspaceId,
-    scope.instanceId,
-    scope.installationId,
-    input.decisionRequestId,
-]
+import { salesDecisionRequestQueryKey } from "./queries.shared"
 
 /**
  * Read one decision request's committed state.

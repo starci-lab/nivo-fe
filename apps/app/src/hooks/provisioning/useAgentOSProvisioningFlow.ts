@@ -1,4 +1,3 @@
-"use client"
 
 import { useCallback, useEffect } from "react"
 import { useTranslations } from "next-intl"
@@ -75,20 +74,6 @@ export const useAgentOSProvisioningFlow = (input: UseAgentOSProvisioningFlowInpu
         if (eventKind === "order" && eventId === orderId) void reconcile()
         if (eventKind === "workspace" && eventId === readyWorkspaceId) void reconcile()
     }, [eventId, eventKey, eventKind, isResume, orderId, readyWorkspaceId, reconcile])
-
-    useEffect(() => {
-        if (
-            !isResume ||
-            (flow.phase !== "awaiting_payment" &&
-                flow.phase !== "accepted" &&
-                flow.phase !== "preparing" &&
-                flow.phase !== "payment_unknown" &&
-                flow.phase !== "provisioning_unknown")
-        )
-            return
-        const timer = window.setInterval(() => void reconcile(), 4_000)
-        return () => window.clearInterval(timer)
-    }, [flow.phase, isResume, reconcile])
 
     useEffect(() => {
         if (!isResume || realtime.status !== "connected" || flow.phase === "catalog_loading") return

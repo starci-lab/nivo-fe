@@ -18,10 +18,16 @@ const mocks = vi.hoisted(() => ({
     },
 }))
 
-vi.mock("@/hooks/swr/mutations/auth", () => ({
+vi.mock("@/hooks/swr/mutations/useMutateForgotPasswordInitSwr", () => ({
     useMutateForgotPasswordInitSwr: () => ({ trigger: mocks.forgotPasswordInit }),
+}))
+vi.mock("@/hooks/swr/mutations/useMutateSignInSwr", () => ({
     useMutateSignInSwr: () => ({ trigger: mocks.signIn }),
+}))
+vi.mock("@/hooks/swr/mutations/useMutateSignUpInitSwr", () => ({
     useMutateSignUpInitSwr: () => ({ trigger: mocks.signUpInit }),
+}))
+vi.mock("@/hooks/swr/mutations/useOauthReturnExchange", () => ({
     useOauthReturnExchange: () => ({ answer: undefined, isMutating: false }),
 }))
 vi.mock("@/hooks/swr/mutations/useMutateContinueBrokeredSignInSwr", () => ({

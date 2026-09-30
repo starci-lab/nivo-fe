@@ -1,20 +1,24 @@
+import { runAndReadMock } from "@/test-support/mock-result"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 
+type NivoQueryMockOptions = {
+    readonly refreshInterval?: number | ((data: unknown, error?: unknown) => number)
+}
+
 const { useNivoQuery } = vi.hoisted(() => ({
-    useNivoQuery: vi.fn((key: unknown, query: unknown, options?: unknown) => ({ key, query, options })),
+    useNivoQuery: vi.fn((key: unknown, query: (...args: Array<unknown>) => unknown, options?: NivoQueryMockOptions) => ({ key, query, options })),
 }))
 vi.mock("../useNivoQuery", () => ({ useNivoQuery }))
 
 import { useQueryMyPodOpenclawStatusSwr } from "./useQueryMyPodOpenclawStatusSwr"
 import { QUERY_POD_OPENCLAW_STATUS_SWR_KEY } from "../swr.shared"
 
-type QueryMockResult = { readonly key: unknown }
 
 describe("useQueryMyPodOpenclawStatusSwr", () => {
     beforeEach(() => vi.clearAllMocks())
 
     it("uses its shared SWR key", () => {
-        const result = useQueryMyPodOpenclawStatusSwr() as unknown as QueryMockResult
+        const result = runAndReadMock(() => useQueryMyPodOpenclawStatusSwr(), useNivoQuery)
         expect(result.key).toEqual(QUERY_POD_OPENCLAW_STATUS_SWR_KEY)
         expect(useNivoQuery).toHaveBeenCalledOnce()
     })

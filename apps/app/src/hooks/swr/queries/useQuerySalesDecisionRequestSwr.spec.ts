@@ -12,7 +12,8 @@ vi.mock("../useNivoQuery", () => ({ useNivoQuery: mocks.useNivoQuery }))
 vi.mock("@/hooks/auth/useSession", () => ({ useSession: mocks.useSession }))
 vi.mock("@/modules/api/sales", () => mocks.api)
 
-import { salesDecisionRequestQueryKey, useQuerySalesDecisionRequestSwr } from "./useQuerySalesDecisionRequestSwr"
+import { useQuerySalesDecisionRequestSwr } from "./useQuerySalesDecisionRequestSwr"
+import { salesDecisionRequestQueryKey } from "./queries.shared"
 
 const SCOPE = { workspaceId: "workspace-1", instanceId: "instance-1", installationId: "installation-1" }
 

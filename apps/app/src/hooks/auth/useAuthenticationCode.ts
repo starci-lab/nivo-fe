@@ -1,12 +1,9 @@
-"use client"
 
 import { useCallback, useEffect, useState } from "react"
-import {
-    useMutateForgotPasswordResendSwr,
-    useMutateForgotPasswordVerifyOtpSwr,
-    useMutateSignUpResendSwr,
-    useMutateSignUpVerifyOtpSwr,
-} from "@/hooks/swr/mutations/auth"
+import { useMutateForgotPasswordResendSwr } from "@/hooks/swr/mutations/useMutateForgotPasswordResendSwr"
+import { useMutateForgotPasswordVerifyOtpSwr } from "@/hooks/swr/mutations/useMutateForgotPasswordVerifyOtpSwr"
+import { useMutateSignUpResendSwr } from "@/hooks/swr/mutations/useMutateSignUpResendSwr"
+import { useMutateSignUpVerifyOtpSwr } from "@/hooks/swr/mutations/useMutateSignUpVerifyOtpSwr"
 import type { AuthCode, AuthMode } from "@/components/blocks/auth/AuthenticationPanel"
 import type { OtpChallenge } from "@/modules/api/auth"
 import { noticeForConclusion } from "@/modules/auth/authentication"

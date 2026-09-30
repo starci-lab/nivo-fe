@@ -1,10 +1,9 @@
-"use client"
 
 import { commandSalesClose, type SalesCloseRequest, type SalesInstallationScope } from "@/modules/api/sales"
 import { operationMutationKey, operationAnswerNeedsRead, type OperationTrigger } from "@/modules/api/operation-route"
 import { useAccessToken } from "../../auth/useAccessToken"
 import { useNivoMutation } from "../useNivoMutation"
-import { salesOpportunityQueryKey } from "../queries/useQuerySalesOpportunitySwr"
+import { salesOpportunityQueryKey } from "../queries/queries.shared"
 
 /*
  * One hook per file, one registered command per hook.

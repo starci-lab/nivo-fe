@@ -11,11 +11,8 @@ vi.mock("../useNivoQuery", () => ({ useNivoQuery }))
 vi.mock("../../auth/useAccessToken", () => ({ useAccessToken }))
 vi.mock("@/modules/api/workspace-controlplane", () => ({ chatbotWorkbench }))
 
-import {
-    chatbotWorkbenchQueryKey,
-    useQueryChatbotWorkbenchSwr,
-    type SupportQueryIdentity,
-} from "./useQueryChatbotWorkbenchSwr"
+import { useQueryChatbotWorkbenchSwr } from "./useQueryChatbotWorkbenchSwr"
+import { chatbotWorkbenchQueryKey, type SupportQueryIdentity } from "./queries.shared"
 
 const identity: SupportQueryIdentity = {
     hostname: "agent-workspace.nivo.vn",

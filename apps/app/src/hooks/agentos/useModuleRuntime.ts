@@ -1,7 +1,5 @@
-"use client"
-
 import { useCallback, useRef, useState } from "react"
-import { useMutateManageAgentosModuleRuntimeSwr } from "../swr/mutations/console"
+import { useMutateManageAgentosModuleRuntimeSwr } from "../swr/mutations/useMutateManageAgentosModuleRuntimeSwr"
 import { useQueryMyAgentWorkspaceControlCenterSwr } from "../swr/queries/useQueryMyAgentWorkspaceControlCenterSwr"
 import { useQueryMyAgentosModuleRuntimeSwr } from "../swr/queries/useQueryMyAgentosModuleRuntimeSwr"
 import { useQueryMyAgentosModuleTestSurfaceSwr } from "../swr/queries/useQueryMyAgentosModuleTestSurfaceSwr"
@@ -86,6 +84,7 @@ export const useModuleRuntime = (input: ModuleRuntimeQueryInput) => {
         onError: settleFailed,
     })
     const runtimeMutation = useMutateManageAgentosModuleRuntimeSwr(installationId)
+    const triggerRuntime = runtimeMutation.trigger
     const testSurfaceQuery = useQueryMyAgentosModuleTestSurfaceSwr(
         installationId,
         view === "test" || view === "setup",
@@ -102,6 +101,7 @@ export const useModuleRuntime = (input: ModuleRuntimeQueryInput) => {
         ["chatbot", "agentos-chatbot", "multichannel-chatbot"].includes(runtime.installation.moduleKey)
     const chatbotEnabled = view === "operate" && isChatbotInstallation
     const controlCenter = useQueryMyAgentWorkspaceControlCenterSwr(workspaceId, chatbotEnabled)
+    const mutateRuntime = runtimeQuery.mutate
     const chatbotIdentity = {
         hostname: controllerHostnameForWorkspace(controlCenter.data, workspaceId),
         workspaceId,
@@ -113,18 +113,18 @@ export const useModuleRuntime = (input: ModuleRuntimeQueryInput) => {
         async (command: ManageAgentosModuleRuntimeInput, markRefused = true): Promise<AgentosModuleRuntime | null> => {
             setPending(true)
             setActionRefused(false)
-            const result = await runtimeMutation.trigger(command)
+            const result = await triggerRuntime(command)
             setPending(false)
             if (!result.ok || result.data.installation.agentWorkspaceId !== workspaceId) {
                 if (markRefused) setActionRefused(true)
                 return null
             }
-            await runtimeQuery.mutate(result, {
+            await mutateRuntime(result, {
                 revalidate: false,
             })
             return result.data
         },
-        [runtimeMutation.trigger, runtimeQuery, workspaceId],
+        [mutateRuntime, triggerRuntime, workspaceId],
     )
     const settleRuntime = useCallback(
         (

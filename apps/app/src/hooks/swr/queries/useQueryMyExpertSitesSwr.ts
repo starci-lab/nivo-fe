@@ -1,4 +1,3 @@
-"use client"
 import { myExpertSites } from "@/modules/api/expert-sites"
 import { useNivoQuery } from "../useNivoQuery"
 import { QUERY_EXPERT_SITES_SWR_KEY } from "../swr.shared"

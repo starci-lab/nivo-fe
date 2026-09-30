@@ -1,4 +1,3 @@
-"use client"
 import { myCatalogOrders } from "@/modules/api/commerce"
 import { useNivoQuery } from "../useNivoQuery"
 import { QUERY_CATALOG_ORDERS_SWR_KEY } from "../swr.shared"

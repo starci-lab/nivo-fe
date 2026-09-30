@@ -1,4 +1,3 @@
-"use client"
 
 import { useEffect } from "react"
 import { scrollToElement } from "./collab.shared"

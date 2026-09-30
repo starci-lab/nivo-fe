@@ -10,10 +10,16 @@ const mocks = vi.hoisted(() => ({
     signUpVerify: vi.fn(),
 }))
 
-vi.mock("@/hooks/swr/mutations/auth", () => ({
+vi.mock("@/hooks/swr/mutations/useMutateForgotPasswordResendSwr", () => ({
     useMutateForgotPasswordResendSwr: () => ({ trigger: mocks.forgotResend }),
+}))
+vi.mock("@/hooks/swr/mutations/useMutateForgotPasswordVerifyOtpSwr", () => ({
     useMutateForgotPasswordVerifyOtpSwr: () => ({ trigger: mocks.forgotVerify }),
+}))
+vi.mock("@/hooks/swr/mutations/useMutateSignUpResendSwr", () => ({
     useMutateSignUpResendSwr: () => ({ trigger: mocks.signUpResend }),
+}))
+vi.mock("@/hooks/swr/mutations/useMutateSignUpVerifyOtpSwr", () => ({
     useMutateSignUpVerifyOtpSwr: () => ({ trigger: mocks.signUpVerify }),
 }))
 

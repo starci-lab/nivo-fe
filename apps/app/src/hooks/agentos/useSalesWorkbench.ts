@@ -1,6 +1,4 @@
-"use client"
-
-import { useState } from "react"
+import { useState, type SetStateAction } from "react"
 import { useParams } from "next/navigation"
 import type {
     SalesClarificationFact,
@@ -12,17 +10,6 @@ import type {
 } from "@/modules/api/sales"
 import { nivoQueryPayload } from "@/modules/query"
 import { useQueryMyAgentWorkspaceControlCenterSwr } from "@/hooks/swr/queries/useQueryMyAgentWorkspaceControlCenterSwr"
-import { useQuerySalesReadinessSwr } from "@/hooks/swr/queries/useQuerySalesReadinessSwr"
-import { useQuerySalesPolicySwr } from "@/hooks/swr/queries/useQuerySalesPolicySwr"
-import { useQuerySalesPipelineSwr } from "@/hooks/swr/queries/useQuerySalesPipelineSwr"
-import { useQuerySalesOpportunitySwr } from "@/hooks/swr/queries/useQuerySalesOpportunitySwr"
-import { useQuerySalesCommandSwr } from "@/hooks/swr/queries/useQuerySalesCommandSwr"
-import { useQuerySalesActionSwr } from "@/hooks/swr/queries/useQuerySalesActionSwr"
-import { useMutateSalesConfigurePolicySwr } from "@/hooks/swr/mutations/useMutateSalesConfigurePolicySwr"
-import { useMutateSalesSubmitCommandSwr } from "@/hooks/swr/mutations/useMutateSalesSubmitCommandSwr"
-import { useMutateSalesClarifyCommandSwr } from "@/hooks/swr/mutations/useMutateSalesClarifyCommandSwr"
-import { useMutateSalesCloseSwr } from "@/hooks/swr/mutations/useMutateSalesCloseSwr"
-import { useMutateSalesRecoverActionSwr } from "@/hooks/swr/mutations/useMutateSalesRecoverActionSwr"
 import {
     salesActionIdentityOf,
     salesActionStatusKey,
@@ -51,6 +38,8 @@ import {
     parseSalesReadinessValue,
 } from "@/modules/api/sales/payload.guards"
 import { useWorkbenchCommand } from "./useWorkbenchCommand"
+import { useSalesWorkbenchCommands } from "./useSalesWorkbenchCommands"
+import { useSalesWorkbenchReads } from "./useSalesWorkbenchReads"
 
 /*
  * The connected Sales workbench (impl.sales.nivo-fe.opportunity-workbench-view).
@@ -76,6 +65,35 @@ import { useWorkbenchCommand } from "./useWorkbenchCommand"
 
 const PAGE_SIZE = 20
 
+type SalesWorkbenchFormState = {
+    readonly cursor: string | null
+    readonly opportunityId: string
+    readonly commandId: string
+    readonly commandRevision: string
+    readonly customerRefs: string
+    readonly opportunityIds: string
+    readonly offerRefs: string
+    readonly requestedActions: string
+    readonly commandFingerprint: string
+    readonly expectedRevisions: string
+    readonly clarificationRevision: string
+    readonly factKind: "customerRef" | "opportunityId"
+    readonly factValue: string
+    readonly actionId: string
+    readonly attemptGeneration: string
+    readonly actionRevision: string
+    readonly receiverIntentId: string
+    readonly receiverAttemptId: string
+    readonly recoveryFingerprint: string
+    readonly closeIntentId: string
+    readonly closeOutcome: SalesCloseRequest["outcome"]
+    readonly closeEvidenceRefs: string
+    readonly closeOrderId: string
+    readonly closeRevision: string
+    readonly policyRevision: string
+    readonly policyCadence: string
+}
+
 /** One read's served value, or null when it has not answered with one. */
 const answered = <TValue>(
     answer: SalesAnswerStanding | undefined,
@@ -100,9 +118,6 @@ const pipelinePageOf = (scopeFingerprint: string, cursor: string | null): SalesP
     after: cursor === null ? null : { lastOpportunityId: cursor },
     limit: PAGE_SIZE,
 })
-
-/** Whether one named selector may be addressed at all. */
-const named = (ready: boolean, identity: string): boolean => ready && identity.length > 0
 
 /** One integer control as a usable revision, or null while it holds none. */
 const integerOrNull = (value: string): number | null => (Number.isSafeInteger(Number(value)) ? Number(value) : null)
@@ -190,32 +205,94 @@ export const useSalesWorkbench = (moduleId: string, locale: string, t: SalesTran
     const ready = scope !== null
     const scopeFingerprint = scopeFingerprintOf(scope)
 
-    const [cursor, setCursor] = useState<string | null>(null)
-    const [opportunityId, setOpportunityId] = useState("")
-    const [commandId, setCommandId] = useState("")
-    const [commandRevision, setCommandRevision] = useState("1")
-    const [customerRefs, setCustomerRefs] = useState("")
-    const [opportunityIds, setOpportunityIds] = useState("")
-    const [offerRefs, setOfferRefs] = useState("")
-    const [requestedActions, setRequestedActions] = useState("")
-    const [commandFingerprint, setCommandFingerprint] = useState("")
-    const [expectedRevisions, setExpectedRevisions] = useState("")
-    const [clarificationRevision, setClarificationRevision] = useState("1")
-    const [factKind, setFactKind] = useState<"customerRef" | "opportunityId">("opportunityId")
-    const [factValue, setFactValue] = useState("")
-    const [actionId, setActionId] = useState("")
-    const [attemptGeneration, setAttemptGeneration] = useState("1")
-    const [actionRevision, setActionRevision] = useState("1")
-    const [receiverIntentId, setReceiverIntentId] = useState("")
-    const [receiverAttemptId, setReceiverAttemptId] = useState("")
-    const [recoveryFingerprint, setRecoveryFingerprint] = useState("")
-    const [closeIntentId, setCloseIntentId] = useState("")
-    const [closeOutcome, setCloseOutcome] = useState<SalesCloseRequest["outcome"]>("won")
-    const [closeEvidenceRefs, setCloseEvidenceRefs] = useState("")
-    const [closeOrderId, setCloseOrderId] = useState("")
-    const [closeRevision, setCloseRevision] = useState("1")
-    const [policyRevision, setPolicyRevision] = useState("")
-    const [policyCadence, setPolicyCadence] = useState("")
+    const [form, setForm] = useState<SalesWorkbenchFormState>({
+        cursor: null,
+        opportunityId: "",
+        commandId: "",
+        commandRevision: "1",
+        customerRefs: "",
+        opportunityIds: "",
+        offerRefs: "",
+        requestedActions: "",
+        commandFingerprint: "",
+        expectedRevisions: "",
+        clarificationRevision: "1",
+        factKind: "opportunityId",
+        factValue: "",
+        actionId: "",
+        attemptGeneration: "1",
+        actionRevision: "1",
+        receiverIntentId: "",
+        receiverAttemptId: "",
+        recoveryFingerprint: "",
+        closeIntentId: "",
+        closeOutcome: "won",
+        closeEvidenceRefs: "",
+        closeOrderId: "",
+        closeRevision: "1",
+        policyRevision: "",
+        policyCadence: "",
+    })
+    const fieldSetter = <TField extends keyof SalesWorkbenchFormState>(field: TField) =>
+        (action: SetStateAction<SalesWorkbenchFormState[TField]>) =>
+            setForm((current) => {
+                const value = typeof action === "function" ? action(current[field]) : action
+                return { ...current, [field]: value }
+            })
+    const {
+        cursor,
+        opportunityId,
+        commandId,
+        commandRevision,
+        customerRefs,
+        opportunityIds,
+        offerRefs,
+        requestedActions,
+        commandFingerprint,
+        expectedRevisions,
+        clarificationRevision,
+        factKind,
+        factValue,
+        actionId,
+        attemptGeneration,
+        actionRevision,
+        receiverIntentId,
+        receiverAttemptId,
+        recoveryFingerprint,
+        closeIntentId,
+        closeOutcome,
+        closeEvidenceRefs,
+        closeOrderId,
+        closeRevision,
+        policyRevision,
+        policyCadence,
+    } = form
+    const setCursor = fieldSetter("cursor")
+    const setOpportunityId = fieldSetter("opportunityId")
+    const setCommandId = fieldSetter("commandId")
+    const setCommandRevision = fieldSetter("commandRevision")
+    const setCustomerRefs = fieldSetter("customerRefs")
+    const setOpportunityIds = fieldSetter("opportunityIds")
+    const setOfferRefs = fieldSetter("offerRefs")
+    const setRequestedActions = fieldSetter("requestedActions")
+    const setCommandFingerprint = fieldSetter("commandFingerprint")
+    const setExpectedRevisions = fieldSetter("expectedRevisions")
+    const setClarificationRevision = fieldSetter("clarificationRevision")
+    const setFactKind = fieldSetter("factKind")
+    const setFactValue = fieldSetter("factValue")
+    const setActionId = fieldSetter("actionId")
+    const setAttemptGeneration = fieldSetter("attemptGeneration")
+    const setActionRevision = fieldSetter("actionRevision")
+    const setReceiverIntentId = fieldSetter("receiverIntentId")
+    const setReceiverAttemptId = fieldSetter("receiverAttemptId")
+    const setRecoveryFingerprint = fieldSetter("recoveryFingerprint")
+    const setCloseIntentId = fieldSetter("closeIntentId")
+    const setCloseOutcome = fieldSetter("closeOutcome")
+    const setCloseEvidenceRefs = fieldSetter("closeEvidenceRefs")
+    const setCloseOrderId = fieldSetter("closeOrderId")
+    const setCloseRevision = fieldSetter("closeRevision")
+    const setPolicyRevision = fieldSetter("policyRevision")
+    const setPolicyCadence = fieldSetter("policyCadence")
     const workbenchCommand = useWorkbenchCommand({
         refusal: (code, reason) => t(salesRefusalKey(code), { reason }),
         unsettled: t("refusal.unsettled"),
@@ -224,22 +301,17 @@ export const useSalesWorkbench = (moduleId: string, locale: string, t: SalesTran
     })
 
     const pipelineInput = pipelinePageOf(scopeFingerprint, cursor)
-    const pipeline = useQuerySalesPipelineSwr(addressable, pipelineInput, ready)
-    const readiness = useQuerySalesReadinessSwr(addressable, { salesInstallationId: routeInstallationId }, ready)
-    const policy = useQuerySalesPolicySwr(
+    const { pipeline, readiness, policy, opportunity, command, action } = useSalesWorkbenchReads({
         addressable,
-        { salesInstallationId: routeInstallationId, requestId: null },
+        pipelineInput,
+        routeInstallationId,
+        opportunityId,
+        commandId,
+        actionId,
         ready,
-    )
-    const opportunity = useQuerySalesOpportunitySwr(addressable, { opportunityId }, named(ready, opportunityId))
-    const command = useQuerySalesCommandSwr(addressable, { commandId }, named(ready, commandId))
-    const action = useQuerySalesActionSwr(addressable, { actionId }, named(ready, actionId))
-
-    const configurePolicy = useMutateSalesConfigurePolicySwr(addressable, ready)
-    const submitCommand = useMutateSalesSubmitCommandSwr(addressable, ready)
-    const clarifyCommand = useMutateSalesClarifyCommandSwr(addressable, ready)
-    const closeOpportunity = useMutateSalesCloseSwr(addressable, ready)
-    const recoverAction = useMutateSalesRecoverActionSwr(addressable, ready)
+    })
+    const { configurePolicy, submitCommand, clarifyCommand, closeOpportunity, recoverAction } =
+        useSalesWorkbenchCommands(addressable, ready)
 
     const pipelineModel = answered(pipeline.data, parseSalesPipelineValue)
     const readinessModel = answered(readiness.data, parseSalesReadinessValue)

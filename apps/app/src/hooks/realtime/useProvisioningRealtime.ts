@@ -1,4 +1,3 @@
-"use client"
 
 import { useEffect, useRef, useState } from "react"
 import { io, type Socket } from "socket.io-client"
@@ -9,8 +8,6 @@ import {
     type ProvisioningRealtimeState,
     type ProvisioningTarget,
 } from "./realtime.shared"
-
-export type { ProvisioningTarget, ProvisioningEvent, ProvisioningRealtimeState } from "./realtime.shared"
 
 /** Inputs required to subscribe to exactly one provisioning subject. */
 type UseProvisioningRealtimeInput = {

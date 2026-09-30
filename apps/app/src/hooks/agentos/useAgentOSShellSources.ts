@@ -1,5 +1,3 @@
-"use client"
-
 /*
  * The AgentOS shell's source-reading half (CU-SHELL-CONNECTED).
  *

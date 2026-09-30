@@ -19,7 +19,8 @@ vi.mock("@/modules/api/instances", () => mocks.api)
 vi.mock("@/modules/api/commerce", () => mocks.api)
 vi.mock("@/modules/api/agentos-workspaces", () => mocks.api)
 
-import { OverviewDataProvider, useOverviewData } from "./useOverviewData"
+import { OverviewDataProvider } from "./overview.shared"
+import { useOverviewData } from "./useOverviewData"
 
 const Probe = () => <output>{JSON.stringify(useOverviewData())}</output>
 

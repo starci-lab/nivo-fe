@@ -1,7 +1,8 @@
+import { runAndReadMock } from "@/test-support/mock-result"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 
 const { useNivoQuery, useAccessToken, api } = vi.hoisted(() => ({
-    useNivoQuery: vi.fn((key: unknown, query: unknown, options?: unknown) => ({ key, query, options })),
+    useNivoQuery: vi.fn((key: unknown, query: (...args: Array<unknown>) => unknown, options?: NivoQueryMockOptions) => ({ key, query, options })),
     useAccessToken: vi.fn((): string | null => "tok"),
     api: vi.fn(),
 }))
@@ -13,7 +14,6 @@ import { readCollabGroup } from "@/modules/api/collab"
 import { useQueryCollabGroupSwr } from "./useQueryCollabGroupSwr"
 import { QUERY_COLLAB_GROUP_SWR_KEY } from "../swr.shared"
 
-type QueryResult = { readonly key: unknown; readonly query: () => Promise<unknown>; readonly options?: unknown }
 
 describe("useQueryCollabGroupSwr", () => {
     beforeEach(() => {
@@ -23,14 +23,14 @@ describe("useQueryCollabGroupSwr", () => {
 
     it("uses its shared key and reads the exact workspace-scoped resource", async () => {
         api.mockResolvedValue({ ok: true, data: { messages: [] } })
-        const result = useQueryCollabGroupSwr("ws-1", "c-1") as unknown as QueryResult
+        const result = runAndReadMock(() => useQueryCollabGroupSwr("ws-1", "c-1"), useNivoQuery)
         expect(result.key).toEqual(QUERY_COLLAB_GROUP_SWR_KEY("ws-1", "c-1"))
         await result.query()
         expect(readCollabGroup).toHaveBeenCalledWith({ workspaceId: "ws-1", accessToken: "tok", cursor: "c-1" })
     })
 
     it("keeps the socket fallback interval supplied by the caller", () => {
-            expect(((useQueryCollabGroupSwr("ws-1") as unknown as QueryResult).options as { refreshInterval: number }).refreshInterval).toBe(0)
-            expect(((useQueryCollabGroupSwr("ws-1", undefined, 5_000) as unknown as QueryResult).options as { refreshInterval: number }).refreshInterval).toBe(5_000)
+            expect(runAndReadMock(() => useQueryCollabGroupSwr("ws-1"), useNivoQuery).options?.refreshInterval).toBe(0)
+            expect(runAndReadMock(() => useQueryCollabGroupSwr("ws-1", undefined, 5_000), useNivoQuery).options?.refreshInterval).toBe(5_000)
         })
 })

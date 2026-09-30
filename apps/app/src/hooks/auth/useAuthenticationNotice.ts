@@ -1,4 +1,3 @@
-"use client"
 
 import { useCallback, useEffect, useRef, useState } from "react"
 import { sessionEndingNotice, type AuthNoticeKind, type SessionEndingArrival } from "@/modules/auth/authentication"

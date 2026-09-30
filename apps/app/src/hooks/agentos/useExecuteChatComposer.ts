@@ -1,5 +1,3 @@
-"use client"
-
 import { useState } from "react"
 
 /** Own the editable draft and its reset identity for one Execute conversation. */

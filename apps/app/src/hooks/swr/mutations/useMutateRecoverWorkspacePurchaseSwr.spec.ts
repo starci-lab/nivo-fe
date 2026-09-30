@@ -16,7 +16,7 @@ const mocks = vi.hoisted(() => ({
 vi.mock("../useNivoMutation", () => ({ useNivoMutation: mocks.useNivoMutation }))
 vi.mock("@/modules/api/workspace-controlplane", () => mocks.api)
 
-import { workspaceCheckoutStatusQueryKey } from "../queries/useQueryWorkspaceCheckoutStatusSwr"
+import { workspaceCheckoutStatusQueryKey } from "../queries/queries.shared"
 import { useMutateRecoverWorkspacePurchaseSwr } from "./useMutateRecoverWorkspacePurchaseSwr"
 
 const RECOVER = {

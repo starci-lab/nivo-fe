@@ -1,4 +1,3 @@
-"use client"
 
 import { useState, type Dispatch, type SetStateAction } from "react"
 import { useTranslations } from "next-intl"

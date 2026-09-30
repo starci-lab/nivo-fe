@@ -1,4 +1,3 @@
-"use client"
 import type { SWRConfiguration } from "swr"
 import { myAgentosModuleTestRun, type AgentosModuleTestSurface } from "../../../modules/api/agentos-module-tests"
 import { type Outcome } from "@nivo/api"

@@ -1,4 +1,3 @@
-"use client"
 import { useCallback } from "react"
 import { myAgentosModuleTestRun } from "@/modules/api/agentos-module-tests"
 

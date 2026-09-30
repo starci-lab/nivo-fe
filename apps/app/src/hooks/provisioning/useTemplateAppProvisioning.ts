@@ -1,4 +1,3 @@
-"use client"
 
 import { useEffect, useState } from "react"
 import { useTranslations } from "next-intl"
@@ -63,12 +62,6 @@ export const useTemplateAppProvisioning = (context: TemplateAppProvisioningConte
         if (realtime.status !== "connected" || trackedSiteId === undefined) return
         void refreshDeployment()
     }, [realtime.status, refreshDeployment, trackedSiteId])
-
-    useEffect(() => {
-        if (flow.phase !== "accepted" && flow.phase !== "preparing") return
-        const timer = window.setInterval(() => void refreshDeployment(), 4_000)
-        return () => window.clearInterval(timer)
-    }, [flow.phase, refreshDeployment])
 
     const changeSlug = (value: string): void => setSlug(value)
     const submit = async (): Promise<void> => {

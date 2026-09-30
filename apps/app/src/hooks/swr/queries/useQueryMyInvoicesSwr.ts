@@ -1,4 +1,3 @@
-"use client"
 import { myInvoices } from "@/modules/api/commerce"
 import { useNivoQuery } from "../useNivoQuery"
 import { QUERY_INVOICES_SWR_KEY } from "../swr.shared"

@@ -1,4 +1,3 @@
-"use client"
 
 import { navigation } from "@/modules/i18n"
 

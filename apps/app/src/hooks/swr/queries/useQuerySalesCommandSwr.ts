@@ -1,26 +1,8 @@
-"use client"
-
 import { readSalesCommand, type SalesCommandRequest, type SalesInstallationScope } from "@/modules/api/sales"
 import { operationReadIdentity } from "@/modules/api/operation-route"
 import { useAccessToken } from "../../auth/useAccessToken"
 import { useNivoQuery } from "../useNivoQuery"
-import { type NivoQueryKey } from "../swr.shared"
-
-/*
- * One hook per file, one registered read per hook: this file names exactly one Sales operation, its
- * cache identity and the stable read identity the route echoes. This is the read a submitted or
- * clarified command plan is reconciled by - by its own command identity, never by a new one.
- */
-
-/** Cache identity for one command plan inside one installation. */
-export const salesCommandQueryKey = (scope: SalesInstallationScope, input: SalesCommandRequest): NivoQueryKey => [
-    "sales",
-    "command",
-    scope.workspaceId,
-    scope.instanceId,
-    scope.installationId,
-    input.commandId,
-]
+import { salesCommandQueryKey } from "./queries.shared"
 
 /**
  * Read one command plan's committed state.

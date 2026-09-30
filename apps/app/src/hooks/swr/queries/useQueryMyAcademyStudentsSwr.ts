@@ -1,4 +1,3 @@
-"use client"
 import { myAcademyStudents } from "@/modules/api/academy"
 import { useNivoQuery } from "../useNivoQuery"
 import { QUERY_ACADEMY_STUDENTS_SWR_KEY } from "../swr.shared"

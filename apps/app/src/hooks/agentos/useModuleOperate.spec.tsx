@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest"
 import type { AgentosModuleRuntime } from "../../modules/api/agentos-module-runtime"
 import { moduleRuntimeFixture, runtimeSessionFixture } from "../../test-support/mock-result"
 import type { ModuleRuntimeControls } from "./agentos.shared"
-import type { SupportQueryIdentity } from "../swr/queries/useQueryChatbotWorkbenchSwr"
+import type { SupportQueryIdentity } from "../swr/queries/queries.shared"
 
 /*
  * The operate hook's load-bearing behaviours: a stale session or support identity falls back to
@@ -23,10 +23,16 @@ const mocks = vi.hoisted(() => ({
 vi.mock("@/hooks/swr/queries/useQueryChatbotWorkbenchSwr", () => ({
     useQueryChatbotWorkbenchSwr: () => ({ data: mocks.chatbotData.value, isLoading: mocks.chatbotLoading.value }),
 }))
-vi.mock("@/hooks/swr/mutations/workspace-controlplane", () => ({
+vi.mock("@/hooks/swr/mutations/useMutateStartChatbotZaloOauthSwr", () => ({
     useMutateStartChatbotZaloOauthSwr: () => ({ trigger: mocks.zaloTrigger }),
+}))
+vi.mock("@/hooks/swr/mutations/useMutateSetChatbotHandoffSwr", () => ({
     useMutateSetChatbotHandoffSwr: () => ({ trigger: mocks.setHandoff }),
+}))
+vi.mock("@/hooks/swr/mutations/useMutateResolveChatbotHandoffSwr", () => ({
     useMutateResolveChatbotHandoffSwr: () => ({ trigger: mocks.resolveHandoff }),
+}))
+vi.mock("@/hooks/swr/mutations/useMutateReconcileChatbotDeliverySwr", () => ({
     useMutateReconcileChatbotDeliverySwr: () => ({ trigger: mocks.reconcile }),
 }))
 

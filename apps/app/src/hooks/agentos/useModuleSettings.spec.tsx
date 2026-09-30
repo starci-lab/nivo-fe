@@ -15,7 +15,7 @@ const mocks = vi.hoisted(() => ({
     channelTrigger: vi.fn(),
 }))
 
-vi.mock("@/hooks/swr/mutations/console", () => ({
+vi.mock("@/hooks/swr/mutations/useMutateConfigureAgentWorkspaceChannelSwr", () => ({
     useMutateConfigureAgentWorkspaceChannelSwr: () => ({ trigger: mocks.channelTrigger }),
 }))
 

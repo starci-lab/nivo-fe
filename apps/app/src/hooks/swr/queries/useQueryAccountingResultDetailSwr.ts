@@ -1,31 +1,8 @@
-"use client"
-
-import {
-    readAccountingResultDetail,
-    type AccountingInstallationScope,
-    type AccountingResultDetailInput,
-} from "@/modules/api/accounting"
+import { readAccountingResultDetail, type AccountingInstallationScope, type AccountingResultDetailInput } from "@/modules/api/accounting"
 import { operationReadIdentity } from "@/modules/api/operation-route"
 import { useAccessToken } from "../../auth/useAccessToken"
 import { useNivoQuery } from "../useNivoQuery"
-import { type NivoQueryKey } from "../swr.shared"
-
-/* One hook per file, one registered read per hook. */
-
-/** Cache identity for one current or historical result detail inside one installation. */
-export const accountingResultDetailQueryKey = (
-    scope: AccountingInstallationScope,
-    input: AccountingResultDetailInput,
-): NivoQueryKey => [
-    "accounting",
-    "result-detail",
-    scope.workspaceId,
-    scope.instanceId,
-    scope.installationId,
-    input.action,
-    input.action === "current" ? input.resultId : input.itemId,
-    input.action === "current" ? "current" : input.asOf,
-]
+import { accountingResultDetailQueryKey } from "./queries.shared"
 
 /**
  * Read one current or historical result detail with its lineage.

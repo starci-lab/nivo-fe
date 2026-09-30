@@ -1361,6 +1361,7 @@
           "unknownKind": "Kind: {kind}"
         },
         "runtime": {
+          "setupRevisionTitle": "Setup revision",
           "chatbot": {
             "title": "Chatbot workbench",
             "installation": "Installation",
@@ -1507,7 +1508,8 @@
             "placeholder": "Ask Nivo to execute…",
             "send": "Send",
             "refused": "The Execute operation was refused; no message or widget was appended.",
-            "title": "Execute chat"
+            "title": "Execute chat",
+            "conversationTitle": "Conversation {number}"
           },
           "widgets": {
             "supportTitle": "Support follow-up",
@@ -1880,6 +1882,7 @@
               },
               "overview": {
                 "label": "Statement",
+                "noMeasures": "No measures are recorded for this period.",
                 "covered": "covering {count} recorded results",
                 "empty": "No result is recorded for this period",
                 "emptyHint": "Choose another period, or admit the evidence this period should contain.",
@@ -1892,9 +1895,7 @@
                 "attention": "Needs attention: {codes}",
                 "sourceCoverage": "{count} source evidence identities behind this period",
                 "partial": "Partly covered because: {reasons}",
-                "measureAbsent": "Not measured by this period",
                 "measureUnknown": "Not measured: {reason}",
-                "measureCovered": "over {count} results",
                 "estimate": "The tax figure is an estimate under {currency} policy and excludes whatever that policy names."
               },
               "availability": {
@@ -2263,6 +2264,10 @@
         "webhookCount": "{count} webhooks",
         "webhookSecretCopied": "Webhook created; the one-time signing secret was sent to the clipboard.",
         "dnsTarget": "Point the matching CNAME or A record to {target}.",
+        "hints": {
+          "consentMode": "Choose required, granted, or denied.",
+          "webhookEvents": "Enter supported event keys, separated by commas."
+        },
         "status": {
           "absent": "Not configured",
           "pending": "Pending",

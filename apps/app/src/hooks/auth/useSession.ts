@@ -1,4 +1,3 @@
-"use client"
 
 import { useContext } from "react"
 import { SessionContext, type Session } from "@/modules/auth/session"

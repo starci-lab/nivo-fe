@@ -12,7 +12,8 @@ vi.mock("../useNivoQuery", () => ({ useNivoQuery: mocks.useNivoQuery }))
 vi.mock("@/hooks/auth/useSession", () => ({ useSession: mocks.useSession }))
 vi.mock("@/modules/api/sales", () => mocks.api)
 
-import { salesPipelineQueryKey, useQuerySalesPipelineSwr } from "./useQuerySalesPipelineSwr"
+import { useQuerySalesPipelineSwr } from "./useQuerySalesPipelineSwr"
+import { salesPipelineQueryKey } from "./queries.shared"
 
 const SCOPE = { workspaceId: "workspace-1", instanceId: "instance-1", installationId: "installation-1" }
 const FINGERPRINT = "a".repeat(64)

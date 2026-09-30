@@ -1,5 +1,7 @@
 import { act, renderHook } from "@testing-library/react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
+import { NextIntlClientProvider } from "next-intl"
+import type { PropsWithChildren } from "react"
 import en from "@/messages/en.json"
 
 /*
@@ -33,13 +35,6 @@ const mocks = vi.hoisted(() => {
 })
 
 vi.mock("next/navigation", () => ({ useParams: () => mocks.params.value }))
-vi.mock("next-intl", () => ({
-    useFormatter: () => ({
-        number: (value: number | bigint) => String(value),
-        dateTime: (value: Date | number) => (value instanceof Date ? value.toISOString() : String(value)),
-        relativeTime: () => "",
-    }),
-}))
 vi.mock("@/hooks/swr/queries/console", () => ({
     useQueryMyAgentWorkspaceControlCenterSwr: () => mocks.controlCenter.value,
 }))
@@ -92,7 +87,14 @@ const evidenceAnswer = (state: string) => ({
     ok: true,
     data: { op: "evidence", payload: { evidenceId: "evidence-1", state, revision: 1, missingFacts: [] } },
 })
-const render = () => renderHook(() => useAccountingWorkbench("installation-1", "en", translate))
+const render = () =>
+    renderHook(() => useAccountingWorkbench("installation-1", "en", translate), {
+        wrapper: ({ children }: PropsWithChildren) => (
+            <NextIntlClientProvider locale="en" messages={en}>
+                {children}
+            </NextIntlClientProvider>
+        ),
+    })
 
 describe("useAccountingWorkbench settlement", () => {
     beforeEach(() => {

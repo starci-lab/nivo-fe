@@ -5,7 +5,7 @@ import type { AuthenticationFlowControl, AuthenticationTranslate } from "./auth.
 
 const mocks = vi.hoisted(() => ({ verify: vi.fn() }))
 
-vi.mock("@/hooks/swr/mutations/auth", () => ({
+vi.mock("@/hooks/swr/mutations/useMutateVerifyTwoFactorSwr", () => ({
     useMutateVerifyTwoFactorSwr: () => ({ trigger: mocks.verify }),
 }))
 

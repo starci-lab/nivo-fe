@@ -9,7 +9,8 @@ const mocks = vi.hoisted(() => ({
 vi.mock("../useNivoQuery", () => ({ useNivoQuery: mocks.useNivoQuery }))
 vi.mock("@/modules/api/workspace-controlplane", () => mocks.api)
 
-import { useQueryWorkspaceCheckoutEntrySwr, workspaceCheckoutEntryQueryKey } from "./useQueryWorkspaceCheckoutEntrySwr"
+import { useQueryWorkspaceCheckoutEntrySwr } from "./useQueryWorkspaceCheckoutEntrySwr"
+import { workspaceCheckoutEntryQueryKey } from "./queries.shared"
 
 const ENTRY = { purchaseId: "purchase-1", workspaceId: "ws-1" } as const
 

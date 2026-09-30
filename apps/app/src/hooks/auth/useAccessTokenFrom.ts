@@ -1,4 +1,3 @@
-"use client"
 
 import { type TokenReader } from "@nivo/api"
 import { setAccessTokenReader } from "@/modules/api/graphql"

@@ -1,4 +1,3 @@
-"use client"
 import type { SWRConfiguration } from "swr"
 import { myAgentosModuleRuntime, type AgentosModuleRuntime } from "../../../modules/api/agentos-module-runtime"
 import { type Outcome } from "@nivo/api"

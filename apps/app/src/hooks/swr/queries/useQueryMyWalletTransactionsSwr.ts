@@ -1,4 +1,3 @@
-"use client"
 import { myWalletTransactions } from "@/modules/api/commerce"
 import { useNivoQuery } from "../useNivoQuery"
 import { QUERY_WALLET_TRANSACTIONS_SWR_KEY } from "../swr.shared"

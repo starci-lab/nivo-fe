@@ -42,7 +42,7 @@ vi.mock("@/hooks/swr/queries/useQueryMyAgentosModuleTestSurfaceSwr", () => ({
 vi.mock("@/hooks/swr/queries/useQueryMyAgentWorkspaceControlCenterSwr", () => ({
     useQueryMyAgentWorkspaceControlCenterSwr: () => ({ data: undefined }),
 }))
-vi.mock("@/hooks/swr/mutations/console", () => ({
+vi.mock("@/hooks/swr/mutations/useMutateManageAgentosModuleRuntimeSwr", () => ({
     useMutateManageAgentosModuleRuntimeSwr: () => ({ trigger: mocks.trigger }),
 }))
 

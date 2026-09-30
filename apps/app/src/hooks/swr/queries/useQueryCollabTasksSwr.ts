@@ -1,4 +1,3 @@
-"use client"
 import { listCollabTasks } from "@/modules/api/collab"
 import { useAccessToken } from "../../auth/useAccessToken"
 import { useNivoQuery } from "../useNivoQuery"

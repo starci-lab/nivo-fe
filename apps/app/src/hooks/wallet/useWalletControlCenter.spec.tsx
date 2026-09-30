@@ -15,27 +15,6 @@ const mocks = vi.hoisted(() => ({
     session: { state: { status: "signed-in", accessToken: "token" } },
 }))
 
-type WalletProbeProps = {
-    state: "ordinary" | "waypoint"
-    balance: unknown
-    breadcrumb?: unknown
-    linkedInvoice?: unknown
-    transactions: unknown
-    invoices: unknown
-    topUp: unknown
-    result: unknown
-    on?: {
-        topUp?: () => void
-        closeTopUp?: () => void
-        changeTopUpAmount?: (value: string) => void
-        submitTopUp?: () => void
-        closeResult?: () => void
-        payInvoice?: () => void
-        openOrder?: () => void
-        returnToOrder?: () => void
-    }
-}
-
 vi.mock("next/navigation", () => ({
     useSearchParams: () => new URLSearchParams(mocks.navigation.search),
     redirect: vi.fn(),
@@ -47,8 +26,16 @@ vi.mock("@/hooks", async (importOriginal) => ({
 }))
 vi.mock("@/hooks/auth/useSession", () => ({ useSession: () => mocks.session }))
 vi.mock("@/modules/api/commerce", () => mocks.api)
-vi.mock("@/components/blocks/wallet/WalletControlCenter/component", () => ({
-    WalletControlCenterBase: (props: WalletProbeProps) => (
+
+import { useWalletControlCenter } from "./useWalletControlCenter"
+
+type WalletProbeProps = {
+    readonly pageState: "ordinary" | "waypoint"
+}
+
+const WalletProbe = ({ pageState }: WalletProbeProps) => {
+    const props = useWalletControlCenter(pageState)
+    return (
         <div>
             <output data-testid="wallet">
                 {JSON.stringify({
@@ -90,14 +77,12 @@ vi.mock("@/components/blocks/wallet/WalletControlCenter/component", () => ({
                 return-order
             </button>
         </div>
-    ),
-}))
-
-import { WalletControlCenter } from "../../components/blocks/wallet/WalletControlCenter"
+    )
+}
 
 const output = () => screen.getByTestId("wallet").textContent ?? ""
 const renderWallet = () =>
-    render(<WalletControlCenter pageState={mocks.navigation.search === "" ? "ordinary" : "waypoint"} />)
+    render(<WalletProbe pageState={mocks.navigation.search === "" ? "ordinary" : "waypoint"} />)
 const resetQueryCache = () => {
     for (const key of SWRConfig.defaultValue.cache.keys()) SWRConfig.defaultValue.cache.delete(key)
 }

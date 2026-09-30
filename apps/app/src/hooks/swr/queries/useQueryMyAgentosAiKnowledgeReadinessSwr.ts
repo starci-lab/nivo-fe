@@ -1,4 +1,3 @@
-"use client"
 import { myAgentosAiKnowledgeReadiness } from "@/modules/api/agentos-knowledge"
 import { useNivoQuery } from "../useNivoQuery"
 import { QUERY_AGENTOS_AI_KNOWLEDGE_SWR_KEY } from "../swr.shared"
@@ -13,5 +12,3 @@ export const useQueryMyAgentosAiKnowledgeReadinessSwr = (workspaceId?: string, o
                 operationInFlight || (latest?.ok === true && latest.data.readinessStatus === "testing") ? 2_000 : 0,
         },
     )
-
-/** Provisioning and Academy reads. */

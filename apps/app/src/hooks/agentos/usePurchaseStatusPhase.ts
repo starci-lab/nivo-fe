@@ -1,10 +1,8 @@
-"use client"
-
 import { useCallback, useEffect } from "react"
 import { useProvisioningRealtime, type ProvisioningTarget } from "@/hooks"
 import type { WorkspaceCheckoutAnswer, WorkspaceCheckoutStatusView } from "@/modules/api/workspace-controlplane"
 import { settle, type Outcome } from "@nivo/api"
-import { HOLD_PHASES, phaseOf, POLLING_PHASES, PROVISIONING_PHASES, type PurchasePhase } from "@/modules/agentos/purchase-status/phase"
+import { HOLD_PHASES, phaseOf, PROVISIONING_PHASES, type PurchasePhase } from "@/modules/agentos/purchase-status/phase"
 import { purchaseOf } from "@/modules/agentos/purchase-source"
 
 type UsePurchaseStatusPhaseInput = {
@@ -76,12 +74,6 @@ export const usePurchaseStatusPhase = ({
     useEffect(() => {
         if (relevantEvent) void reconcile()
     }, [eventKey, relevantEvent, reconcile])
-
-    useEffect(() => {
-        if (!POLLING_PHASES.has(phase)) return
-        const timer = window.setInterval(() => void reconcile(), 4000)
-        return () => window.clearInterval(timer)
-    }, [phase, reconcile])
 
     useEffect(() => {
         if (realtime.status === "connected" && phase !== "loading" && phase !== "denied") void reconcile()

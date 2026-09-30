@@ -1,5 +1,3 @@
-"use client"
-
 import { useState } from "react"
 import type { SalesHandoffValue, SalesInstallationScope, SalesSubmitHandoffRequest } from "@/modules/api/sales"
 import { nivoQueryPayload } from "@/modules/query"

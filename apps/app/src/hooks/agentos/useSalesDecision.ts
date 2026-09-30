@@ -1,6 +1,4 @@
-"use client"
-
-import { useRef, useState } from "react"
+import { useState } from "react"
 import type { SalesDecideProposalRequest, SalesDecisionValue, SalesInstallationScope } from "@/modules/api/sales"
 import { nivoQueryPayload } from "@/modules/query"
 import { useQueryMyAgentWorkspaceControlCenterSwr } from "@/hooks/swr/queries/useQueryMyAgentWorkspaceControlCenterSwr"
@@ -89,7 +87,7 @@ export const useSalesDecision = (workspaceId: string, installationId: string, t:
     const [decisionRequestId, setDecisionRequestId] = useState("")
     const [choice, setChoice] = useState<SalesDecideProposalRequest["answer"]>("approve")
     const [expectedRevision, setExpectedRevision] = useState("")
-    const basis = useRef<AnswerBasis | null>(null)
+    const [basis, setBasis] = useState<AnswerBasis | null>(null)
     const command = useWorkbenchCommand({
         refusal: (code, reason) => t(salesRefusalKey(code), { reason }),
         unsettled: t("refusal.unsettled"),
@@ -111,9 +109,9 @@ export const useSalesDecision = (workspaceId: string, installationId: string, t:
      * read no longer discloses, so the surface states the move and holds the press instead.
      */
     const stale =
-        basis.current !== null &&
+        basis !== null &&
         model !== null &&
-        (basis.current.version !== model.proposalVersion || basis.current.fingerprint !== model.proposalFingerprint)
+        (basis.version !== model.proposalVersion || basis.fingerprint !== model.proposalFingerprint)
     const revision = integerOrNull(expectedRevision)
     const pending = model !== null && model.status === "pending"
     const answerAddressable = answerPressable(ready, pending, stale, revision)
@@ -122,7 +120,7 @@ export const useSalesDecision = (workspaceId: string, installationId: string, t:
     const onAnswer = () => {
         if (!answerAddressable || model === null || revision === null) return
         const claim: AnswerBasis = { version: model.proposalVersion, fingerprint: model.proposalFingerprint }
-        basis.current = claim
+        setBasis(claim)
         const input: SalesDecideProposalRequest = {
             decisionRequestId: model.decisionRequestId,
             proposalVersion: claim.version,
