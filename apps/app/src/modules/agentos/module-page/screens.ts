@@ -1,7 +1,9 @@
+
+import type { MyAgentosModuleRuntimeQuery } from "@/modules/api/__generated__/core"
+
 import type { ReactNode } from "react"
 import type { AgentOSModuleView } from "../../../components/blocks/agentos/ModuleRouteShellBlock"
 import type { ContextDraft } from "../../../components/blocks/agentos/ContextVersionBlock"
-import type { AgentosModuleRuntime } from "../../api/agentos-module-runtime"
 import type { Formatter } from "../../i18n/formatter"
 import type { ModulePageCopy } from "../module-page-copy"
 import { channelLabelFor } from "./channel-identity"
@@ -27,7 +29,7 @@ type ModuleShellInput = {
     readonly workspaceId: string
     readonly copy: ModulePageCopy
     readonly displayName: string
-    readonly runtime: AgentosModuleRuntime
+    readonly runtime: NonNullable<MyAgentosModuleRuntimeQuery["myAgentosModuleRuntime"]["data"]>
     readonly lifecycleLabels: Readonly<Partial<Record<string, string>>>
     readonly activeVersion: number | null
     readonly channelAccountRef: string | null
@@ -56,7 +58,7 @@ export const moduleShellPropsFor = (input: ModuleShellInput): AgentOSSolutionMod
 
 /** Everything one view's settled screen state is built from. */
 export type ModuleScreenSource = {
-    readonly runtime: AgentosModuleRuntime
+    readonly runtime: NonNullable<MyAgentosModuleRuntimeQuery["myAgentosModuleRuntime"]["data"]>
     readonly copy: ModulePageCopy
     readonly format: Formatter
     readonly view: AgentOSModuleView

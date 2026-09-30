@@ -1,4 +1,5 @@
-import { fetchCourses, type Course } from "@/modules/api/academy"
+import { fetchCourses } from "@/modules/api/academy"
+import type { CoursesQuery } from "@/modules/api/__generated__/graphql"
 import type { Outcome } from "@nivo/api"
 
 /**
@@ -6,4 +7,6 @@ import type { Outcome } from "@nivo/api"
  *
  * Return the API outcome intact so the page can choose how to present a failed read.
  */
-export const queryAcademyCourses = (): Promise<Outcome<Array<Course>>> => fetchCourses()
+export const queryAcademyCourses = (): Promise<
+    Outcome<Array<NonNullable<CoursesQuery["courses"]["data"]>[number]>>
+> => fetchCourses()

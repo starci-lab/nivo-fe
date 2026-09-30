@@ -1,3 +1,8 @@
+import type { MyAgentosModuleTestSurfaceQuery } from "@/modules/api/__generated__/core"
+
+import type { AgentosModuleTestContractView } from "@/modules/api/agentos-module-tests"
+
+
 type RuntimeTrustResultValues = { readonly status: string }
 
 /** Settled display labels and typed formatters supplied by the page owner. */
@@ -33,24 +38,19 @@ import { SurfaceCard, Heading, Text } from "@starci/grammar/common"
 
 import type { ComponentType } from "react"
 
-import type {
-    AgentosModuleTestAssertionResult,
-    AgentosModuleTestContract,
-    AgentosModuleTestRun,
-} from "@/modules/api/agentos-module-tests"
 import type { AgentosRuntimeValue } from "@/modules/api/agentos-runtime-tree"
 type EvidenceComponentProps = {
     readonly copy: TestTrustResultBlockCopy
-    readonly assertion: AgentosModuleTestAssertionResult
+    readonly assertion: NonNullable<MyAgentosModuleTestSurfaceQuery["myAgentosModuleTestSurface"]["data"]>["assertions"][number]
 }
 type EvidenceRegistry = Readonly<Record<string, ComponentType<EvidenceComponentProps>>>
 
 /** Persisted result boundary rendered by the trusted evidence registry. */
 type TestTrustResultBlockProps = {
     readonly copy: TestTrustResultBlockCopy
-    readonly contract: AgentosModuleTestContract
-    readonly run: AgentosModuleTestRun | null
-    readonly assertions: ReadonlyArray<AgentosModuleTestAssertionResult>
+    readonly contract: AgentosModuleTestContractView
+    readonly run: NonNullable<MyAgentosModuleTestSurfaceQuery["myAgentosModuleTestSurface"]["data"]>["runs"][number] | null
+    readonly assertions: ReadonlyArray<NonNullable<MyAgentosModuleTestSurfaceQuery["myAgentosModuleTestSurface"]["data"]>["assertions"][number]>
     readonly contextLabel: string
     readonly registry?: EvidenceRegistry
 }
@@ -105,7 +105,7 @@ const DEFAULT_EVIDENCE_REGISTRY: EvidenceRegistry = {
     "nivo.test-evidence@1.0.0": NivoTestEvidence,
 }
 const RUN_SUMMARY_KEYS = ["total", "pass", "warning", "fail"] as const
-const count = (run: AgentosModuleTestRun, key: "total" | "pass" | "warning" | "fail"): string => {
+const count = (run: NonNullable<MyAgentosModuleTestSurfaceQuery["myAgentosModuleTestSurface"]["data"]>["runs"][number], key: "total" | "pass" | "warning" | "fail"): string => {
     const value = run.summary[key]
     return typeof value === "number" || typeof value === "string" ? String(value) : "0"
 }

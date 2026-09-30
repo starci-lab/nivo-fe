@@ -1,18 +1,17 @@
-/**
- * The parsers of the expert-site documents' payloads. One per shape the expert-site operations
- * select; each returns the value or null, which `graphql` reports as `unavailable`.
- */
+/** Runtime parsers for the generated expert-site document payloads. */
 
 import { isNullableString, isOneOf, isRecord, isString, parseEach } from "@nivo/api"
 import type {
-    CreatedExpertSite,
-    ExpertDeploymentSnapshot,
-    ExpertSiteRow,
-    ProvisionedExpertSite,
-    PublishedExpertSite,
-} from "./expert-sites"
+    CreateExpertSiteMutation,
+    MyExpertSiteDeploymentQuery,
+    MyExpertSitesQuery,
+    ProvisionExpertSiteMutation,
+    PublishExpertSiteMutation,
+} from "./__generated__/core"
 
-const parseExpertSiteRow = (value: unknown): ExpertSiteRow | null =>
+const parseExpertSiteRow = (
+    value: unknown,
+): NonNullable<MyExpertSitesQuery["myExpertSites"]["data"]>[number] | null =>
     isRecord(value) &&
     isString(value.id) &&
     isString(value.slug) &&
@@ -29,15 +28,21 @@ const parseExpertSiteRow = (value: unknown): ExpertSiteRow | null =>
         : null
 
 /** Parse the `data` of `myExpertSites`. */
-export const parseExpertSiteRows = (input: unknown): ReadonlyArray<ExpertSiteRow> | null =>
+export const parseExpertSiteRows = (
+    input: unknown,
+): ReadonlyArray<NonNullable<MyExpertSitesQuery["myExpertSites"]["data"]>[number]> | null =>
     parseEach(input, parseExpertSiteRow)
 
 /** Parse the `data` of `createExpertSite`. */
-export const parseCreatedExpertSite = (input: unknown): CreatedExpertSite | null =>
+export const parseCreatedExpertSite = (
+    input: unknown,
+): NonNullable<CreateExpertSiteMutation["createExpertSite"]["data"]> | null =>
     isRecord(input) && isString(input.id) && isString(input.slug) ? { id: input.id, slug: input.slug } : null
 
 /** Parse the `data` of `publishExpertSite`. */
-export const parsePublishedExpertSite = (input: unknown): PublishedExpertSite | null =>
+export const parsePublishedExpertSite = (
+    input: unknown,
+): NonNullable<PublishExpertSiteMutation["publishExpertSite"]["data"]> | null =>
     isRecord(input) &&
     isString(input.id) &&
     isString(input.slug) &&
@@ -46,19 +51,17 @@ export const parsePublishedExpertSite = (input: unknown): PublishedExpertSite | 
         : null
 
 /** Parse the `data` of `provisionExpertSite`. */
-export const parseProvisionedExpertSite = (input: unknown): ProvisionedExpertSite | null =>
-    isRecord(input) &&
-    isString(input.jobId) &&
-    isString(input.expertDeploymentId) &&
-    isString(input.publicHost)
+export const parseProvisionedExpertSite = (
+    input: unknown,
+): NonNullable<ProvisionExpertSiteMutation["provisionExpertSite"]["data"]> | null =>
+    isRecord(input) && isString(input.jobId) && isString(input.expertDeploymentId) && isString(input.publicHost)
         ? { jobId: input.jobId, expertDeploymentId: input.expertDeploymentId, publicHost: input.publicHost }
         : null
 
 /** Parse the `data` of `myExpertSiteDeployment`. */
-export const parseExpertDeploymentSnapshot = (input: unknown): ExpertDeploymentSnapshot | null =>
-    isRecord(input) &&
-    isString(input.id) &&
-    isString(input.status) &&
-    isNullableString(input.publicHost)
+export const parseExpertDeploymentSnapshot = (
+    input: unknown,
+): NonNullable<MyExpertSiteDeploymentQuery["myExpertSiteDeployment"]["data"]> | null =>
+    isRecord(input) && isString(input.id) && isString(input.status) && isString(input.publicHost)
         ? { id: input.id, status: input.status, publicHost: input.publicHost }
         : null

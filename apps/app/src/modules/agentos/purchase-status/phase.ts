@@ -1,6 +1,5 @@
-import type {
-    WorkspaceCheckoutStatusView,
-} from "@/modules/api/workspace-controlplane"
+
+import type { WorkspaceCheckoutPurchaseStatusFieldsFragment } from "@/modules/api/__generated__/core"
 
 /** Every resolved state the purchase-status surface can prove. */
 export type PurchasePhase =
@@ -84,14 +83,14 @@ export const OBSERVED_ORDER_STATES: ReadonlySet<string> = new Set([
 ])
 
 /** The order fact is distinct from the purchase identity and exists only for an observed order. */
-export const provisioningOrderRefOf = (purchase: WorkspaceCheckoutStatusView): string | null =>
+export const provisioningOrderRefOf = (purchase: WorkspaceCheckoutPurchaseStatusFieldsFragment): string | null =>
     OBSERVED_ORDER_STATES.has(purchase.provisioning.state) ? purchase.provisioning.reference : null
 
 /**
  * The refund-family phase a refused paid order stands on. A settled refund is shown only beside
  * its linked ledger entry; an unavailable or unlinked projection remains pending reconciliation.
  */
-const refundPhaseOf = (purchase: WorkspaceCheckoutStatusView): PurchasePhase => {
+const refundPhaseOf = (purchase: WorkspaceCheckoutPurchaseStatusFieldsFragment): PurchasePhase => {
     const refund = purchase.refund ?? purchase.refundStatus
     if (refund === null || refund === undefined) return "provisioning-refused"
     if (refund.state === "refunded") {
@@ -110,7 +109,7 @@ const refundPhaseOf = (purchase: WorkspaceCheckoutStatusView): PurchasePhase => 
 }
 
 /** The strongest purchase phase its composed billing, provisioning and readiness facts prove. */
-export const phaseOf = (purchase: WorkspaceCheckoutStatusView): PurchasePhase => {
+export const phaseOf = (purchase: WorkspaceCheckoutPurchaseStatusFieldsFragment): PurchasePhase => {
     switch (purchase.state) {
         case "selected":
         case "payment-not-started":
@@ -156,7 +155,7 @@ export const phaseOf = (purchase: WorkspaceCheckoutStatusView): PurchasePhase =>
 }
 
 /** Readiness is settled only by the readiness facet's own state. */
-const readinessPhaseOf = (state: WorkspaceCheckoutStatusView["readiness"]["state"]): PurchasePhase => {
+const readinessPhaseOf = (state: WorkspaceCheckoutPurchaseStatusFieldsFragment["readiness"]["state"]): PurchasePhase => {
     if (state === "ready") return "ready"
     if (state === "unavailable") return "provisioning-unknown"
     return "provisioning"

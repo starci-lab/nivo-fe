@@ -1,14 +1,14 @@
 import type { Outcome } from "@nivo/api"
-import type { CollabGatewayRequest } from './gateway'
-import type { CollabOperation } from './operation'
+import type { CollabGatewayRequest } from "./gateway"
+import type { CollabOperation } from "./operation"
 
-/** Credential and request passed to the bound Collab transport. */
+/** Credential and client request passed to the bound Collab transport. */
 type CollabTransportCall = {
     readonly accessToken: string
     readonly request: CollabGatewayRequest
 }
 
-/** What the ingress answered for one request: the operation echoed and its own result record. */
+/** The result record extracted after the generated operation response was narrowed. */
 export type CollabServed = {
     readonly op: CollabOperation
     readonly result: Record<string, unknown>

@@ -1,4 +1,4 @@
-import type { Course } from "../api/academy"
+import type { CoursesQuery } from "../api/__generated__/graphql"
 import type { Locale } from "@/modules/i18n"
 import {
     ACADEMY,
@@ -23,7 +23,7 @@ export type AcademySection =
     | { readonly kind: "stats"; readonly id: string; readonly stats: ReadonlyArray<Stat> }
     | { readonly kind: "testimonials"; readonly id: string; readonly title: string; readonly testimonials: ReadonlyArray<Testimonial> }
     | { readonly kind: "gallery"; readonly id: string; readonly title: string; readonly gallery: ReadonlyArray<GalleryItem> }
-    | { readonly kind: "courses"; readonly id: string; readonly title: string; readonly emptyTitle: string; readonly emptyBody: string; readonly courses: ReadonlyArray<Course> }
+    | { readonly kind: "courses"; readonly id: string; readonly title: string; readonly emptyTitle: string; readonly emptyBody: string; readonly courses: ReadonlyArray<NonNullable<CoursesQuery["courses"]["data"]>[number]> }
     | { readonly kind: "community"; readonly id: string; readonly title: string; readonly body: string }
     | { readonly kind: "offer"; readonly id: string; readonly title: string; readonly body: string }
     | { readonly kind: "faq"; readonly id: string; readonly title: string; readonly faq: ReadonlyArray<Faq> }
@@ -90,7 +90,7 @@ const whenPresent = <T,>(value: T | undefined, build: (value: T) => AcademySecti
 
 /** Resolve visible Academy sections in template order from authored data and product copy. */
 export const academySectionsOf = (
-    courses: ReadonlyArray<Course>,
+    courses: ReadonlyArray<NonNullable<CoursesQuery["courses"]["data"]>[number]>,
     locale: Locale,
     copy: AcademySectionsCopy,
 ): ReadonlyArray<AcademySection> => {

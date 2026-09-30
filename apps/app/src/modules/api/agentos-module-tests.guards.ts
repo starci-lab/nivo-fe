@@ -1,3 +1,5 @@
+import type { MyAgentosModuleTestSurfaceQuery } from "./__generated__/core"
+
 /**
  * The parsers of the module-test documents' payloads: the open contract, the runs and the
  * assertion evidence. Each returns the value or null, which `graphql` reports as `unavailable`.
@@ -6,13 +8,15 @@
 import { isNullableString, isNumber, isOneOf, isRecord, isString, parseEach } from "@nivo/api"
 import { isAgentosRuntimeValue, isAgentosRuntimeRecord, isAgentosRuntimeWidgetNode } from "./agentos-runtime-tree.guards"
 import type {
-    AgentosModuleTestAssertionContract,
-    AgentosModuleTestAssertionResult,
-    AgentosModuleTestContract,
-    AgentosModuleTestRun,
-    AgentosModuleTestScenarioContract,
-    AgentosModuleTestSurface,
+    AgentosModuleTestAssertionContractView,
+    AgentosModuleTestContractView,
+    AgentosModuleTestScenarioContractView,
+    AgentosModuleTestSurfaceView,
 } from "./agentos-module-tests"
+
+type TestSurface = NonNullable<MyAgentosModuleTestSurfaceQuery["myAgentosModuleTestSurface"]["data"]>
+type TestRun = TestSurface["runs"][number]
+type TestAssertionResult = TestSurface["assertions"][number]
 
 const parseKeyedVersion = (
     value: unknown,
@@ -21,7 +25,7 @@ const parseKeyedVersion = (
         ? { key: value.key, version: value.version }
         : null
 
-const parseAssertionContract = (value: unknown): AgentosModuleTestAssertionContract | null => {
+const parseAssertionContract = (value: unknown): AgentosModuleTestAssertionContractView | null => {
     if (
         !isRecord(value) ||
         !isString(value.key) ||
@@ -40,7 +44,7 @@ const parseAssertionContract = (value: unknown): AgentosModuleTestAssertionContr
         path: string
         operator: "equals" | "contains" | "count-at-least" | "present"
         severity: "fail" | "warning"
-        expected?: AgentosModuleTestAssertionContract["expected"]
+        expected?: AgentosModuleTestAssertionContractView["expected"]
     } = {
         key: value.key,
         label: value.label,
@@ -56,7 +60,7 @@ const parseAssertionContract = (value: unknown): AgentosModuleTestAssertionContr
     return contract
 }
 
-const parseScenarioContract = (value: unknown): AgentosModuleTestScenarioContract | null => {
+const parseScenarioContract = (value: unknown): AgentosModuleTestScenarioContractView | null => {
     if (
         !isRecord(value) ||
         !isString(value.key) ||
@@ -78,7 +82,7 @@ const parseScenarioContract = (value: unknown): AgentosModuleTestScenarioContrac
 }
 
 /** Parse one open versioned test registry contract - also the manifest's `test` facet. */
-export const parseModuleTestContract = (input: unknown): AgentosModuleTestContract | null => {
+export const parseModuleTestContract = (input: unknown): AgentosModuleTestContractView | null => {
     if (!isRecord(input)) return null
     const workbench = parseKeyedVersion(input.workbench)
     const contract = parseKeyedVersion(input.contract)
@@ -90,7 +94,7 @@ export const parseModuleTestContract = (input: unknown): AgentosModuleTestContra
     return { workbench, contract, sandboxAdapter, evidenceWidget, scenarios }
 }
 
-const parseModuleTestRun = (value: unknown): AgentosModuleTestRun | null =>
+const parseModuleTestRun = (value: unknown): TestRun | null =>
     isRecord(value) &&
     isString(value.id) &&
     isString(value.installationId) &&
@@ -142,7 +146,7 @@ const parseModuleTestRun = (value: unknown): AgentosModuleTestRun | null =>
           }
         : null
 
-const parseAssertionResult = (value: unknown): AgentosModuleTestAssertionResult | null =>
+const parseAssertionResult = (value: unknown): TestAssertionResult | null =>
     isRecord(value) &&
     isString(value.id) &&
     isString(value.runId) &&
@@ -169,7 +173,7 @@ const parseAssertionResult = (value: unknown): AgentosModuleTestAssertionResult 
         : null
 
 /** Parse the `data` of `myAgentosModuleTestSurface`/`myAgentosModuleTestRun`/`runAgentosModuleTest`. */
-export const parseModuleTestSurface = (input: unknown): AgentosModuleTestSurface | null => {
+export const parseModuleTestSurface = (input: unknown): AgentosModuleTestSurfaceView | null => {
     if (!isRecord(input)) return null
     const contract = parseModuleTestContract(input.contract)
     const runs = parseEach(input.runs, parseModuleTestRun)

@@ -1,0 +1,54 @@
+import { isBoolean, isNullableString, isOneOf, isRecord, isString, parseEach } from "@nivo/api"
+import type { ConfigureAgentWorkspaceChannelMutation } from "./__generated__/core"
+import type { AgentWorkspaceChannelSettingView } from "./agentos-module-runtime"
+
+type ChannelSetting = NonNullable<ConfigureAgentWorkspaceChannelMutation["configureAgentWorkspaceChannel"]["data"]>
+
+/** Parse the `data` of `configureAgentWorkspaceChannel`: statuses only, never the secret. */
+export const parseChannelSetting = (input: unknown): AgentWorkspaceChannelSettingView | null => {
+    if (
+        !isRecord(input) ||
+        !isOneOf(input.provider, ["Discord", "Messenger", "Slack", "Telegram", "Whatsapp", "Zalo"]) ||
+        !isString(input.accountId) ||
+        !isOneOf(input.state, ["Applied", "Error", "NotConfigured", "Pending"]) ||
+        !isNullableString(input.displayName)
+    ) {
+        return null
+    }
+    const credentials = parseEach(input.credentials, (entry) =>
+        isRecord(entry) &&
+        isString(entry.key) &&
+        isBoolean(entry.required) &&
+        isBoolean(entry.configured) &&
+        isNullableString(entry.hint) &&
+        isNullableString(entry.syncedAt)
+            ? {
+                  key: entry.key,
+                  required: entry.required,
+                  configured: entry.configured,
+                  hint: entry.hint,
+                  syncedAt: entry.syncedAt,
+              }
+            : null,
+    )
+    if (credentials === null) return null
+    const setting: ChannelSetting = {
+        provider: input.provider,
+        accountId: input.accountId,
+        state: input.state,
+        displayName: input.displayName,
+        credentials,
+    }
+    return {
+        provider: setting.provider,
+        accountId: setting.accountId,
+        state: {
+            Applied: "APPLIED",
+            Error: "ERROR",
+            NotConfigured: "NOT_CONFIGURED",
+            Pending: "PENDING",
+        }[setting.state],
+        displayName: setting.displayName,
+        credentials: setting.credentials,
+    }
+}

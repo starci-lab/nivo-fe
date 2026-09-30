@@ -1,3 +1,6 @@
+
+import type { MyAgentosModuleRuntimeQuery } from "@/modules/api/__generated__/core"
+
 import { useCallback, useState } from "react"
 import { useTranslations } from "next-intl"
 import { useMutateReconcileChatbotDeliverySwr } from "../swr/mutations/useMutateReconcileChatbotDeliverySwr"
@@ -6,7 +9,6 @@ import { useMutateSetChatbotHandoffSwr } from "../swr/mutations/useMutateSetChat
 import { useMutateStartChatbotZaloOauthSwr } from "../swr/mutations/useMutateStartChatbotZaloOauthSwr"
 import { type SupportQueryIdentity } from "../swr/queries/queries.shared"
 import { useQueryChatbotWorkbenchSwr } from "../swr/queries/useQueryChatbotWorkbenchSwr"
-import type { AgentosModuleRuntime } from "../../modules/api/agentos-module-runtime"
 import type { AgentosRuntimeValue } from "../../modules/api/agentos-runtime-tree"
 import { nivoQueryPayload } from "../../modules/query"
 import type { OperateSurfaceProps } from "../../modules/agentos/module-page/surface-types"
@@ -17,7 +19,7 @@ import { idempotencyKey, type ModuleRuntimeControls } from "./agentos.shared"
 /** The runtime, the chatbot identity and the shared commands the operate surface connects. */
 interface ModuleOperateInput {
     readonly installationId: string
-    readonly runtime: AgentosModuleRuntime | null
+    readonly runtime: NonNullable<MyAgentosModuleRuntimeQuery["myAgentosModuleRuntime"]["data"]> | null
     readonly chatbotIdentity: SupportQueryIdentity
     readonly controls: ModuleRuntimeControls
 }

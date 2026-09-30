@@ -1,5 +1,7 @@
+import type { ChatbotConversationPayload } from "@/modules/api/__generated__/agentos-controlplane"
+
 import { Badge, Button, EmptyNotice, SurfaceCard, SurfaceListCard, Text } from "@starci/grammar/common"
-import type { ChatbotConversation } from "@/modules/api/workspace-controlplane"
+
 import { CHATBOT_CHANNEL_ROW_CLASS_NAME } from "./classNames"
 import type {
     ChatbotWorkbenchBlockBaseActions,
@@ -12,12 +14,12 @@ type WorkbenchRailProps = {
     readonly on: ChatbotWorkbenchBlockBaseActions
 }
 
-const conversationLabel = (conversation: ChatbotConversation, copy: ChatbotWorkbenchBlockBaseCopy): string =>
+const conversationLabel = (conversation: ChatbotConversationPayload, copy: ChatbotWorkbenchBlockBaseCopy): string =>
     conversation.handoffState === "human" ? copy.humanOwned : copy.automated
 
 /** Resolve the selected conversation's ownership label including an in-flight control action. */
 export const chatbotControlLabel = (
-    conversation: ChatbotConversation,
+    conversation: ChatbotConversationPayload,
     copy: ChatbotWorkbenchBlockBaseCopy,
     pending: boolean,
 ): string => {

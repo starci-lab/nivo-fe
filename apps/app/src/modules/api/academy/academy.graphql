@@ -1,0 +1,352 @@
+﻿fragment AcademyStudentFields on AcademyStudentView {
+    id
+    name
+    email
+    role
+    status
+    xp
+}
+
+fragment AcademyCredentialStatusFields on AcademyCredentialStatusType {
+    key
+    configured
+    hint
+    syncedAt
+    verification
+    verificationReason
+    verifiedAt
+}
+
+fragment AcademyCustomDomainStateFields on AcademyCustomDomainStateType {
+    domain
+    target
+    dnsReady
+    delivery
+    detail
+}
+
+fragment AcademyProviderStatusFields on AcademyProviderStatusType {
+    provider
+    status
+    clientId
+    identifier
+    consentMode
+    reason
+    deliveredAt
+    verifiedAt
+}
+
+fragment AcademyWebhookStatusFields on AcademyWebhookStatusType {
+    id
+    endpoint
+    events
+    enabled
+    version
+    lastDeliveryStatus
+    lastDeliveredAt
+}
+
+fragment ExpertSiteLeadFields on ExpertSiteLeadEntity {
+    id
+    name
+    contact
+    message
+    status
+    note
+}
+
+query MyAcademyGrowthSnapshot($request: MyAcademyGrowthSnapshotRequest!) {
+    myAcademyGrowthSnapshot(request: $request) {
+        data {
+            revenueVnd
+            paidOrders
+            totalMembers
+            activeMembers
+            totalCompletions
+        }
+        message
+        success
+        error
+    }
+}
+
+query MyAcademyStudents($input: MyAcademyStudentsInput!) {
+    myAcademyStudents(request: $input) {
+        data {
+            items {
+                ...AcademyStudentFields
+            }
+            total
+        }
+        message
+        success
+        error
+    }
+}
+
+query MyAcademyStudentDetail($request: MyAcademyStudentDetailRequest!) {
+    myAcademyStudentDetail(request: $request) {
+        data {
+            member {
+                id
+                name
+                email
+                role
+                status
+            }
+            orders {
+                id
+                courseSlug
+                status
+                amountVnd
+            }
+            courses {
+                slug
+                title
+                completed
+                total
+            }
+        }
+        message
+        success
+        error
+    }
+}
+
+query MyAcademyIntegrations($request: MyAcademyIntegrationsRequest!) {
+    myAcademyIntegrations(request: $request) {
+        data {
+            credentials {
+                ...AcademyCredentialStatusFields
+            }
+            customDomain {
+                ...AcademyCustomDomainStateFields
+            }
+            google {
+                ...AcademyProviderStatusFields
+            }
+            zalo {
+                ...AcademyProviderStatusFields
+            }
+            analytics {
+                ...AcademyProviderStatusFields
+            }
+            webhooks {
+                ...AcademyWebhookStatusFields
+            }
+        }
+        message
+        success
+        error
+    }
+}
+
+query MyExpertSiteLeads($request: MyExpertSiteLeadsRequest!) {
+    myExpertSiteLeads(request: $request) {
+        data {
+            ...ExpertSiteLeadFields
+        }
+        message
+        success
+        error
+    }
+}
+
+mutation CreateAcademyStudent($input: CreateAcademyStudentInput!) {
+    createAcademyStudent(request: $input) {
+        data {
+            ...AcademyStudentFields
+        }
+        message
+        success
+        error
+    }
+}
+
+mutation UpdateAcademyStudent($input: UpdateAcademyStudentInput!) {
+    updateAcademyStudent(request: $input) {
+        data {
+            ...AcademyStudentFields
+        }
+        message
+        success
+        error
+    }
+}
+
+mutation SetAcademyStudentStatus($input: SetAcademyStudentStatusInput!) {
+    setAcademyStudentStatus(request: $input) {
+        data {
+            ...AcademyStudentFields
+        }
+        message
+        success
+        error
+    }
+}
+
+mutation GrantAcademyCourseAccess($input: GrantAcademyCourseAccessInput!) {
+    grantAcademyCourseAccess(request: $input) {
+        data {
+            id
+            email
+            courseSlug
+            status
+        }
+        message
+        success
+        error
+    }
+}
+
+mutation RevokeAcademyCourseAccess($input: RevokeAcademyCourseAccessInput!) {
+    revokeAcademyCourseAccess(request: $input) {
+        data {
+            revoked
+            keptPaidPurchase
+        }
+        message
+        success
+        error
+    }
+}
+
+mutation UpdateExpertSiteLead($input: UpdateExpertSiteLeadInput!) {
+    updateExpertSiteLead(request: $input) {
+        data {
+            ...ExpertSiteLeadFields
+        }
+        message
+        success
+        error
+    }
+}
+
+mutation DraftLeadReply($input: DraftLeadReplyInput!) {
+    draftLeadReply(request: $input) {
+        data {
+            reply
+        }
+        message
+        success
+        error
+    }
+}
+
+mutation SaveAcademyCredential($input: SaveAcademyCredentialInput!) {
+    saveAcademyCredential(request: $input) {
+        data {
+            credential {
+                ...AcademyCredentialStatusFields
+            }
+            delivery
+            detail
+        }
+        message
+        success
+        error
+    }
+}
+
+mutation SetAcademyCustomDomain($input: SetAcademyCustomDomainInput!) {
+    setAcademyCustomDomain(request: $input) {
+        data {
+            ...AcademyCustomDomainStateFields
+        }
+        message
+        success
+        error
+    }
+}
+
+mutation SaveAcademyGoogleOAuth($input: SaveAcademyGoogleOAuthInput!) {
+    saveAcademyGoogleOAuth(request: $input) {
+        data {
+            ...AcademyProviderStatusFields
+        }
+        message
+        success
+        error
+    }
+}
+
+mutation DisconnectAcademyGoogleOAuth($request: DisconnectAcademyGoogleOAuthRequest!) {
+    disconnectAcademyGoogleOAuth(request: $request) {
+        data {
+            ...AcademyProviderStatusFields
+        }
+        message
+        success
+        error
+    }
+}
+
+mutation BeginAcademyZaloAuthorization($input: BeginAcademyZaloAuthorizationInput!) {
+    beginAcademyZaloAuthorization(request: $input) {
+        data {
+            authorizationUrl
+            expiresAt
+        }
+        message
+        success
+        error
+    }
+}
+
+mutation SaveAcademyAnalytics($input: SaveAcademyAnalyticsInput!) {
+    saveAcademyAnalytics(request: $input) {
+        data {
+            ...AcademyProviderStatusFields
+        }
+        message
+        success
+        error
+    }
+}
+
+mutation CreateAcademyWebhook($input: CreateAcademyWebhookInput!) {
+    createAcademyWebhook(request: $input) {
+        data {
+            id
+            endpoint
+            events
+            enabled
+            version
+            lastDeliveryStatus
+            lastDeliveredAt
+            signingSecret
+        }
+        message
+        success
+        error
+    }
+}
+
+mutation RotateAcademyWebhookSecret($input: RotateAcademyWebhookSecretInput!) {
+    rotateAcademyWebhookSecret(request: $input) {
+        data {
+            id
+            endpoint
+            events
+            enabled
+            version
+            lastDeliveryStatus
+            lastDeliveredAt
+            signingSecret
+        }
+        message
+        success
+        error
+    }
+}
+
+mutation DisableAcademyWebhook($input: DisableAcademyWebhookInput!) {
+    disableAcademyWebhook(request: $input) {
+        data {
+            ...AcademyWebhookStatusFields
+        }
+        message
+        success
+        error
+    }
+}

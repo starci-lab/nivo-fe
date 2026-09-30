@@ -1,0 +1,99 @@
+fragment AgentosSolutionModuleFields on AgentosSolutionModuleSummary {
+    key
+    version
+    name
+    summary
+    agentRoles
+    channelRoles
+    safetyMode
+}
+
+fragment AgentosModuleInstallationFields on AgentosModuleInstallationEntity {
+    id
+    agentWorkspaceId
+    moduleKey
+    moduleVersion
+    displayName
+    status
+    failureCode
+    createdAt
+    updatedAt
+}
+
+fragment AgentosModuleInstallationDetailFields on AgentosModuleInstallationDetail {
+    id
+    agentWorkspaceId
+    moduleKey
+    moduleVersion
+    status
+    sagaId
+    failureCode
+    generatedAgentIds
+    sharedKnowledgeSourceIds
+    channelAccountRefs
+    commonKnowledgeVersion
+    privateKnowledgeVersion
+    manifestDigest
+    modelProfileRef
+    desiredDigest
+    appliedDigest
+    knowledgeState
+    knowledgeArtifact {
+        id
+        knowledgeVersion
+        sourceDigest
+        snapshotDigest
+        embeddingProfile
+        embeddingDimension
+        pointCount
+    }
+    retrievalScope {
+        installationId
+        moduleKey
+        knowledgeVersion
+    }
+}
+
+query MyAgentosSolutionModules {
+    myAgentosSolutionModules {
+        data {
+            ...AgentosSolutionModuleFields
+        }
+        message
+        success
+        error
+    }
+}
+
+query MyAgentosModuleInstallations($request: MyAgentosModuleInstallationsRequest!) {
+    myAgentosModuleInstallations(request: $request) {
+        data {
+            ...AgentosModuleInstallationFields
+        }
+        message
+        success
+        error
+    }
+}
+
+query MyAgentosModuleInstallation($request: MyAgentosModuleInstallationRequest!) {
+    myAgentosModuleInstallation(request: $request) {
+        data {
+            ...AgentosModuleInstallationDetailFields
+        }
+        message
+        success
+        error
+    }
+}
+
+mutation InstallAgentosSolutionModule($input: InstallAgentosSolutionModuleInput!) {
+    installAgentosSolutionModule(request: $input) {
+        data {
+            ...AgentosModuleInstallationFields
+        }
+        message
+        success
+        error
+    }
+}

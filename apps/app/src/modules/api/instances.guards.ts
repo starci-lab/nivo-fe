@@ -1,12 +1,10 @@
-/**
- * The parsers of the instance documents' payloads. One per shape the instance operations select;
- * each returns the value or null, which `graphql` reports as `unavailable`.
- */
+import type { MyInstancesQuery, MyPodOpenclawStatusQuery } from "./__generated__/core"
+
+/** Runtime parsers for the generated instance document payloads. */
 
 import { isBoolean, isNullableNumber, isNullableString, isRecord, isString, parseEach } from "@nivo/api"
-import type { InstanceRow, PodStatusRow } from "./instances"
 
-const parseInstanceRow = (value: unknown): InstanceRow | null =>
+const parseInstanceRow = (value: unknown): NonNullable<MyInstancesQuery["myInstances"]["data"]>[number] | null =>
     isRecord(value) &&
     isString(value.id) &&
     isString(value.appKey) &&
@@ -29,11 +27,15 @@ const parseInstanceRow = (value: unknown): InstanceRow | null =>
         : null
 
 /** Parse the `data` of `myInstances`. */
-export const parseInstanceRows = (input: unknown): ReadonlyArray<InstanceRow> | null =>
+export const parseInstanceRows = (
+    input: unknown,
+): ReadonlyArray<NonNullable<MyInstancesQuery["myInstances"]["data"]>[number]> | null =>
     parseEach(input, parseInstanceRow)
 
 /** Parse the `data` of `myPodOpenclawStatus`. */
-export const parsePodStatusRow = (input: unknown): PodStatusRow | null =>
+export const parsePodStatusRow = (
+    input: unknown,
+): NonNullable<MyPodOpenclawStatusQuery["myPodOpenclawStatus"]["data"]> | null =>
     isRecord(input) &&
     isBoolean(input.reachable) &&
     isNullableNumber(input.httpStatus) &&

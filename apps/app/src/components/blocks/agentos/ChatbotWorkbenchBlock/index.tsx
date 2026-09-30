@@ -1,12 +1,15 @@
 "use client"
 
+import type { ChatbotWorkbenchFieldsFragment } from "@/modules/api/__generated__/agentos-controlplane"
+
 import { useFormatter } from "next-intl"
 import { useState } from "react"
-import type { ChatbotWorkbench } from "@/modules/api/workspace-controlplane"
+
 import type { Formatter } from "../../../../modules/i18n/formatter"
 import { ChatbotWorkbenchBlockBase, type ChatbotWorkbenchBlockBaseCopy } from "./component"
 
 /** Localized copy for the installed Chatbot workbench, including the version line's two forms. */
+
 export type ChatbotWorkbenchBlockCopy = ChatbotWorkbenchBlockBaseCopy & {
     readonly approvedVersion: (version: string) => string
     readonly noApprovedVersion: string
@@ -15,7 +18,7 @@ export type ChatbotWorkbenchBlockCopy = ChatbotWorkbenchBlockBaseCopy & {
 /** Installation-qualified state and actions for the workbench surface. */
 type ChatbotWorkbenchBlockProps = {
     readonly installationId: string
-    readonly workbench: ChatbotWorkbench | null
+    readonly workbench: ChatbotWorkbenchFieldsFragment | null
     readonly selectedConversationId: string | null
     readonly pending: boolean
     readonly refusedCode: string | null

@@ -1,4 +1,5 @@
-import type { AcademyStudentDetail } from "../api/academy"
+import type { AcademyStudentDetail } from "../api/__generated__/core"
+
 import type { nivoQueryReading } from "../query"
 
 /** Derive the student roster's presentation from its settled query and item count. */

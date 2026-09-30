@@ -1,15 +1,18 @@
+
+import type { MyAgentosModuleRuntimeQuery } from "@/modules/api/__generated__/core"
+
 import type { ExecuteMessage } from "../../../components/blocks/agentos/ExecuteChatBlock"
 import type { ExecuteSession } from "../../../components/blocks/agentos/ExecuteSessionRailBlock"
 import type { SetupMessage, SetupRevision } from "../../../components/blocks/agentos/PrivateSetupChatBlock"
-import type { AgentosModuleRuntime, AgentosRuntimeSession } from "../../api/agentos-module-runtime"
+
 import type { Formatter } from "../../i18n/formatter"
 import type { ModulePageCopy } from "../module-page-copy"
 import { executeSessionTitleFor } from "./sessions"
 
 /** The setup conversation lines belonging to one selected session. */
 export const setupMessagesFor = (
-    runtime: AgentosModuleRuntime,
-    selectedSetup: AgentosRuntimeSession | null,
+    runtime: NonNullable<MyAgentosModuleRuntimeQuery["myAgentosModuleRuntime"]["data"]>,
+    selectedSetup: NonNullable<MyAgentosModuleRuntimeQuery["myAgentosModuleRuntime"]["data"]>["setupSessions"][number] | null,
 ): ReadonlyArray<SetupMessage> =>
     selectedSetup === null
         ? []
@@ -22,7 +25,7 @@ export const setupMessagesFor = (
               }))
 
 /** The revision rail entries: only sessions that carry a numbered revision and a status. */
-export const setupRevisionsFor = (runtime: AgentosModuleRuntime): ReadonlyArray<SetupRevision> =>
+export const setupRevisionsFor = (runtime: NonNullable<MyAgentosModuleRuntimeQuery["myAgentosModuleRuntime"]["data"]>): ReadonlyArray<SetupRevision> =>
     runtime.setupSessions
         .filter(
             (
@@ -39,12 +42,12 @@ export const setupRevisionsFor = (runtime: AgentosModuleRuntime): ReadonlyArray<
         }))
 
 /** Whether any setup session is still open: starting a new revision is allowed only while none is. */
-export const setupOpenFor = (runtime: AgentosModuleRuntime): boolean =>
+export const setupOpenFor = (runtime: NonNullable<MyAgentosModuleRuntimeQuery["myAgentosModuleRuntime"]["data"]>): boolean =>
     runtime.setupSessions.some((item) => item.setupStatus === "open" || item.setupStatus === "ready")
 
 /** The rail entries for the execute sessions of one runtime. */
 export const executeSessionsFor = (
-    runtime: AgentosModuleRuntime,
+    runtime: NonNullable<MyAgentosModuleRuntimeQuery["myAgentosModuleRuntime"]["data"]>,
     copy: ModulePageCopy,
     format: Formatter,
 ): ReadonlyArray<ExecuteSession> =>
@@ -60,8 +63,8 @@ export const executeSessionsFor = (
 
 /** The conversation lines of one selected execute session, with bound context and widget state. */
 export const executeMessagesFor = (
-    runtime: AgentosModuleRuntime,
-    selectedSession: AgentosRuntimeSession | null,
+    runtime: NonNullable<MyAgentosModuleRuntimeQuery["myAgentosModuleRuntime"]["data"]>,
+    selectedSession: NonNullable<MyAgentosModuleRuntimeQuery["myAgentosModuleRuntime"]["data"]>["setupSessions"][number] | null,
     copy: ModulePageCopy,
 ): ReadonlyArray<ExecuteMessage> => {
     if (selectedSession === null) return []

@@ -1,7 +1,10 @@
 "use client"
 
+import type { DomainFieldsFragment } from "@/modules/api/__generated__/core"
+
 import { useFormatter, useTranslations } from "next-intl"
-import { useNow, useOverviewData } from "@/hooks"
+import { useNow } from "@/hooks/time"
+import { useOverviewData } from "@/hooks/overview"
 
 import { BILLING_CURRENCY } from "@/modules/config"
 import { OverviewSignalsBase, type OverviewSignalsCell } from "./component"

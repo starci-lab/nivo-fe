@@ -1,12 +1,5 @@
-import type { AgentWorkspaceAppLaunch } from "../agentos-workspaces"
-import type {
-    CatalogItemRow,
-    CatalogOrderStatus,
-    InvoiceStatus,
-    WalletTopUpPayLink,
-} from "../commerce"
-/** Catalog offer shape consumed by the workspace purchase flow. */
-export type WorkspacePurchaseOffer = CatalogItemRow
+
+import type { CatalogOrderStatus, InvoiceStatus } from "../__generated__/core"
 
 /** The stable purchase identity admitted by checkout; the catalog order row IS the purchase. */
 export type WorkspacePurchaseReceipt = {
@@ -61,7 +54,7 @@ type WorkspacePurchaseProvisioningFact =
     | { readonly state: "unavailable"; readonly code: string | null }
 
 /**
- * Source-qualified status of one purchase.
+ * Source-qualified status view composed from the order, billing and workspace reads.
  *
  * EACH FACT KEEPS THE NAME OF ITS OWN SOURCE and never borrows another's verdict: an invoice-less
  * order is "not-raised", never "failed"; a timed-out source is "unavailable", never a verdict;
@@ -77,63 +70,6 @@ export type WorkspacePurchaseStatus = {
     readonly provisioning: WorkspacePurchaseProvisioningFact
 }
 
-/** The lifecycle states a provisioning saga's own enum can report. */
-type WorkspaceProvisioningSagaStatus =
-    | "queued"
-    | "running_forward"
-    | "waiting_retry"
-    | "compensating"
-    | "completed"
-    | "compensated"
-    | "compensation_failed"
-
-/** The lifecycle states one durable saga step's own enum can report. */
-type WorkspaceProvisioningSagaStepStatus =
-    "pending" | "running" | "completed" | "failed" | "compensating" | "compensated" | "compensation_failed" | "skipped"
-
-/** The durable record of one purchase-bound provisioning order, as `myProvisioningSaga` reports it. */
-export type WorkspaceProvisioningSaga = {
-    readonly id: string
-    readonly jobId: string
-    readonly definitionKey: string
-    readonly definitionVersion: number
-    readonly resourceKind: string
-    readonly resourceId: string
-    readonly ownerId: string
-    readonly status: WorkspaceProvisioningSagaStatus
-    readonly direction: "forward" | "compensating"
-    readonly forwardCursor: number
-    readonly compensationCursor: number | null
-    readonly sequence: number
-    readonly failureCode: string | null
-    readonly failureReason: string | null
-    readonly finishedAt: string | null
-    readonly createdAt: string
-    readonly updatedAt: string
-}
-
-/** One durable forward/compensation step inside the saga read model. */
-export type WorkspaceProvisioningSagaStep = {
-    readonly id: string
-    readonly stepKey: string
-    readonly ordinal: number
-    readonly isCompensable: boolean
-    readonly forwardStatus: WorkspaceProvisioningSagaStepStatus
-    readonly compensationStatus: WorkspaceProvisioningSagaStepStatus
-    readonly lastError: string | null
-    readonly createdAt: string
-    readonly updatedAt: string
-}
-
-/** The saga row together with every step it has recorded so far. */
-export type WorkspaceProvisioningSagaView = {
-    readonly saga: WorkspaceProvisioningSaga
-    readonly steps: ReadonlyArray<WorkspaceProvisioningSagaStep>
-}
-
-/** The provider-hosted payment action raised for one purchase invoice. */
-export type WorkspacePurchasePayLink = WalletTopUpPayLink
-
 /** What raising one provider-hosted payment action requires. */
 export type WorkspacePurchasePayLinkInput = {
     /** The invoice amount, in dong. */
@@ -143,8 +79,3 @@ export type WorkspacePurchasePayLinkInput = {
     /** Where the provider returns an abandoned checkout. */
     readonly cancelUrl: string
 }
-
-/** The readiness-gated entry grant issued by instance-management, never a caller-chosen address. */
-export type PurchasedWorkspaceEntry = AgentWorkspaceAppLaunch
-
-/** The fields a saga row carries, identical for the view and for the recovery mutations. */

@@ -1,6 +1,6 @@
-import type {
-    WorkspaceCheckoutStatusView,
-} from "@/modules/api/workspace-controlplane"
+
+import type { WorkspaceCheckoutPurchaseStatusFieldsFragment } from "@/modules/api/__generated__/core"
+
 import { type Outcome } from "@nivo/api"
 import type { WorkspaceCheckoutAnswer } from "@/modules/api/workspace-controlplane"
 import type { PurchaseStatusCopy } from "./copy"
@@ -8,6 +8,7 @@ import type { PurchasePhase } from "./phase"
 import type { PurchaseStatusLinks } from "./view-model"
 
 /** Locale-bound formatters the pure view derivation needs for observed timestamps and amounts. */
+
 type PurchaseStatusFormatters = {
     readonly timeOf: (iso: string) => string
     readonly stampOf: (iso: string) => string
@@ -34,7 +35,7 @@ export type PurchaseStatusPresentationContext = {
     readonly phase: PurchasePhase
     readonly answer: Outcome<WorkspaceCheckoutAnswer> | undefined
     readonly outcome: WorkspaceCheckoutAnswer | null
-    readonly purchase: WorkspaceCheckoutStatusView | null
+    readonly purchase: WorkspaceCheckoutPurchaseStatusFieldsFragment | null
     readonly readyWorkspaceId: string | null
     readonly purchaserFact: string | null
     readonly copy: PurchaseStatusCopy

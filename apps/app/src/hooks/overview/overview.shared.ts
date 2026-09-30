@@ -1,3 +1,5 @@
+import type { AgentWorkspaceFieldsFragment, DomainFieldsFragment, ExpertSiteFieldsFragment, InvoiceFieldsFragment, PodOpenclawStatusFieldsFragment, WalletFieldsFragment } from "@/modules/api/__generated__/core"
+
 import { createContext, createElement, useMemo } from "react"
 import type { ComponentType, Context, ReactElement } from "react"
 import { useQueryMyAgentWorkspacesSwr } from "../swr/queries/useQueryMyAgentWorkspacesSwr"
@@ -6,23 +8,24 @@ import { useQueryMyExpertSitesSwr } from "../swr/queries/useQueryMyExpertSitesSw
 import { useQueryMyInvoicesSwr } from "../swr/queries/useQueryMyInvoicesSwr"
 import { useQueryMyPodOpenclawStatusSwr } from "../swr/queries/useQueryMyPodOpenclawStatusSwr"
 import { useQueryMyWalletSwr } from "../swr/queries/useQueryMyWalletSwr"
-import { type AgentWorkspaceRow } from "@/modules/api/agentos-workspaces"
-import { type DomainRow, type InvoiceRow, type WalletRow } from "@/modules/api/commerce"
-import { type ExpertSiteRow } from "@/modules/api/expert-sites"
-import { type PodStatusRow } from "@/modules/api/instances"
+
+
+
+
 import { type Outcome } from "@nivo/api"
 
 /** One independently settling answer in the account operations briefing. */
+
 export type OverviewAnswer<T> = Outcome<T> | null
 
 /** Source-owned answers shared by the connected overview blocks. */
 export type OverviewDataProviderData = {
-    readonly apps: OverviewAnswer<ReadonlyArray<ExpertSiteRow>>
-    readonly workspaces: OverviewAnswer<ReadonlyArray<AgentWorkspaceRow>>
-    readonly pod: OverviewAnswer<PodStatusRow>
-    readonly domains: OverviewAnswer<ReadonlyArray<DomainRow>>
-    readonly wallet: OverviewAnswer<WalletRow>
-    readonly invoices: OverviewAnswer<ReadonlyArray<InvoiceRow>>
+    readonly apps: OverviewAnswer<ReadonlyArray<ExpertSiteFieldsFragment>>
+    readonly workspaces: OverviewAnswer<ReadonlyArray<AgentWorkspaceFieldsFragment>>
+    readonly pod: OverviewAnswer<PodOpenclawStatusFieldsFragment>
+    readonly domains: OverviewAnswer<ReadonlyArray<DomainFieldsFragment>>
+    readonly wallet: OverviewAnswer<WalletFieldsFragment>
+    readonly invoices: OverviewAnswer<ReadonlyArray<InvoiceFieldsFragment>>
 }
 
 const EMPTY_OVERVIEW: OverviewDataProviderData = {

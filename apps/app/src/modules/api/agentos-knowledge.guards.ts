@@ -1,20 +1,25 @@
+import type { AgentosAiReadinessComponentType, AgentosKnowledgeOriginType } from "./__generated__/core"
+
 /**
  * The parsers of the AI-knowledge documents' payloads. Each returns the value or null, which
  * `graphql` reports as `unavailable`.
  */
 
 import { isBoolean, isNullableString, isNumber, isRecord, isString, parseEach } from "@nivo/api"
-import type { AgentosAiKnowledgeReadiness, AgentosAiOperationReceipt } from "./agentos-knowledge"
+import type {
+    MyAgentosAiKnowledgeReadinessQuery,
+    ReindexAgentWorkspaceKnowledgeMutation,
+    RunAgentosAiReadinessTestMutation,
+} from "./__generated__/core"
 
-type ReadinessComponent = AgentosAiKnowledgeReadiness["components"][number]
-type ReadinessOrigin = AgentosAiKnowledgeReadiness["origins"][number]
+type Readiness = NonNullable<MyAgentosAiKnowledgeReadinessQuery["myAgentosAiKnowledgeReadiness"]["data"]>
 
-const parseComponent = (value: unknown): ReadinessComponent | null =>
+const parseComponent = (value: unknown): AgentosAiReadinessComponentType | null =>
     isRecord(value) && isString(value.component) && isString(value.verdict)
         ? { component: value.component, verdict: value.verdict }
         : null
 
-const parseOrigin = (value: unknown): ReadinessOrigin | null =>
+const parseOrigin = (value: unknown): AgentosKnowledgeOriginType | null =>
     isRecord(value) &&
     isString(value.origin) &&
     isNullableString(value.version) &&
@@ -31,7 +36,7 @@ const parseOrigin = (value: unknown): ReadinessOrigin | null =>
         : null
 
 /** Parse the `data` of `myAgentosAiKnowledgeReadiness`. */
-export const parseAgentosAiKnowledgeReadiness = (input: unknown): AgentosAiKnowledgeReadiness | null => {
+export const parseAgentosAiKnowledgeReadiness = (input: unknown): Readiness | null => {
     if (
         !isRecord(input) ||
         !isString(input.provider) ||
@@ -72,8 +77,19 @@ export const parseAgentosAiKnowledgeReadiness = (input: unknown): AgentosAiKnowl
     }
 }
 
-/** Parse the `data` of `runAgentosAiReadinessTest`/`reindexAgentWorkspaceKnowledge`. */
-export const parseAgentosAiOperationReceipt = (input: unknown): AgentosAiOperationReceipt | null =>
+const parseOperationReceipt = (input: unknown) =>
     isRecord(input) && isString(input.operationId) && isString(input.status)
         ? { operationId: input.operationId, status: input.status }
         : null
+
+/** Parse the `data` of `runAgentosAiReadinessTest`. */
+export const parseAgentosAiReadinessTestReceipt = (
+    input: unknown,
+): NonNullable<RunAgentosAiReadinessTestMutation["runAgentosAiReadinessTest"]["data"]> | null =>
+    parseOperationReceipt(input)
+
+/** Parse the `data` of `reindexAgentWorkspaceKnowledge`. */
+export const parseAgentosKnowledgeReindexReceipt = (
+    input: unknown,
+): NonNullable<ReindexAgentWorkspaceKnowledgeMutation["reindexAgentWorkspaceKnowledge"]["data"]> | null =>
+    parseOperationReceipt(input)

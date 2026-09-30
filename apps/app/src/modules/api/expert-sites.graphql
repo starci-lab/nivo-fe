@@ -1,0 +1,85 @@
+fragment ExpertSiteFields on ExpertSiteEntity {
+    id
+    slug
+    customDomain
+    provisionStatus
+    status
+}
+
+fragment CreatedExpertSiteFields on ExpertSiteEntity {
+    id
+    slug
+}
+
+fragment PublishedExpertSiteFields on ExpertSiteEntity {
+    id
+    slug
+    status
+}
+
+fragment ProvisionedExpertSiteFields on ProvisionExpertSiteResult {
+    jobId
+    expertDeploymentId
+    publicHost
+}
+
+fragment ExpertDeploymentSnapshotFields on ExpertDeploymentEntity {
+    id
+    status
+    publicHost
+}
+
+query MyExpertSites {
+    myExpertSites {
+        data {
+            ...ExpertSiteFields
+        }
+        message
+        success
+        error
+    }
+}
+
+mutation CreateExpertSite($input: CreateExpertSiteInput!) {
+    createExpertSite(request: $input) {
+        data {
+            ...CreatedExpertSiteFields
+        }
+        message
+        success
+        error
+    }
+}
+
+mutation PublishExpertSite($input: PublishExpertSiteInput!) {
+    publishExpertSite(request: $input) {
+        data {
+            ...PublishedExpertSiteFields
+        }
+        message
+        success
+        error
+    }
+}
+
+mutation ProvisionExpertSite($input: ProvisionExpertSiteInput!) {
+    provisionExpertSite(request: $input) {
+        data {
+            ...ProvisionedExpertSiteFields
+        }
+        message
+        success
+        error
+    }
+}
+
+query MyExpertSiteDeployment($request: MyExpertSiteDeploymentRequest!) {
+    myExpertSiteDeployment(request: $request) {
+        data {
+            ...ExpertDeploymentSnapshotFields
+        }
+        message
+        success
+        error
+    }
+}

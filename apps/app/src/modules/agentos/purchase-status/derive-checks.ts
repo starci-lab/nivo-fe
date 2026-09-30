@@ -1,4 +1,6 @@
-import type { WorkspaceCheckoutStatusView } from "@/modules/api/workspace-controlplane"
+
+import type { WorkspaceCheckoutPurchaseStatusFieldsFragment } from "@/modules/api/__generated__/core"
+
 import { check, type PurchaseStatusCheck, type WordTone } from "./checks"
 import type { PurchaseStatusCopy } from "./copy"
 import { OBSERVED_ORDER_STATES } from "./phase"
@@ -7,8 +9,9 @@ import type { PurchaseStatusOperation } from "./view-model"
 type TimeOf = (iso: string) => string
 
 /** Derive provider, amount, canonical-settlement and admission checks for a payment surface. */
+
 export const paymentChecksOf = (
-    purchase: WorkspaceCheckoutStatusView | null,
+    purchase: WorkspaceCheckoutPurchaseStatusFieldsFragment | null,
     copy: PurchaseStatusCopy,
     amountText: string | null,
     billingSettled: boolean,
@@ -84,7 +87,7 @@ export const paymentChecksOf = (
 
 /** Derive billing, entitlement, configuration and readiness checks for a provisioning surface. */
 export const provisioningChecksOf = (
-    purchase: WorkspaceCheckoutStatusView | null,
+    purchase: WorkspaceCheckoutPurchaseStatusFieldsFragment | null,
     copy: PurchaseStatusCopy,
     billingSettled: boolean,
     timeOf: TimeOf,
@@ -184,7 +187,7 @@ export const provisioningChecksOf = (
 
 /** Derive the operation panel's progress and observation sentences from source facts. */
 export const provisioningOperationOf = (
-    purchase: WorkspaceCheckoutStatusView | null,
+    purchase: WorkspaceCheckoutPurchaseStatusFieldsFragment | null,
     copy: PurchaseStatusCopy,
     observedAt: string | null,
     timeOf: TimeOf,

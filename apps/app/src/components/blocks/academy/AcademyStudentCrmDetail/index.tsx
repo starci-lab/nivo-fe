@@ -1,8 +1,9 @@
+import type { AcademyStudentDetail } from "../../../../modules/api/__generated__/core"
+
 import type { ReactNode } from "react"
 import { LabelledProgressRow } from "@nivo/ui"
 import { Button, Input, SurfaceCard, Text } from "@starci/grammar/common"
 import type { AcademyStudentCrmActions, AcademyStudentCrmLabels } from "../../../../modules/academy/student-crm"
-import type { AcademyStudentDetail } from "../../../../modules/api/academy"
 import { ACADEMY_STUDENT_CRM_DETAIL_CLASS_NAME } from "./classNames"
 
 type AcademyStudentCrmDetailProps = {

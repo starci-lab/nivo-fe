@@ -1,13 +1,19 @@
+import type { ChatbotWorkbenchFieldsFragment } from "../../api/__generated__/agentos-controlplane"
+import type { MyAgentosModuleRuntimeQuery } from "@/modules/api/__generated__/core"
+
+import type { AgentosModuleTestSurfaceView } from "@/modules/api/agentos-module-tests"
+import type { AgentosModuleTestContractView } from "@/modules/api/agentos-module-tests"
+
+
+
 import type { ReactNode } from "react"
 import type { ContextDraft } from "../../../components/blocks/agentos/ContextVersionBlock"
 import type { ExecuteMessage, TrustedWidgetComponentProps } from "../../../components/blocks/agentos/ExecuteChatBlock"
 import type { ExecuteSession } from "../../../components/blocks/agentos/ExecuteSessionRailBlock"
 import type { AgentOSModuleView } from "../../../components/blocks/agentos/ModuleRouteShellBlock"
 import type { SetupMessage, SetupRevision } from "../../../components/blocks/agentos/PrivateSetupChatBlock"
-import type { AgentosModuleRuntime } from "../../api/agentos-module-runtime"
+
 import type { AgentosRuntimeValue } from "../../api/agentos-runtime-tree"
-import type { AgentosModuleTestContract, AgentosModuleTestSurface } from "../../api/agentos-module-tests"
-import type { ChatbotWorkbench } from "../../api/workspace-controlplane"
 
 /** Settled inputs and actions for the controlled Setup panel. */
 export type SetupSurfaceProps = {
@@ -43,10 +49,10 @@ export type SetupSurfaceProps = {
 
 /** Settled inputs and actions for module scenario testing. */
 export type TestSurfaceProps = {
-    readonly contract: AgentosModuleTestContract
+    readonly contract: AgentosModuleTestContractView
     readonly targetReady: boolean
     readonly contextLabel: string
-    readonly testSurface: AgentosModuleTestSurface | null
+    readonly testSurface: AgentosModuleTestSurfaceView | null
     readonly pending: boolean
     readonly selectedScenarioKey: string
     readonly mode: "exploratory" | "acceptance"
@@ -76,11 +82,11 @@ export type OperateSurfaceProps = {
     readonly selectedSessionId: string | null
     readonly selectedSessionTitle: string
     readonly messages: ReadonlyArray<ExecuteMessage>
-    readonly tasks: AgentosModuleRuntime["tasks"]
-    readonly events: AgentosModuleRuntime["operationEvents"]
+    readonly tasks: NonNullable<MyAgentosModuleRuntimeQuery["myAgentosModuleRuntime"]["data"]>["tasks"]
+    readonly events: NonNullable<MyAgentosModuleRuntimeQuery["myAgentosModuleRuntime"]["data"]>["operationEvents"]
     readonly operationTarget: "customer-chat" | "customer-workbench" | "internal-chat" | "internal-workbench"
     readonly isChatbot: boolean
-    readonly chatbotWorkbench: ChatbotWorkbench | null
+    readonly chatbotWorkbench: ChatbotWorkbenchFieldsFragment | null
     readonly chatbotRefusedCode: string | null
     readonly supportInbox: AgentOSSolutionModuleSupportInbox
     readonly pending: boolean
@@ -155,7 +161,7 @@ export type DiagnosticsSurfaceProps = {
     readonly kindKey: string
     readonly workbenchKey: string
     readonly diagnostics: Readonly<Record<string, AgentosRuntimeValue>>
-    readonly events: AgentosModuleRuntime["operationEvents"]
+    readonly events: NonNullable<MyAgentosModuleRuntimeQuery["myAgentosModuleRuntime"]["data"]>["operationEvents"]
     readonly selectedSignal: "all" | "channel" | "ai"
     readonly compactPane: "signals" | "readiness" | "evidence"
     readonly onSelectSignal: (signal: "all" | "channel" | "ai") => void

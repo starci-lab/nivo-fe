@@ -1,4 +1,6 @@
-import type { AgentWorkspaceControlCenter } from "../../api/agentos-workspaces"
+
+import type { AgentWorkspaceControlCenterFieldsFragment } from "../../api/__generated__/core"
+
 import { nivoQueryPayload, type NivoQueryAnswer } from "../../query"
 import type { ModulePageCopy } from "../module-page-copy"
 
@@ -15,7 +17,7 @@ export const channelLabelFor = (channelAccountRef: string | null, copy: ModulePa
  * workspace has no instance yet — an unprovisioned workspace has no controller to name.
  */
 export const controllerHostnameForWorkspace = (
-    answer: NivoQueryAnswer<AgentWorkspaceControlCenter> | undefined,
+    answer: NivoQueryAnswer<AgentWorkspaceControlCenterFieldsFragment> | undefined,
     workspaceId: string,
 ): string | null => {
     const candidate = nivoQueryPayload(answer)

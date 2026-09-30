@@ -1,3 +1,5 @@
+import type { AgentWorkspaceControlCenterFieldsFragment } from "@/modules/api/__generated__/core"
+
 import type { AgentOSWorkspaceControlCenterLabels } from "@/modules/agentos/workspace-control-center/labels"
 import type { AgentOSWorkspacePageState, AgentOSWorkspaceControlCenterStatus } from "@/modules/agentos/workspace-control-center/contracts"
 import type { AgentOSShellConfigurationDigests, AgentOSShellView, AgentOSShellViewStatus, AgentOSWorkspaceControlCenterShellLabels } from "@/modules/agentos/workspace-control-center/shell-types"
@@ -8,11 +10,12 @@ import { AgentOSWorkspaceModuleList } from "@/components/blocks/agentos/AgentOSW
 import { AgentOSWorkspaceRuntimeSummary } from "@/components/blocks/agentos/AgentOSWorkspaceRuntimeSummary"
 import { AgentOSWorkspaceShell } from "@/components/blocks/agentos/AgentOSWorkspaceShell"
 import { AgentOSWorkspaceOperations } from "@/components/blocks/operations/AgentOSWorkspaceOperations"
-import type { AgentWorkspaceControlCenter } from "@/modules/api/agentos-workspaces"
+
 import { CONTENT_CLASS_NAME, SECTIONS_CLASS_NAME, SHELL_NOTICE_CLASS_NAME } from "./classNames"
 import { EmptyNotice, PageContainer, SurfaceCard, Text, TextAction } from "@starci/grammar/common"
 
 /** The sign-in address the product already publishes (ConsoleLayout and SessionEndingDialog agree). */
+
 export const AGENT_OS_SIGN_IN_HREF = "/authentication"
 export type { AgentOSWorkspaceControlCenterLabels } from "@/modules/agentos/workspace-control-center/labels"
 export type { AgentOSWorkspacePageState, AgentOSWorkspaceControlCenterStatus } from "@/modules/agentos/workspace-control-center/contracts"
@@ -52,7 +55,7 @@ export type AgentOSWorkspaceControlCenterProps = {
         readonly workspaceId?: string
         readonly controlCenterState: AgentOSWorkspaceControlCenterStatus
         readonly message?: string
-        readonly data?: AgentWorkspaceControlCenter
+        readonly data?: AgentWorkspaceControlCenterFieldsFragment
         readonly shell: AgentOSShellView
         readonly labels: AgentOSWorkspaceControlCenterLabels
         readonly retryPending?: boolean
@@ -77,7 +80,7 @@ export type AgentOSWorkspaceControlCenterViewProps = {
     readonly pageState: AgentOSWorkspacePageState
     readonly controlCenterState: AgentOSWorkspaceControlCenterStatus
     readonly message?: string
-    readonly data?: AgentWorkspaceControlCenter
+    readonly data?: AgentWorkspaceControlCenterFieldsFragment
     readonly shell: AgentOSShellView
     readonly labels: AgentOSWorkspaceControlCenterLabels
     readonly onSelectPageState: (pageState: AgentOSWorkspacePageState) => void

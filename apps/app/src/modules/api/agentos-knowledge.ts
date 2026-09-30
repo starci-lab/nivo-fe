@@ -8,86 +8,30 @@
 
 import { type Outcome } from "@nivo/api"
 import { graphql } from "./graphql"
-import { parseAgentosAiKnowledgeReadiness, parseAgentosAiOperationReceipt } from "./agentos-knowledge.guards"
-
-/** Owner-safe AI, vector-store and knowledge provenance for one workspace. */
-export type AgentosAiKnowledgeReadiness = {
-    readonly provider: string
-    readonly chatModel: string
-    readonly embeddingProfile: string
-    readonly embeddingDimension: number
-    readonly credentialStatus: string
-    readonly credentialMaskedHint: string | null
-    readonly qdrantHealth: string
-    readonly readinessStatus: string
-    readonly aiReady: boolean
-    readonly readinessOperationId: string | null
-    readonly knowledgeRecoveryOperationId: string | null
-    readonly components: ReadonlyArray<{
-        readonly component: string
-        readonly verdict: string
-    }>
-    readonly origins: ReadonlyArray<{
-        readonly origin: string
-        readonly version: string | null
-        readonly digest: string | null
-        readonly documentCount: number
-        readonly lastUpdatedAt: string | null
-    }>
-    readonly failureCode: string | null
-    readonly testedAt: string | null
-}
-
-/** Receipt for one bounded AI readiness or knowledge recovery operation. */
-export type AgentosAiOperationReceipt = {
-    readonly operationId: string
-    readonly status: string
-}
-
-/** Input shared by bounded workspace AI readiness and knowledge recovery operations. */
-type AgentosAiOperationInput = {
-    readonly workspaceId: string
-    readonly idempotencyKey: string
-}
+import {
+    MyAgentosAiKnowledgeReadinessDocument,
+    ReindexAgentWorkspaceKnowledgeDocument,
+    RunAgentosAiReadinessTestDocument,
+} from "./__generated__/core"
+import type {
+    MyAgentosAiKnowledgeReadinessQuery,
+    ReindexAgentWorkspaceKnowledgeInput,
+    ReindexAgentWorkspaceKnowledgeMutation,
+    RunAgentosAiReadinessTestInput,
+    RunAgentosAiReadinessTestMutation,
+} from "./__generated__/core"
+import {
+    parseAgentosAiKnowledgeReadiness,
+    parseAgentosAiReadinessTestReceipt,
+    parseAgentosKnowledgeReindexReceipt,
+} from "./agentos-knowledge.guards"
 
 /** Read current per-workspace provider, model, global-Qdrant recovery and readiness evidence. */
-export const myAgentosAiKnowledgeReadiness = (workspaceId: string): Promise<Outcome<AgentosAiKnowledgeReadiness>> =>
+export const myAgentosAiKnowledgeReadiness = (
+    workspaceId: string,
+): Promise<Outcome<NonNullable<MyAgentosAiKnowledgeReadinessQuery["myAgentosAiKnowledgeReadiness"]["data"]>>> =>
     graphql(
-        `
-            query MyAgentosAiKnowledgeReadiness($request: MyAgentosAiKnowledgeReadinessRequest!) {
-                myAgentosAiKnowledgeReadiness(request: $request) {
-                    data {
-                        provider
-                        chatModel
-                        embeddingProfile
-                        embeddingDimension
-                        credentialStatus
-                        credentialMaskedHint
-                        qdrantHealth
-                        readinessStatus
-                        aiReady
-                        readinessOperationId
-                        knowledgeRecoveryOperationId
-                        failureCode
-                        testedAt
-                        components {
-                            component
-                            verdict
-                        }
-                        origins {
-                            origin
-                            version
-                            digest
-                            documentCount
-                            lastUpdatedAt
-                        }
-                    }
-                    message
-                    success
-                    error
-                }
-            }
-        `,
+        MyAgentosAiKnowledgeReadinessDocument,
         parseAgentosAiKnowledgeReadiness,
         {
             request: { workspaceId },
@@ -96,23 +40,11 @@ export const myAgentosAiKnowledgeReadiness = (workspaceId: string): Promise<Outc
 
 /** Ask the backend to run one bounded provider, Qdrant and retrieval readiness test. */
 export const runAgentosAiReadinessTest = (
-    input: AgentosAiOperationInput,
-): Promise<Outcome<AgentosAiOperationReceipt>> =>
+    input: RunAgentosAiReadinessTestInput,
+): Promise<Outcome<NonNullable<RunAgentosAiReadinessTestMutation["runAgentosAiReadinessTest"]["data"]>>> =>
     graphql(
-        `
-            mutation RunAgentosAiReadinessTest($input: RunAgentosAiReadinessTestInput!) {
-                runAgentosAiReadinessTest(request: $input) {
-                    data {
-                        operationId
-                        status
-                    }
-                    message
-                    success
-                    error
-                }
-            }
-        `,
-        parseAgentosAiOperationReceipt,
+        RunAgentosAiReadinessTestDocument,
+        parseAgentosAiReadinessTestReceipt,
         {
             input,
         },
@@ -120,23 +52,11 @@ export const runAgentosAiReadinessTest = (
 
 /** Recover the workspace-private Qdrant collection from pinned Nivo/module knowledge snapshots. */
 export const reindexAgentWorkspaceKnowledge = (
-    input: AgentosAiOperationInput,
-): Promise<Outcome<AgentosAiOperationReceipt>> =>
+    input: ReindexAgentWorkspaceKnowledgeInput,
+): Promise<Outcome<NonNullable<ReindexAgentWorkspaceKnowledgeMutation["reindexAgentWorkspaceKnowledge"]["data"]>>> =>
     graphql(
-        `
-            mutation ReindexAgentWorkspaceKnowledge($input: ReindexAgentWorkspaceKnowledgeInput!) {
-                reindexAgentWorkspaceKnowledge(request: $input) {
-                    data {
-                        operationId
-                        status
-                    }
-                    message
-                    success
-                    error
-                }
-            }
-        `,
-        parseAgentosAiOperationReceipt,
+        ReindexAgentWorkspaceKnowledgeDocument,
+        parseAgentosKnowledgeReindexReceipt,
         {
             input,
         },

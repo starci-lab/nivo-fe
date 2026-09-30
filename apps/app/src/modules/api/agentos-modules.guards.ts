@@ -5,12 +5,18 @@
 
 import { isNullableString, isNumber, isOneOf, isRecord, isString, isStringArray, parseEach } from "@nivo/api"
 import type {
-    AgentosModuleInstallation,
-    AgentosModuleInstallationDetail,
-    AgentosSolutionModule,
-} from "./agentos-modules"
+    InstallAgentosSolutionModuleMutation,
+    MyAgentosModuleInstallationQuery,
+    MyAgentosModuleInstallationsQuery,
+    MyAgentosSolutionModulesQuery,
+} from "./__generated__/core"
 
-const parseSolutionModule = (value: unknown): AgentosSolutionModule | null =>
+type SolutionModule = NonNullable<MyAgentosSolutionModulesQuery["myAgentosSolutionModules"]["data"]>[number]
+type Installation = NonNullable<InstallAgentosSolutionModuleMutation["installAgentosSolutionModule"]["data"]>
+type ModuleInstallationDetail = MyAgentosModuleInstallationQuery["myAgentosModuleInstallation"]["data"]
+type KnowledgeArtifact = NonNullable<NonNullable<ModuleInstallationDetail>["knowledgeArtifact"]>
+
+const parseSolutionModule = (value: unknown): SolutionModule | null =>
     isRecord(value) &&
     isString(value.key) &&
     isString(value.version) &&
@@ -31,11 +37,11 @@ const parseSolutionModule = (value: unknown): AgentosSolutionModule | null =>
         : null
 
 /** Parse the `data` of `myAgentosSolutionModules`. */
-export const parseSolutionModules = (input: unknown): ReadonlyArray<AgentosSolutionModule> | null =>
+export const parseSolutionModules = (input: unknown): NonNullable<MyAgentosSolutionModulesQuery["myAgentosSolutionModules"]["data"]> | null =>
     parseEach(input, parseSolutionModule)
 
 /** Parse one installation row - also the `data` of `installAgentosSolutionModule`. */
-export const parseModuleInstallation = (input: unknown): AgentosModuleInstallation | null =>
+export const parseModuleInstallation = (input: unknown): Installation | null =>
     isRecord(input) &&
     isString(input.id) &&
     isString(input.agentWorkspaceId) &&
@@ -60,12 +66,14 @@ export const parseModuleInstallation = (input: unknown): AgentosModuleInstallati
         : null
 
 /** Parse the `data` of `myAgentosModuleInstallations`. */
-export const parseModuleInstallations = (input: unknown): ReadonlyArray<AgentosModuleInstallation> | null =>
+export const parseModuleInstallations = (
+    input: unknown,
+): NonNullable<MyAgentosModuleInstallationsQuery["myAgentosModuleInstallations"]["data"]> | null =>
     parseEach(input, parseModuleInstallation)
 
 const parseKnowledgeArtifact = (
     value: unknown,
-): NonNullable<AgentosModuleInstallationDetail["knowledgeArtifact"]> | null =>
+): KnowledgeArtifact | null =>
     isRecord(value) &&
     isString(value.id) &&
     isString(value.knowledgeVersion) &&
@@ -86,7 +94,7 @@ const parseKnowledgeArtifact = (
         : null
 
 /** Parse the `data` of `myAgentosModuleInstallation`. */
-export const parseModuleInstallationDetail = (input: unknown): AgentosModuleInstallationDetail | null => {
+export const parseModuleInstallationDetail = (input: unknown): ModuleInstallationDetail => {
     if (
         !isRecord(input) ||
         !isString(input.id) ||

@@ -1,5 +1,7 @@
+import type { InvoiceFieldsFragment, WalletFieldsFragment, WalletTransactionFieldsFragment } from "@/modules/api/__generated__/core"
+
 import type { useTranslations } from "next-intl"
-import type { InvoiceRow, WalletRow, WalletTransactionRow } from "@/modules/api/commerce"
+
 import { type Outcome } from "@nivo/api"
 import type { BalanceSectionView, LedgerSectionView, LinkedInvoiceSectionView, WalletFactRow, WalletLedgerRow } from "./types"
 import { invoiceTone, type WalletWaypoint } from "./waypoint"
@@ -7,27 +9,28 @@ import { invoiceTone, type WalletWaypoint } from "./waypoint"
 type WalletTranslator = ReturnType<typeof useTranslations<"console">>
 
 type WalletSectionInput = {
-    readonly walletAnswer: Outcome<WalletRow> | undefined
-    readonly invoicesAnswer: Outcome<ReadonlyArray<InvoiceRow>> | undefined
-    readonly movements: Outcome<ReadonlyArray<WalletTransactionRow>> | undefined
+    readonly walletAnswer: Outcome<WalletFieldsFragment> | undefined
+    readonly invoicesAnswer: Outcome<ReadonlyArray<InvoiceFieldsFragment>> | undefined
+    readonly movements: Outcome<ReadonlyArray<WalletTransactionFieldsFragment>> | undefined
     readonly waypoint: WalletWaypoint | null | undefined
     readonly payingInvoice: boolean
     readonly paymentError: string | null
     readonly t: WalletTranslator
     readonly amount: (amountVnd: number) => string
     readonly day: (iso: string) => string
+
 }
 
 /** Project wallet, transaction and invoice answers into settled section states. */
 export const createWalletSectionViews = (input: WalletSectionInput) => {
     const { walletAnswer, invoicesAnswer, movements, waypoint, payingInvoice, paymentError, t, amount, day } = input
-    const invoiceLabel = (invoice: InvoiceRow) => {
+    const invoiceLabel = (invoice: InvoiceFieldsFragment) => {
         const item = invoice.catalogOrder?.catalogItem?.name
         const tier = invoice.catalogOrder?.catalogTier?.name
         if (item === undefined) return t("wallet.invoicesLabel")
         return tier === undefined ? item : `${item} · ${tier}`
     }
-    const invoiceRow = (invoice: InvoiceRow): WalletLedgerRow => ({
+    const invoiceRow = (invoice: InvoiceFieldsFragment): WalletLedgerRow => ({
         id: invoice.id,
         title: invoiceLabel(invoice),
         caption: t("wallet.dueAt", {

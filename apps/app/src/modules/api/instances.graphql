@@ -1,0 +1,40 @@
+fragment InstanceFields on MyInstance {
+    id
+    appKey
+    detailId
+    name
+    plan
+    ram
+    vcpu
+    status
+}
+
+fragment PodOpenclawStatusFields on PodOpenclawStatus {
+    reachable
+    httpStatus
+    tokenConfigured
+    tokenHint
+    checkedAt
+}
+
+query MyInstances {
+    myInstances {
+        data {
+            ...InstanceFields
+        }
+        message
+        success
+        error
+    }
+}
+
+query MyPodOpenclawStatus {
+    myPodOpenclawStatus {
+        data {
+            ...PodOpenclawStatusFields
+        }
+        message
+        success
+        error
+    }
+}

@@ -1,0 +1,212 @@
+fragment AuthPayloadFields on AuthPayload {
+    accessToken
+    requiresTwoFactor
+    twoFactorToken
+}
+
+fragment SignInPayloadFields on SignInPayload {
+    accessToken
+    destination
+    requiresTwoFactor
+    twoFactorToken
+    undecided {
+        retryWithSameRequest
+    }
+}
+
+fragment SignUpVerifyOtpPayloadFields on SignUpVerifyOtpPayload {
+    accessToken
+    conclusion {
+        reason
+    }
+    requiresTwoFactor
+    twoFactorToken
+    undecided {
+        retryWithSameRequest
+    }
+}
+
+fragment ExchangeOauthCodePayloadFields on ExchangeOauthCodePayload {
+    accessToken
+    providerEmailRefused
+    requiresTwoFactor
+    twoFactorToken
+    undecided {
+        continuationReference
+    }
+}
+
+fragment ContinueBrokeredSignInPayloadFields on ContinueBrokeredSignInPayload {
+    accessToken
+    providerEmailRefused
+    requiresTwoFactor
+    twoFactorToken
+    undecided {
+        retryWithSameRequest
+    }
+}
+
+fragment OtpChallengeFields on OtpChallenge {
+    challengeId
+    expiresInSeconds
+}
+
+mutation SignIn($input: SignInInput!) {
+    signIn(request: $input) {
+        data {
+            ...SignInPayloadFields
+        }
+        message
+        success
+        error
+    }
+}
+
+mutation VerifyTwoFactor($input: VerifyTwoFactorInput!) {
+    verifyTwoFactor(request: $input) {
+        data {
+            ...AuthPayloadFields
+        }
+        message
+        success
+        error
+    }
+}
+
+mutation ExchangeOauthCode($input: ExchangeOauthCodeInput!) {
+    exchangeOauthCode(request: $input) {
+        data {
+            ...ExchangeOauthCodePayloadFields
+        }
+        message
+        success
+        error
+    }
+}
+
+mutation ContinueBrokeredSignIn($input: ContinueBrokeredSignInInput!) {
+    continueBrokeredSignIn(request: $input) {
+        data {
+            ...ContinueBrokeredSignInPayloadFields
+        }
+        message
+        success
+        error
+    }
+}
+
+mutation SignUpInit($input: SignUpInitInput!) {
+    signUpInit(request: $input) {
+        data {
+            ...OtpChallengeFields
+        }
+        message
+        success
+        error
+    }
+}
+
+mutation SignUpResend($input: SignUpResendInput!) {
+    signUpResend(request: $input) {
+        data {
+            ...OtpChallengeFields
+        }
+        message
+        success
+        error
+    }
+}
+
+mutation SignUpVerifyOtp($input: SignUpVerifyOtpInput!) {
+    signUpVerifyOtp(request: $input) {
+        data {
+            ...SignUpVerifyOtpPayloadFields
+        }
+        message
+        success
+        error
+    }
+}
+
+mutation ForgotPasswordInit($input: ForgotPasswordInitInput!) {
+    forgotPasswordInit(request: $input) {
+        data {
+            ...OtpChallengeFields
+        }
+        message
+        success
+        error
+    }
+}
+
+mutation ForgotPasswordResend($input: ForgotPasswordResendInput!) {
+    forgotPasswordResend(request: $input) {
+        data {
+            ...OtpChallengeFields
+        }
+        message
+        success
+        error
+    }
+}
+
+mutation ForgotPasswordVerifyOtp($input: ForgotPasswordVerifyOtpInput!) {
+    forgotPasswordVerifyOtp(request: $input) {
+        data
+        message
+        success
+        error
+    }
+}
+
+mutation RequestPasswordReset($input: RequestPasswordResetInput!) {
+    requestPasswordReset(request: $input) {
+        data
+        message
+        success
+        error
+    }
+}
+
+mutation ResetPassword($input: ResetPasswordInput!) {
+    resetPassword(request: $input) {
+        data
+        message
+        success
+        error
+    }
+}
+
+mutation EndPrincipalSessions($input: EndPrincipalSessionsInput!) {
+    endPrincipalSessions(request: $input) {
+        data {
+            kind
+            authorityEndingConfirmed
+        }
+        message
+        success
+        error
+    }
+}
+
+mutation RefreshSession {
+    refreshSession {
+        data {
+            ...AuthPayloadFields
+        }
+        message
+        success
+        error
+    }
+}
+
+mutation SignOut($input: SignOutInput) {
+    signOut(request: $input) {
+        data
+        remoteRevocationObserved
+        authorityEndingConfirmed
+        message
+        success
+        error
+    }
+}

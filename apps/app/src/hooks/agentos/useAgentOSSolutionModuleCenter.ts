@@ -1,13 +1,17 @@
+
+import type { AgentosSolutionModuleSummary } from "@/modules/api/__generated__/core"
+
 import { useCallback, useEffect, useState } from "react"
 import { useLocale, useTranslations } from "next-intl"
 import {
     useMutateInstallAgentosSolutionModuleSwr,
-    useProvisioningRealtime,
+} from "../swr/mutations/useMutateInstallAgentosSolutionModuleSwr"
+import { useProvisioningRealtime } from "../realtime/useProvisioningRealtime"
+import {
     useQueryMyAgentosModuleInstallationsSwr,
-    useQueryMyAgentosSolutionModulesSwr,
-    useAccessToken,
-} from ".."
-import type { AgentosSolutionModule } from "../../modules/api/agentos-modules"
+} from "../swr/queries/useQueryMyAgentosModuleInstallationsSwr"
+import { useQueryMyAgentosSolutionModulesSwr } from "../swr/queries/useQueryMyAgentosSolutionModulesSwr"
+import { useAccessToken } from "../auth/useAccessToken"
 import { nivoQueryReading } from "../../modules/query"
 import {
     solutionCatalogCards,
@@ -86,7 +90,7 @@ export const useAgentOSSolutionModuleCenter = (props: AgentOSSolutionModuleCente
     )
 
     const install = useCallback(
-        async (moduleKey: AgentosSolutionModule["key"]) => {
+        async (moduleKey: AgentosSolutionModuleSummary["key"]) => {
             setPendingKey(moduleKey)
             setOutcome(undefined)
             const idempotencyKey = installRequestKeys.get(moduleKey) ?? `nivo-fe:${crypto.randomUUID()}`

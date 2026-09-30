@@ -1,3 +1,5 @@
+import type { MyAgentosModuleTestSurfaceQuery, RunAgentosModuleTestMutationVariables } from "./__generated__/core"
+
 /**
  * The test contract of one installed module: its surface, its runs and their assertion results.
  *
@@ -9,10 +11,15 @@
 import { type Outcome } from "@nivo/api"
 import { graphql } from "./graphql"
 import { parseModuleTestSurface } from "./agentos-module-tests.guards"
-import type { AgentosRuntimeValue, AgentosRuntimeWidgetNode } from "./agentos-runtime-tree"
+import type { AgentosRuntimeValue } from "./agentos-runtime-tree"
+import {
+    MyAgentosModuleTestRunDocument,
+    MyAgentosModuleTestSurfaceDocument,
+    RunAgentosModuleTestDocument,
+} from "./__generated__/core"
 
-/** One declarative assertion pinned to a side-effect-free module test scenario. */
-export type AgentosModuleTestAssertionContract = {
+/** One validated assertion in a module test contract JSON value. */
+export type AgentosModuleTestAssertionContractView = {
     readonly key: string
     readonly label: string
     readonly source: "input" | "context"
@@ -22,17 +29,17 @@ export type AgentosModuleTestAssertionContract = {
     readonly severity: "fail" | "warning"
 }
 
-/** One fake-data scenario registered by a kind-owned test workbench. */
-export type AgentosModuleTestScenarioContract = {
+/** One validated fake-data scenario registered by a kind-owned test workbench. */
+export type AgentosModuleTestScenarioContractView = {
     readonly key: string
     readonly label: string
     readonly description: string
     readonly fixture: Readonly<Record<string, AgentosRuntimeValue>>
-    readonly assertions: ReadonlyArray<AgentosModuleTestAssertionContract>
+    readonly assertions: ReadonlyArray<AgentosModuleTestAssertionContractView>
 }
 
-/** Open versioned test registry contract pinned to an installation manifest. */
-export type AgentosModuleTestContract = {
+/** Validated view of the open versioned contract carried in the backend JSON scalar. */
+export type AgentosModuleTestContractView = {
     readonly workbench: {
         readonly key: string
         readonly version: string
@@ -49,91 +56,21 @@ export type AgentosModuleTestContract = {
         readonly key: string
         readonly version: string
     }
-    readonly scenarios: ReadonlyArray<AgentosModuleTestScenarioContract>
+    readonly scenarios: ReadonlyArray<AgentosModuleTestScenarioContractView>
 }
 
-/** Immutable summary for one persisted module test run. */
-export type AgentosModuleTestRun = {
-    readonly id: string
-    readonly installationId: string
-    readonly moduleDefinitionId: string
-    readonly contextVersionId: string | null
-    readonly setupSessionId: string | null
-    readonly draftDigest: string | null
-    readonly requestedByUserId: string
-    readonly kindKey: string
-    readonly kindVersion: string
-    readonly testContractKey: string
-    readonly testContractVersion: string
-    readonly scenarioKey: string
-    readonly mode: "exploratory" | "acceptance"
-    readonly definitionDigest: string
-    readonly targetDigest: string
-    readonly authorityGeneration: number
-    readonly sourceGeneration: number
-    readonly retrievalGeneration: number
-    readonly status: "running" | "passed" | "warning" | "failed"
-    readonly scenarioInput: Readonly<Record<string, AgentosRuntimeValue>>
-    readonly summary: Readonly<Record<string, AgentosRuntimeValue>>
-    readonly completedAt: string | null
-    readonly createdAt: string
+/** Test surface mapped from a generated operation result and its validated contract JSON. */
+export type AgentosModuleTestSurfaceView = {
+    readonly contract: AgentosModuleTestContractView
+    readonly runs: NonNullable<MyAgentosModuleTestSurfaceQuery["myAgentosModuleTestSurface"]["data"]>["runs"]
+    readonly run: NonNullable<MyAgentosModuleTestSurfaceQuery["myAgentosModuleTestSurface"]["data"]>["run"]
+    readonly assertions: NonNullable<MyAgentosModuleTestSurfaceQuery["myAgentosModuleTestSurface"]["data"]>["assertions"]
 }
-
-/** Trusted, normalized assertion evidence for one module test run. */
-export type AgentosModuleTestAssertionResult = {
-    readonly id: string
-    readonly runId: string
-    readonly ordinal: number
-    readonly assertionKey: string
-    readonly label: string
-    readonly verdict: "pass" | "warning" | "fail"
-    readonly expected: AgentosRuntimeValue | null
-    readonly actual: AgentosRuntimeValue | null
-    readonly evidence: AgentosRuntimeWidgetNode
-    readonly createdAt: string
-}
-
-/** Owner-only Test surface, including the open contract and persisted evidence. */
-export type AgentosModuleTestSurface = {
-    readonly contract: AgentosModuleTestContract
-    readonly runs: ReadonlyArray<AgentosModuleTestRun>
-    readonly run: AgentosModuleTestRun | null
-    readonly assertions: ReadonlyArray<AgentosModuleTestAssertionResult>
-}
-
-/** Explicit immutable-context request for one isolated module test. */
-export type RunAgentosModuleTestInput = {
-    readonly installationId: string
-    readonly contextVersionId?: string
-    readonly setupSessionId?: string
-    readonly scenarioKey: string
-    readonly mode: "exploratory" | "acceptance"
-    readonly idempotencyKey: string
-    readonly scenarioInput?: Readonly<Record<string, AgentosRuntimeValue>>
-}
-
-const MODULE_TEST_FIELDS = `
-    contract
-    runs {
-        id installationId moduleDefinitionId contextVersionId setupSessionId draftDigest requestedByUserId kindKey kindVersion
-        testContractKey testContractVersion scenarioKey mode definitionDigest targetDigest authorityGeneration sourceGeneration retrievalGeneration status scenarioInput summary completedAt createdAt
-    }
-    run {
-        id installationId moduleDefinitionId contextVersionId setupSessionId draftDigest requestedByUserId kindKey kindVersion
-        testContractKey testContractVersion scenarioKey mode definitionDigest targetDigest authorityGeneration sourceGeneration retrievalGeneration status scenarioInput summary completedAt createdAt
-    }
-    assertions { id runId ordinal assertionKey label verdict expected actual evidence createdAt }
-`
 
 /** Read the kind-owned Test contract and recent persisted runs for one installation. */
-export const myAgentosModuleTestSurface = (installationId: string): Promise<Outcome<AgentosModuleTestSurface>> =>
+export const myAgentosModuleTestSurface = (installationId: string): Promise<Outcome<AgentosModuleTestSurfaceView>> =>
     graphql(
-        `query MyAgentosModuleTestSurface($request: MyAgentosModuleTestSurfaceRequest!) {
-            myAgentosModuleTestSurface(request: $request) {
-                data { ${MODULE_TEST_FIELDS} }
-                message success error
-            }
-        }`,
+        MyAgentosModuleTestSurfaceDocument,
         parseModuleTestSurface,
         {
             request: { installationId },
@@ -144,14 +81,9 @@ export const myAgentosModuleTestSurface = (installationId: string): Promise<Outc
 export const myAgentosModuleTestRun = (
     installationId: string,
     runId: string,
-): Promise<Outcome<AgentosModuleTestSurface>> =>
+): Promise<Outcome<AgentosModuleTestSurfaceView>> =>
     graphql(
-        `query MyAgentosModuleTestRun($request: MyAgentosModuleTestRunRequest!) {
-            myAgentosModuleTestRun(request: $request) {
-                data { ${MODULE_TEST_FIELDS} }
-                message success error
-            }
-        }`,
+        MyAgentosModuleTestRunDocument,
         parseModuleTestSurface,
         {
             request: { installationId, runId },
@@ -159,14 +91,11 @@ export const myAgentosModuleTestRun = (
     )
 
 /** Run one side-effect-free scenario against one explicit immutable context version. */
-export const runAgentosModuleTest = (input: RunAgentosModuleTestInput): Promise<Outcome<AgentosModuleTestSurface>> =>
+export const runAgentosModuleTest = (
+    input: RunAgentosModuleTestMutationVariables["input"],
+): Promise<Outcome<AgentosModuleTestSurfaceView>> =>
     graphql(
-        `mutation RunAgentosModuleTest($input: RunAgentosModuleTestInput!) {
-            runAgentosModuleTest(request: $input) {
-                data { ${MODULE_TEST_FIELDS} }
-                message success error
-            }
-        }`,
+        RunAgentosModuleTestDocument,
         parseModuleTestSurface,
         {
             input,

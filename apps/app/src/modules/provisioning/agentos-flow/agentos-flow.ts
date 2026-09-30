@@ -1,19 +1,18 @@
-import type {
-    WorkspaceCheckoutAnswer,
-    WorkspaceCheckoutOffer,
-    WorkspaceCheckoutStatusView,
-} from "@/modules/api/workspace-controlplane"
+import type { WorkspaceCheckoutOfferFieldsFragment, WorkspaceCheckoutPurchaseStatusFieldsFragment } from "@/modules/api/__generated__/core"
+
+import type { WorkspaceCheckoutAnswer } from "@/modules/api/workspace-controlplane"
 import type { NivoQueryFailure } from "@/modules/query"
 import { type Outcome } from "@nivo/api"
 import { purchaseOf } from "@/modules/agentos/purchase-source"
 
 /** The settled phase of the AgentOS purchase and readiness journey. */
+
 export type AgentOSFlow =
     | { readonly phase: "catalog_loading" }
     | {
           readonly phase: "request"
-          readonly catalogue: ReadonlyArray<WorkspaceCheckoutOffer>
-          readonly offer: WorkspaceCheckoutOffer | null
+          readonly catalogue: ReadonlyArray<WorkspaceCheckoutOfferFieldsFragment>
+          readonly offer: WorkspaceCheckoutOfferFieldsFragment | null
           readonly verdict: string
       }
     | { readonly phase: "awaiting_payment"; readonly orderId: string; readonly subject: string; readonly detail: string }
@@ -98,7 +97,7 @@ export const queryFailureText = (kind: NivoQueryFailure["kind"], shared: AgentOS
 
 /** Settle one composed purchase view into the phase its confirmed facets prove. */
 export const phaseFromPurchase = (
-    purchase: WorkspaceCheckoutStatusView,
+    purchase: WorkspaceCheckoutPurchaseStatusFieldsFragment,
     copy: AgentOSCopy,
     productName: string,
 ): AgentOSFlow => {

@@ -149,7 +149,7 @@ export const sendOperation = async (
         return {
             arrived: false,
             code: "BAD_REQUEST",
-            reason: "The stable operation identity is empty, over-long or carries a control byte.",
+            reason: "BAD_REQUEST",
             requestId,
         }
     }
@@ -157,7 +157,7 @@ export const sendOperation = async (
         return {
             arrived: false,
             code: "UNAUTHENTICATED",
-            reason: "No access token is held, so no request left the browser.",
+            reason: "UNAUTHENTICATED",
             requestId: null,
         }
     }
@@ -170,16 +170,16 @@ export const sendOperation = async (
     })
     if (sent.ok) return { arrived: true, body: sent.data.body }
     if (sent.kind === "refused")
-        return { arrived: false, code: "UNAUTHENTICATED", reason: "Core refused the bearer token.", requestId }
+        return { arrived: false, code: "UNAUTHENTICATED", reason: "UNAUTHENTICATED", requestId }
     if (sent.status === null)
         return {
             arrived: false,
             code: "UNREACHABLE",
-            reason: `The Core route could not be reached: ${sent.reason}`,
+            reason: "UNREACHABLE",
             requestId,
         }
     if (sent.body === null)
-        return { arrived: false, code: "MALFORMED_ANSWER", reason: "The route answer is not JSON.", requestId }
+        return { arrived: false, code: "MALFORMED_ANSWER", reason: "MALFORMED_ANSWER", requestId }
     return { arrived: true, body: sent.body }
 }
 

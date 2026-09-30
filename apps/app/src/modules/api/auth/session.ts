@@ -1,8 +1,14 @@
+import type {
+    AuthPayload,
+    EndPrincipalSessionsInput,
+    SignOutInput,
+    SignOutMutation,
+} from "../__generated__/core"
+
 import { type EnvelopeAnswer, type Outcome } from "@nivo/api"
+import { EndPrincipalSessionsDocument, RefreshSessionDocument, SignOutDocument } from "../__generated__/core"
 import { graphql, graphqlEnvelope } from "../graphql"
-import { AUTH_PAYLOAD } from "./documents"
-import { parseAuthPayload, parseEndPrincipalSessionsAnswer, parseSignOutEnvelope } from "./guards"
-import type { AuthPayload, EndPrincipalSessionsAnswer, EndPrincipalSessionsInput, SignOutInput, SignOutOutcome } from "./types"
+import { parseAuthPayload, parseEndPrincipalSessionsDecision, parseSignOutEnvelope } from "./guards"
 
 /**
  * Trade the HttpOnly refresh cookie for a fresh access token.
@@ -14,7 +20,21 @@ import type { AuthPayload, EndPrincipalSessionsAnswer, EndPrincipalSessionsInput
  * @returns A fresh session, or why there is none.
  */
 export const refreshSession = (): Promise<Outcome<AuthPayload>> =>
-    graphql(`mutation RefreshSession { refreshSession { data ${AUTH_PAYLOAD} message success error } }`, parseAuthPayload)
+    graphql(RefreshSessionDocument, parseAuthPayload)
+
+/**
+ * End a named principal's Login sessions under the supplied authority context.
+ *
+ * The workspace flow supplies the workspace and roster member; a Nivo operation supplies the
+ * principal. The adapter uses the generated schema input directly, whose nullable fields do not
+ * encode that choice as a one-of constraint.
+ *
+ * @param input - The request identity, target and authority context.
+ * @returns The applied scope, an undecided answer, a generic refusal, or why there is none.
+ */
+export const endPrincipalSessions = (
+    input: EndPrincipalSessionsInput,
+) => graphql(EndPrincipalSessionsDocument, parseEndPrincipalSessionsDecision, { input })
 
 /**
  * End this browser's session, or every session of the signed-in principal.
@@ -30,50 +50,21 @@ export const refreshSession = (): Promise<Outcome<AuthPayload>> =>
  * @param input - The ending scope; omitted means this browser.
  * @returns The completed request and the two answers stated beside it, or why there is none.
  */
-export const signOut = (input?: SignOutInput): Promise<Outcome<EnvelopeAnswer<boolean, SignOutOutcome>>> =>
-    graphqlEnvelope<boolean, SignOutOutcome>(
-        "mutation SignOut($input: SignOutInput) { signOut(request: $input) { data remoteRevocationObserved authorityEndingConfirmed message success error } }",
+export const signOut = (
+    input?: SignOutInput,
+): Promise<
+    Outcome<
+        EnvelopeAnswer<
+            boolean,
+            Pick<SignOutMutation["signOut"], "remoteRevocationObserved" | "authorityEndingConfirmed">
+        >
+    >
+> =>
+    graphqlEnvelope<
+        boolean,
+        Pick<SignOutMutation["signOut"], "remoteRevocationObserved" | "authorityEndingConfirmed">
+    >(
+        SignOutDocument,
         parseSignOutEnvelope,
         input === undefined ? undefined : { input },
-    )
-
-/**
- * End a named principal's Login sessions, once the owner of the stated authority context confirms
- * the requester.
- *
- * THE REQUESTER IS NEVER NAMED HERE. It is taken from the verified access grant, so a caller cannot
- * ask for somebody else's sessions by asserting who they are. `workspaceId` selects WHICH owner
- * confirms - a current Owner or Manager of that workspace, for a current member of it - and the
- * workspace form then aims at the roster `memberId` the requester selected; the owner resolves that
- * member's Login principal, so no principal or email crosses this wire. The server-only
- * Nivo-operation form names the principal instead.
- *
- * ONE SHAPE FOR ALL THREE ANSWERS is the point of this door: `scopeApplied`, `undecided` and
- * `refused` differ only by `kind`, and nothing in the answer says whether the named principal
- * existed, was a member, or had a session anywhere - a refusal reveals no more than an applied scope
- * does. `undecided` is never a refusal: resend the same `requestId` and the same request continues
- * without a second effect.
- *
- * @param input - This request's identity and exactly one authority context with its target.
- * @returns The decided answer, or why there is none.
- */
-export const endPrincipalSessions = (input: EndPrincipalSessionsInput): Promise<Outcome<EndPrincipalSessionsAnswer>> =>
-    graphql(
-        `
-            mutation EndPrincipalSessions($input: EndPrincipalSessionsInput!) {
-                endPrincipalSessions(request: $input) {
-                    data {
-                        kind
-                        authorityEndingConfirmed
-                    }
-                    message
-                    success
-                    error
-                }
-            }
-        `,
-        parseEndPrincipalSessionsAnswer,
-        {
-            input,
-        },
     )

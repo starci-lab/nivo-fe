@@ -1,6 +1,8 @@
+
+import type { MyAgentosCustomModuleStudioQuery } from "@/modules/api/__generated__/core"
+
 import { LabelledProgressRow } from "@nivo/ui"
 import { SurfaceCard, Text } from "@starci/grammar/common"
-import type { AgentosModuleStudio } from "@/modules/api/agentos-module-studio"
 /** Public API role for AgentOSModuleProfileProps. */
 export type AgentOSModuleProfileProps = AgentOSModuleProfileViewProps
 /** Resolved copy for the profile block. */
@@ -12,7 +14,7 @@ type AgentOSModuleProfileLabels = {
 }
 /** Profile projection, slot flags and copy the pure profile draws. */
 type AgentOSModuleProfileData = {
-    readonly studio?: AgentosModuleStudio
+    readonly studio?: NonNullable<MyAgentosCustomModuleStudioQuery["myAgentosCustomModuleStudio"]["data"]>
     readonly loading: boolean
     readonly refused: boolean
     readonly labels: AgentOSModuleProfileLabels

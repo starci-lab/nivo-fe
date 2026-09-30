@@ -1,3 +1,5 @@
+import type { MyAgentosModuleRuntimeQuery } from "./__generated__/core"
+
 /**
  * The parsers of the module-runtime documents' payloads: the shared Module Studio projection and
  * the write-only channel setting. Each returns the value or null, which `graphql` reports as
@@ -9,27 +11,28 @@ import { isAgentosRuntimeRecord, isAgentosRuntimeWidgetNode } from "./agentos-ru
 import type { AgentosRuntimeValue } from "./agentos-runtime-tree"
 import { parseModuleTestContract } from "./agentos-module-tests.guards"
 import type {
-    AgentosModuleRuntime,
-    AgentosRuntimeContextVersion,
-    AgentosRuntimeCredential,
-    AgentosRuntimeManifest,
-    AgentosRuntimeMessage,
-    AgentosRuntimeMessageTree,
-    AgentosRuntimeOperationEvent,
-    AgentosRuntimeSession,
-    AgentosRuntimeTask,
-    AgentosRuntimeWidget,
-    AgentWorkspaceChannelSetting,
+    AgentosRuntimeManifestView,
+    AgentosRuntimeMessageTreeView,
 } from "./agentos-module-runtime"
 
+type Runtime = NonNullable<MyAgentosModuleRuntimeQuery["myAgentosModuleRuntime"]["data"]>
+type RuntimeInstallation = Runtime["installation"]
+type RuntimeSession = Runtime["setupSessions"][number]
+type RuntimeContextVersion = Runtime["contextVersions"][number]
+type RuntimeMessage = Runtime["messages"][number]
+type RuntimeOperationEvent = Runtime["operationEvents"][number]
+type RuntimeTask = Runtime["tasks"][number]
+type RuntimeWidget = Runtime["widgets"][number]
+type RuntimeCredential = Runtime["credentials"][number]
+type RuntimeParticipant = Runtime["participants"][number]
 const parseKeyedVersion = (value: unknown): { readonly key: string; readonly version: string } | null =>
     isRecord(value) && isString(value.key) && isString(value.version)
         ? { key: value.key, version: value.version }
         : null
 
-type ManifestRequirement = NonNullable<AgentosRuntimeManifest["setup"]>["requirements"][number]
-type ManifestWidget = AgentosRuntimeManifest["widgets"][number]
-type ManifestCredentialSlot = NonNullable<AgentosRuntimeManifest["credentialSlots"]>[number]
+type ManifestRequirement = NonNullable<AgentosRuntimeManifestView["setup"]>["requirements"][number]
+type ManifestWidget = AgentosRuntimeManifestView["widgets"][number]
+type ManifestCredentialSlot = NonNullable<AgentosRuntimeManifestView["credentialSlots"]>[number]
 
 const parseRequirement = (value: unknown): ManifestRequirement | null => {
     if (
@@ -82,7 +85,7 @@ const parseRequirement = (value: unknown): ManifestRequirement | null => {
     return requirement
 }
 
-const parseManifestSetup = (value: unknown): NonNullable<AgentosRuntimeManifest["setup"]> | null => {
+const parseManifestSetup = (value: unknown): NonNullable<AgentosRuntimeManifestView["setup"]> | null => {
     if (!isRecord(value) || value.schemaVersion !== 1 || !isStringArray(value.requiredAcceptanceScenarios)) {
         return null
     }
@@ -94,7 +97,7 @@ const parseManifestSetup = (value: unknown): NonNullable<AgentosRuntimeManifest[
 
 const parseManifestOperations = (
     value: unknown,
-): NonNullable<AgentosRuntimeManifest["operations"]> | null => {
+): NonNullable<AgentosRuntimeManifestView["operations"]> | null => {
     if (!isRecord(value) || !isStringArray(value.setupFields)) return null
     const replyContract = parseKeyedVersion(value.replyContract)
     const taskContract = parseKeyedVersion(value.taskContract)
@@ -133,7 +136,7 @@ const parseCredentialSlot = (value: unknown): ManifestCredentialSlot | null =>
         ? { key: value.key, label: value.label, provider: value.provider, secret: true }
         : null
 
-const parseRuntimeManifest = (value: unknown): AgentosRuntimeManifest | null => {
+const parseRuntimeManifest = (value: unknown): AgentosRuntimeManifestView | null => {
     if (!isRecord(value) || !isNumber(value.schemaVersion) || !isAgentosRuntimeRecord(value.config)) return null
     const kind = parseKeyedVersion(value.kind)
     const workbench = parseKeyedVersion(value.workbench)
@@ -144,11 +147,11 @@ const parseRuntimeManifest = (value: unknown): AgentosRuntimeManifest | null => 
         kind: { readonly key: string; readonly version: string }
         workbench: { readonly key: string; readonly version: string }
         widgets: ReadonlyArray<ManifestWidget>
-        config: AgentosRuntimeManifest["config"]
-        test?: AgentosRuntimeManifest["test"]
-        setup?: AgentosRuntimeManifest["setup"]
-        operations?: AgentosRuntimeManifest["operations"]
-        credentialSlots?: AgentosRuntimeManifest["credentialSlots"]
+        config: AgentosRuntimeManifestView["config"]
+        test?: AgentosRuntimeManifestView["test"]
+        setup?: AgentosRuntimeManifestView["setup"]
+        operations?: AgentosRuntimeManifestView["operations"]
+        credentialSlots?: AgentosRuntimeManifestView["credentialSlots"]
     } = { schemaVersion: value.schemaVersion, kind, workbench, widgets, config: value.config }
     if (value.test !== undefined) {
         const test = parseModuleTestContract(value.test)
@@ -172,8 +175,6 @@ const parseRuntimeManifest = (value: unknown): AgentosRuntimeManifest | null => 
     }
     return manifest
 }
-
-type RuntimeInstallation = AgentosModuleRuntime["installation"]
 
 const parseRuntimeInstallation = (value: unknown): RuntimeInstallation | null => {
     if (
@@ -232,7 +233,7 @@ const parseRuntimeInstallation = (value: unknown): RuntimeInstallation | null =>
     }
 }
 
-const parseRuntimeSession = (value: unknown): AgentosRuntimeSession | null =>
+const parseRuntimeSession = (value: unknown): RuntimeSession | null =>
     isRecord(value) &&
     isString(value.id) &&
     isString(value.installationId) &&
@@ -268,14 +269,14 @@ const parseRuntimeSession = (value: unknown): AgentosRuntimeSession | null =>
           }
         : null
 
-const parseParticipant = (value: unknown): AgentosModuleRuntime["participants"][number] | null =>
+const parseParticipant = (value: unknown): RuntimeParticipant | null =>
     isRecord(value) && isString(value.id) && isString(value.sessionId) && isString(value.userId)
         ? { id: value.id, sessionId: value.sessionId, userId: value.userId }
         : null
 
-const parseMessageTree = (value: unknown): AgentosRuntimeMessageTree | null => {
+const parseMessageTree = (value: unknown): AgentosRuntimeMessageTreeView | null => {
     if (!isRecord(value) || value.schemaVersion !== 1 || !Array.isArray(value.nodes)) return null
-    const nodes: Array<AgentosRuntimeMessageTree["nodes"][number]> = []
+    const nodes: Array<AgentosRuntimeMessageTreeView["nodes"][number]> = []
     for (const node of value.nodes) {
         if (!isRecord(node)) return null
         if (node.type === "markdown" && isString(node.markdown)) {
@@ -296,7 +297,7 @@ const parseMessageTree = (value: unknown): AgentosRuntimeMessageTree | null => {
     return { schemaVersion: 1, nodes }
 }
 
-const parseRuntimeMessage = (value: unknown): AgentosRuntimeMessage | null => {
+const parseRuntimeMessage = (value: unknown): RuntimeMessage | null => {
     if (
         !isRecord(value) ||
         !isString(value.id) ||
@@ -330,7 +331,7 @@ const parseRuntimeMessage = (value: unknown): AgentosRuntimeMessage | null => {
     }
 }
 
-const parseContextVersion = (value: unknown): AgentosRuntimeContextVersion | null =>
+const parseContextVersion = (value: unknown): RuntimeContextVersion | null =>
     isRecord(value) &&
     isString(value.id) &&
     isString(value.installationId) &&
@@ -360,7 +361,7 @@ const parseContextVersion = (value: unknown): AgentosRuntimeContextVersion | nul
           }
         : null
 
-const parseOperationEvent = (value: unknown): AgentosRuntimeOperationEvent | null =>
+const parseOperationEvent = (value: unknown): RuntimeOperationEvent | null =>
     isRecord(value) &&
     isString(value.id) &&
     isString(value.installationId) &&
@@ -396,7 +397,7 @@ const parseOperationEvent = (value: unknown): AgentosRuntimeOperationEvent | nul
           }
         : null
 
-const parseRuntimeTask = (value: unknown): AgentosRuntimeTask | null =>
+const parseRuntimeTask = (value: unknown): RuntimeTask | null =>
     isRecord(value) &&
     isString(value.id) &&
     isString(value.installationId) &&
@@ -434,7 +435,7 @@ const parseRuntimeTask = (value: unknown): AgentosRuntimeTask | null =>
           }
         : null
 
-const parseRuntimeWidget = (value: unknown): AgentosRuntimeWidget | null =>
+const parseRuntimeWidget = (value: unknown): RuntimeWidget | null =>
     isRecord(value) &&
     isString(value.id) &&
     isString(value.messageId) &&
@@ -450,7 +451,7 @@ const parseRuntimeWidget = (value: unknown): AgentosRuntimeWidget | null =>
           }
         : null
 
-const parseRuntimeCredential = (value: unknown): AgentosRuntimeCredential | null =>
+const parseRuntimeCredential = (value: unknown): RuntimeCredential | null =>
     isRecord(value) &&
     isString(value.id) &&
     isString(value.installationId) &&
@@ -467,7 +468,7 @@ const parseRuntimeCredential = (value: unknown): AgentosRuntimeCredential | null
         : null
 
 /** Parse the `data` of `myAgentosModuleRuntime`/`manageAgentosModuleRuntime`: the whole projection. */
-export const parseModuleRuntime = (input: unknown): AgentosModuleRuntime | null => {
+export const parseModuleRuntime = (input: unknown): Runtime | null => {
     if (!isRecord(input)) return null
     const installation = parseRuntimeInstallation(input.installation)
     const setupSession =
@@ -514,42 +515,5 @@ export const parseModuleRuntime = (input: unknown): AgentosModuleRuntime | null 
         credentials,
         settings: input.settings,
         diagnostics: input.diagnostics,
-    }
-}
-
-/** Parse the `data` of `configureAgentWorkspaceChannel`: statuses only, never the secret. */
-export const parseChannelSetting = (input: unknown): AgentWorkspaceChannelSetting | null => {
-    if (
-        !isRecord(input) ||
-        !isString(input.provider) ||
-        !isString(input.accountId) ||
-        !isOneOf(input.state, ["NOT_CONFIGURED", "PENDING", "APPLIED", "ERROR"]) ||
-        !isNullableString(input.displayName)
-    ) {
-        return null
-    }
-    const credentials = parseEach(input.credentials, (entry) =>
-        isRecord(entry) &&
-        isString(entry.key) &&
-        isBoolean(entry.required) &&
-        isBoolean(entry.configured) &&
-        isNullableString(entry.hint) &&
-        isNullableString(entry.syncedAt)
-            ? {
-                  key: entry.key,
-                  required: entry.required,
-                  configured: entry.configured,
-                  hint: entry.hint,
-                  syncedAt: entry.syncedAt,
-              }
-            : null,
-    )
-    if (credentials === null) return null
-    return {
-        provider: input.provider,
-        accountId: input.accountId,
-        state: input.state,
-        displayName: input.displayName,
-        credentials,
     }
 }

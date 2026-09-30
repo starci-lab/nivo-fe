@@ -1,6 +1,8 @@
+import type { WalletFieldsFragment, WalletTopUpPayLinkFieldsFragment } from "@/modules/api/__generated__/core"
+
 import type { useTranslations } from "next-intl"
 import { type Outcome } from "@nivo/api"
-import type { WalletRow, WalletTopUpPayLink } from "@/modules/api/commerce"
+
 import type { PaymentResultView, TopUpView } from "./types"
 import { paymentResultCopy, type TopUpSession } from "./waypoint"
 
@@ -11,13 +13,14 @@ type WalletOverlayInput = {
     readonly isReturn: boolean
     readonly isCancelled: boolean
     readonly stored: TopUpSession | null
-    readonly walletAnswer: Outcome<WalletRow> | undefined
+    readonly walletAnswer: Outcome<WalletFieldsFragment> | undefined
     readonly amount: (amountVnd: number) => string
     readonly topUpOpen: boolean
     readonly topUpAmount: string
     readonly topUpPending: boolean
     readonly topUpError: string | undefined
-    readonly checkout: WalletTopUpPayLink | undefined
+    readonly checkout: WalletTopUpPayLinkFieldsFragment | undefined
+
 }
 
 /** Derive top-up and provider-return overlay presentation from observed payment evidence. */

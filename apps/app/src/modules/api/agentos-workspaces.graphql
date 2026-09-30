@@ -1,0 +1,172 @@
+fragment AgentWorkspaceFields on AgentWorkspaceEntity {
+    id
+    name
+    status
+    catalogOrder {
+        id
+    }
+}
+
+fragment AgentWorkspaceControlCenterFields on MyAgentWorkspaceControlCenterData {
+    workspace {
+        id
+        name
+        status
+        externalWorkspaceRef
+    }
+    instance {
+        id
+        name
+        hostname
+        status
+        chartVersion
+        ramMb
+        vcpu
+        planCode
+        planRamGb
+        planVcpu
+    }
+    apps {
+        app
+        accessMode
+        available
+        reason
+        observedVersion
+    }
+    runtime {
+        instanceId
+        appKey
+        status
+        releaseName
+        chartName
+        chartVersion
+        probeStatus
+        fingerprint
+        lastError
+        observedAt
+        stale
+        components {
+            key
+            kind
+            status
+            desiredReplicas
+            readyReplicas
+            image
+            pvcSize
+            storagePolicy
+            cpuUsageMillicores
+            cpuRequestMillicores
+            cpuLimitMillicores
+            memoryUsageBytes
+            memoryRequestBytes
+            memoryLimitBytes
+            restartCount
+            lastTerminationReason
+            oomKilled
+            throttled
+        }
+        storage {
+            key
+            kind
+            size
+            policy
+            status
+        }
+        totals {
+            cpuUsageMillicores
+            cpuRequestMillicores
+            cpuLimitMillicores
+            memoryUsageBytes
+            memoryRequestBytes
+            memoryLimitBytes
+            restartCount
+            oomKilled
+            throttled
+        }
+    }
+    recovery {
+        state
+        phase
+        attemptCount
+        lastAttemptAt
+        nextAttemptAt
+        failureCode
+        targetGeneration
+        requiredSyncRevision
+        appliedSyncRevision
+        syncCompletedAt
+        observedAt
+        recoverableDataScope
+    }
+}
+
+fragment AgentWorkspaceAppLaunchFields on IssuedAgentWorkspaceAppLaunchType {
+    launchId
+    redirectUrl
+    expiresAt
+}
+
+fragment RenewedAgentWorkspaceAppLaunchFields on RenewedAgentWorkspaceAppLaunchType {
+    launchId
+    expiresAt
+}
+
+fragment RevokedAgentWorkspaceAppLaunchFields on RevokedAgentWorkspaceAppLaunchType {
+    launchId
+    revoked
+}
+
+query MyAgentWorkspace {
+    myAgentWorkspace {
+        data {
+            ...AgentWorkspaceFields
+        }
+        message
+        success
+        error
+    }
+}
+
+query MyAgentWorkspaceControlCenter($request: MyAgentWorkspaceControlCenterRequest!) {
+    myAgentWorkspaceControlCenter(request: $request) {
+        data {
+            ...AgentWorkspaceControlCenterFields
+        }
+        message
+        success
+        error
+    }
+}
+
+mutation IssueAgentWorkspaceAppLaunch($input: IssueAgentWorkspaceAppLaunchInput!) {
+    issueAgentWorkspaceAppLaunch(request: $input) {
+        data {
+            ...AgentWorkspaceAppLaunchFields
+        }
+        message
+        success
+        error
+    }
+}
+
+mutation RenewAgentWorkspaceAppLaunch($input: RenewAgentWorkspaceAppLaunchInput!) {
+    renewAgentWorkspaceAppLaunch(request: $input) {
+        data {
+            ...RenewedAgentWorkspaceAppLaunchFields
+        }
+        message
+        success
+        error
+    }
+}
+
+mutation RevokeAgentWorkspaceAppLaunch($input: RevokeAgentWorkspaceAppLaunchInput!) {
+    revokeAgentWorkspaceAppLaunch(request: $input) {
+        data {
+            ...RevokedAgentWorkspaceAppLaunchFields
+        }
+        message
+        success
+        error
+    }
+}

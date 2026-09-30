@@ -1,6 +1,6 @@
 import { AcademyChrome } from "@/features/layouts/AcademyChrome"
 import { AcademySections } from "@/components/blocks/academy/AcademySections"
-import type { Course } from "@/modules/api/academy"
+import type { CoursesQuery } from "@/modules/api/__generated__/graphql"
 
 /**
  * PAGE - the academy's landing screen, drawing half.
@@ -18,7 +18,7 @@ import type { Course } from "@/modules/api/academy"
 /** The atoms the landing screen draws. */
 type AcademyPageBaseData = {
     /** The catalog this academy sells, already resolved. */
-    readonly courses: ReadonlyArray<Course>
+    readonly courses: ReadonlyArray<NonNullable<CoursesQuery["courses"]["data"]>[number]>
 }
 
 /** Props for {@link AcademyPageBase}. */

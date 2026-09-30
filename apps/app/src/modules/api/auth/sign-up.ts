@@ -1,8 +1,18 @@
 import { type Outcome } from "@nivo/api"
+import {
+    SignUpInitDocument,
+    SignUpResendDocument,
+    SignUpVerifyOtpDocument,
+} from "../__generated__/core"
 import { graphql } from "../graphql"
-import { OTP_CHALLENGE, SIGN_UP_VERIFY_PAYLOAD } from "./documents"
 import { parseOtpChallenge, parseSignUpVerifyOtpPayload } from "./guards"
-import type { OtpChallenge, OtpResendInput, SignUpInitInput, SignUpVerifyOtpInput, SignUpVerifyOtpPayload } from "./types"
+import type {
+    OtpChallenge,
+    SignUpInitInput,
+    SignUpResendInput,
+    SignUpVerifyOtpInput,
+    SignUpVerifyOtpPayload,
+} from "../__generated__/core"
 
 /**
  * Open an account behind a mailed code.
@@ -16,7 +26,7 @@ import type { OtpChallenge, OtpResendInput, SignUpInitInput, SignUpVerifyOtpInpu
  */
 export const signUpInit = (input: SignUpInitInput): Promise<Outcome<OtpChallenge>> =>
     graphql(
-        `mutation SignUpInit($input: SignUpInitInput!) { signUpInit(request: $input) { data ${OTP_CHALLENGE} message success error } }`,
+        SignUpInitDocument,
         parseOtpChallenge,
         {
             input,
@@ -32,9 +42,9 @@ export const signUpInit = (input: SignUpInitInput): Promise<Outcome<OtpChallenge
  * @param input - The challenge to renew.
  * @returns The renewed challenge, or why it was refused.
  */
-export const signUpResend = (input: OtpResendInput): Promise<Outcome<OtpChallenge>> =>
+export const signUpResend = (input: SignUpResendInput): Promise<Outcome<OtpChallenge>> =>
     graphql(
-        `mutation SignUpResend($input: SignUpResendInput!) { signUpResend(request: $input) { data ${OTP_CHALLENGE} message success error } }`,
+        SignUpResendDocument,
         parseOtpChallenge,
         {
             input,
@@ -54,7 +64,7 @@ export const signUpResend = (input: OtpResendInput): Promise<Outcome<OtpChalleng
  */
 export const signUpVerifyOtp = (input: SignUpVerifyOtpInput): Promise<Outcome<SignUpVerifyOtpPayload>> =>
     graphql(
-        `mutation SignUpVerifyOtp($input: SignUpVerifyOtpInput!) { signUpVerifyOtp(request: $input) { data ${SIGN_UP_VERIFY_PAYLOAD} message success error } }`,
+        SignUpVerifyOtpDocument,
         parseSignUpVerifyOtpPayload,
         {
             input,

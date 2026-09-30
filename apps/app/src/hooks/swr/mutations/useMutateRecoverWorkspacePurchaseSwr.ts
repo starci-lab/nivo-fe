@@ -1,5 +1,7 @@
 
-import { recoverWorkspacePurchase, type WorkspaceCheckoutRecoverRequest } from "@/modules/api/workspace-controlplane"
+import type { WorkspacePurchaseRecoverInput } from "@/modules/api/__generated__/core"
+
+import { recoverWorkspacePurchase } from "@/modules/api/workspace-controlplane"
 import { useNivoMutation } from "../useNivoMutation"
 import { MUTATION_WORKSPACE_CHECKOUT_RECOVER_SWR_KEY } from "../swr.shared"
 import { workspaceCheckoutStatusQueryKey } from "../queries/queries.shared"
@@ -16,10 +18,11 @@ import { workspaceCheckoutStatusQueryKey } from "../queries/queries.shared"
  * This is the safe retry: an uncertain attempt is reconciled rather than charged again, and an exact
  * repeat addresses the same purchase, so only that purchase's status read is refreshed.
  */
+
 export const useMutateRecoverWorkspacePurchaseSwr = () =>
     useNivoMutation(
         MUTATION_WORKSPACE_CHECKOUT_RECOVER_SWR_KEY,
-        (request: WorkspaceCheckoutRecoverRequest) => recoverWorkspacePurchase(request),
+        (request: WorkspacePurchaseRecoverInput) => recoverWorkspacePurchase(request),
         {
             invalidates: (request) => [workspaceCheckoutStatusQueryKey(request.purchaseId)],
         },

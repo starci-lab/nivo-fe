@@ -1,29 +1,21 @@
-/**
- * The parsers of every commerce document's payload.
- *
- * One parser per shape the commerce operations select, beside the wire types they name. Each
- * returns the freshly built value or null; `graphql` turns null into an `unavailable` outcome, so a
- * malformed payload is never a thrown error and never a domain value under a borrowed name.
- *
- * ADDITIVE SEAM FIELDS (`billingModel`, `renewsAt`, `autoRenew`, `provisioningOrderRef`) are absent
- * on a pre-billing schema: they check when present and are omitted when absent, exactly as the
- * declared optionality means.
- */
+/** Runtime parsers for each commerce document's generated payload shape. */
 
 import { isBoolean, isNullableNumber, isNullableString, isNumber, isOneOf, isRecord, isString, parseEach } from "@nivo/api"
 import type {
-    CatalogItemRow,
-    CatalogOrderRow,
-    CatalogTierRow,
-    DomainRow,
-    InvoiceRow,
-    OrderProduct,
-    WalletRow,
-    WalletTopUpPayLink,
-    WalletTransactionRow,
-} from "./commerce"
+    CatalogItemsQuery,
+    CreateWalletTopUpPayLinkMutation,
+    MyCatalogOrdersQuery,
+    MyDomainsQuery,
+    MyInvoicesQuery,
+    MyWalletQuery,
+    MyWalletTransactionsQuery,
+    OrderAgentOsMutation,
+    PayInvoiceMutation,
+} from "./__generated__/core"
 
-const parseDomainRow = (value: unknown): DomainRow | null =>
+const parseDomainRow = (
+    value: unknown,
+): NonNullable<MyDomainsQuery["myDomains"]["data"]>[number] | null =>
     isRecord(value) &&
     isString(value.id) &&
     isString(value.name) &&
@@ -40,16 +32,20 @@ const parseDomainRow = (value: unknown): DomainRow | null =>
         : null
 
 /** Parse the `data` of `myDomains`. */
-export const parseDomainRows = (input: unknown): ReadonlyArray<DomainRow> | null =>
+export const parseDomainRows = (
+    input: unknown,
+): ReadonlyArray<NonNullable<MyDomainsQuery["myDomains"]["data"]>[number]> | null =>
     parseEach(input, parseDomainRow)
 
 /** Parse the `data` of `myWallet`. */
-export const parseWalletRow = (input: unknown): WalletRow | null =>
+export const parseWalletRow = (input: unknown): NonNullable<MyWalletQuery["myWallet"]["data"]> | null =>
     isRecord(input) && isString(input.id) && isNumber(input.balanceVnd)
         ? { id: input.id, balanceVnd: input.balanceVnd }
         : null
 
-const parseWalletTransactionRow = (value: unknown): WalletTransactionRow | null =>
+const parseWalletTransactionRow = (
+    value: unknown,
+): NonNullable<MyWalletTransactionsQuery["myWalletTransactions"]["data"]>[number] | null =>
     isRecord(value) &&
     isString(value.id) &&
     isNumber(value.amountVnd) &&
@@ -66,16 +62,20 @@ const parseWalletTransactionRow = (value: unknown): WalletTransactionRow | null 
         : null
 
 /** Parse the `data` of `myWalletTransactions`. */
-export const parseWalletTransactionRows = (input: unknown): ReadonlyArray<WalletTransactionRow> | null =>
+export const parseWalletTransactionRows = (
+    input: unknown,
+): ReadonlyArray<NonNullable<MyWalletTransactionsQuery["myWalletTransactions"]["data"]>[number]> | null =>
     parseEach(input, parseWalletTransactionRow)
 
 /** Parse the `data` of `createWalletTopUpPayLink`. */
-export const parseWalletTopUpPayLink = (input: unknown): WalletTopUpPayLink | null =>
+export const parseWalletTopUpPayLink = (
+    input: unknown,
+): NonNullable<CreateWalletTopUpPayLinkMutation["createWalletTopUpPayLink"]["data"]> | null =>
     isRecord(input) &&
     isString(input.paymentId) &&
     isOneOf(input.gateway, ["payos", "sepay"]) &&
     isString(input.referenceId) &&
-    isString(input.checkoutUrl) &&
+    isNullableString(input.checkoutUrl) &&
     isNullableString(input.qrCode) &&
     isNullableString(input.checkoutFields) &&
     isNumber(input.amountVnd) &&
@@ -92,66 +92,49 @@ export const parseWalletTopUpPayLink = (input: unknown): WalletTopUpPayLink | nu
           }
         : null
 
-const parseOrderProductItem = (value: unknown): NonNullable<OrderProduct["catalogItem"]> | null => {
-    if (!isRecord(value) || !isString(value.id) || !isString(value.name)) return null
-    const billingModel = value.billingModel
-    if (billingModel === undefined) return { id: value.id, name: value.name }
-    if (!(billingModel === null || isOneOf(billingModel, ["one_time", "recurring", "setup_plus_recurring"])))
+const parseOrderProductItem = (value: unknown) => {
+    if (
+        !isRecord(value) ||
+        !isString(value.id) ||
+        !isString(value.name) ||
+        !isOneOf(value.billingModel, ["one_time", "recurring", "setup_plus_recurring"])
+    ) {
         return null
-    return { id: value.id, name: value.name, billingModel }
+    }
+    return { id: value.id, name: value.name, billingModel: value.billingModel }
 }
 
-const parseOrderProductTier = (value: unknown): NonNullable<OrderProduct["catalogTier"]> | null =>
+const parseOrderProductTier = (value: unknown) =>
     isRecord(value) && isString(value.id) && isString(value.name) ? { id: value.id, name: value.name } : null
 
-const parseOrderProduct = (value: Record<string, unknown>): OrderProduct | null => {
-    const catalogItem =
-        value.catalogItem === null || value.catalogItem === undefined
-            ? null
-            : parseOrderProductItem(value.catalogItem)
-    const catalogTier =
-        value.catalogTier === null || value.catalogTier === undefined
-            ? null
-            : parseOrderProductTier(value.catalogTier)
+const parseOrderProduct = (value: Record<string, unknown>) => {
+    const catalogItem = value.catalogItem === null ? null : parseOrderProductItem(value.catalogItem)
+    const catalogTier = value.catalogTier === null ? null : parseOrderProductTier(value.catalogTier)
     if (value.catalogItem !== null && catalogItem === null) return null
     if (value.catalogTier !== null && catalogTier === null) return null
     return { catalogItem, catalogTier }
 }
 
-/** The additive order-cycle fields, checked when present and omitted when absent. */
-const parseOrderCycleFields = (
-    value: Record<string, unknown>,
-): Pick<CatalogOrderRow, "renewsAt" | "autoRenew" | "provisioningOrderRef"> | null => {
-    const fields: {
-        renewsAt?: string | null
-        autoRenew?: boolean
-        provisioningOrderRef?: string | null
-    } = {}
-    if (value.renewsAt !== undefined) {
-        if (!isNullableString(value.renewsAt)) return null
-        fields.renewsAt = value.renewsAt
-    }
-    if (value.autoRenew !== undefined) {
-        if (!isBoolean(value.autoRenew)) return null
-        fields.autoRenew = value.autoRenew
-    }
-    if (value.provisioningOrderRef !== undefined) {
-        if (!isNullableString(value.provisioningOrderRef)) return null
-        fields.provisioningOrderRef = value.provisioningOrderRef
-    }
-    return fields
-}
-
-const parseInvoiceCatalogOrder = (value: unknown): InvoiceRow["catalogOrder"] | null => {
+const parseInvoiceCatalogOrder = (
+    value: unknown,
+): NonNullable<MyInvoicesQuery["myInvoices"]["data"]>[number]["catalogOrder"] | null => {
     if (value === null) return null
-    if (!isRecord(value) || !isString(value.id)) return null
+    if (
+        !isRecord(value) ||
+        !isString(value.id) ||
+        !isNullableString(value.renewsAt) ||
+        !isBoolean(value.autoRenew)
+    ) {
+        return null
+    }
     const product = parseOrderProduct(value)
-    const cycle = parseOrderCycleFields(value)
-    if (product === null || cycle === null) return null
-    return { id: value.id, ...cycle, ...product }
+    if (product === null) return null
+    return { id: value.id, renewsAt: value.renewsAt, autoRenew: value.autoRenew, ...product }
 }
 
-const parseInvoiceRow = (value: unknown): InvoiceRow | null => {
+const parseInvoiceRow = (
+    value: unknown,
+): NonNullable<MyInvoicesQuery["myInvoices"]["data"]>[number] | null => {
     if (
         !isRecord(value) ||
         !isString(value.id) ||
@@ -175,32 +158,58 @@ const parseInvoiceRow = (value: unknown): InvoiceRow | null => {
 }
 
 /** Parse the `data` of `myInvoices`. */
-export const parseInvoiceRows = (input: unknown): ReadonlyArray<InvoiceRow> | null => parseEach(input, parseInvoiceRow)
+export const parseInvoiceRows = (
+    input: unknown,
+): ReadonlyArray<NonNullable<MyInvoicesQuery["myInvoices"]["data"]>[number]> | null =>
+    parseEach(input, parseInvoiceRow)
 
 /** Parse the `data` of `payInvoice`. */
-export const parseInvoiceRowAnswer = (input: unknown): InvoiceRow | null => parseInvoiceRow(input)
+export const parseInvoiceRowAnswer = (
+    input: unknown,
+): NonNullable<PayInvoiceMutation["payInvoice"]["data"]> | null => parseInvoiceRow(input)
 
-const parseCatalogOrderRow = (value: unknown): CatalogOrderRow | null => {
-    if (!isRecord(value) || !isString(value.id)) return null
+const parseCatalogOrderRow = (
+    value: unknown,
+): NonNullable<MyCatalogOrdersQuery["myCatalogOrders"]["data"]>[number] | null => {
     if (
-        !isOneOf(value.status, ["active", "cancelled", "completed", "in_progress", "pending_payment", "suspended"])
+        !isRecord(value) ||
+        !isString(value.id) ||
+        !isOneOf(value.status, ["active", "cancelled", "completed", "in_progress", "pending_payment", "suspended"]) ||
+        !isNullableString(value.renewsAt) ||
+        !isBoolean(value.autoRenew)
     ) {
         return null
     }
     const product = parseOrderProduct(value)
-    const cycle = parseOrderCycleFields(value)
-    if (product === null || cycle === null) return null
-    return { id: value.id, status: value.status, ...cycle, ...product }
+    if (product === null) return null
+    return { id: value.id, status: value.status, renewsAt: value.renewsAt, autoRenew: value.autoRenew, ...product }
 }
 
 /** Parse the `data` of `myCatalogOrders`. */
-export const parseCatalogOrderRows = (input: unknown): ReadonlyArray<CatalogOrderRow> | null =>
+export const parseCatalogOrderRows = (
+    input: unknown,
+): ReadonlyArray<NonNullable<MyCatalogOrdersQuery["myCatalogOrders"]["data"]>[number]> | null =>
     parseEach(input, parseCatalogOrderRow)
 
 /** Parse the `data` of `orderCatalogItem`, which selects only the order's identity and product. */
-export const parseCatalogOrderRowAnswer = (input: unknown): CatalogOrderRow | null => parseCatalogOrderRow(input)
+export const parseCatalogOrderRowAnswer = (
+    input: unknown,
+): NonNullable<OrderAgentOsMutation["orderCatalogItem"]["data"]> | null => {
+    if (
+        !isRecord(input) ||
+        !isString(input.id) ||
+        !isOneOf(input.status, ["active", "cancelled", "completed", "in_progress", "pending_payment", "suspended"])
+    ) {
+        return null
+    }
+    const product = parseOrderProduct(input)
+    if (product === null) return null
+    return { id: input.id, status: input.status, ...product }
+}
 
-const parseCatalogTierRow = (value: unknown): CatalogTierRow | null =>
+const parseCatalogTierRow = (
+    value: unknown,
+): NonNullable<NonNullable<CatalogItemsQuery["catalogItems"]["data"]>[number]["tiers"]>[number] | null =>
     isRecord(value) &&
     isString(value.id) &&
     isString(value.tierKey) &&
@@ -216,7 +225,9 @@ const parseCatalogTierRow = (value: unknown): CatalogTierRow | null =>
           }
         : null
 
-const parseCatalogItemRow = (value: unknown): CatalogItemRow | null => {
+const parseCatalogItemRow = (
+    value: unknown,
+): NonNullable<CatalogItemsQuery["catalogItems"]["data"]>[number] | null => {
     if (
         !isRecord(value) ||
         !isString(value.id) ||
@@ -241,5 +252,7 @@ const parseCatalogItemRow = (value: unknown): CatalogItemRow | null => {
 }
 
 /** Parse the `data` of `catalogItems`. */
-export const parseCatalogItemRows = (input: unknown): ReadonlyArray<CatalogItemRow> | null =>
+export const parseCatalogItemRows = (
+    input: unknown,
+): ReadonlyArray<NonNullable<CatalogItemsQuery["catalogItems"]["data"]>[number]> | null =>
     parseEach(input, parseCatalogItemRow)

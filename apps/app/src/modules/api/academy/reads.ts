@@ -1,4 +1,19 @@
-import { type Outcome } from "@nivo/api"
+﻿import { type Outcome } from "@nivo/api"
+import {
+    MyAcademyGrowthSnapshotDocument,
+    MyAcademyIntegrationsDocument,
+    MyAcademyStudentDetailDocument,
+    MyAcademyStudentsDocument,
+    MyExpertSiteLeadsDocument,
+} from "../__generated__/core"
+import type {
+    AcademyGrowthSnapshot,
+    AcademyStudentDetail,
+    AcademyStudentsPage,
+    ExpertSiteLeadFieldsFragment,
+    MyAcademyIntegrations,
+    MyAcademyStudentsInput,
+} from "../__generated__/core"
 import { graphql } from "../graphql"
 import {
     parseAcademyGrowthSnapshot,
@@ -7,181 +22,40 @@ import {
     parseAcademyStudentsPage,
     parseExpertSiteLeads,
 } from "./payload.guards"
-import type {
-    AcademyGrowthSnapshot,
-    AcademyIntegrations,
-    AcademyStudentDetail,
-    AcademyStudentsPage,
-    ExpertSiteLead,
-    MyAcademyStudentsInput
-} from "./types"
 
 /** Read Academy growth through the owner-scoped Nivo bridge. */
 export const myAcademyGrowthSnapshot = (siteId: string): Promise<Outcome<AcademyGrowthSnapshot>> =>
     graphql(
-        `
-            query MyAcademyGrowthSnapshot($request: MyAcademyGrowthSnapshotRequest!) {
-                myAcademyGrowthSnapshot(request: $request) {
-                    data {
-                        revenueVnd
-                        paidOrders
-                        totalMembers
-                        activeMembers
-                        totalCompletions
-                    }
-                    message
-                    success
-                    error
-                }
-            }
-        `,
+        MyAcademyGrowthSnapshotDocument,
         parseAcademyGrowthSnapshot,
-        {
-            request: { siteId },
-        },
+        { request: { siteId } },
     )
 
 /** Read one bounded student page through the owner-scoped Nivo bridge. */
 export const myAcademyStudents = (input: MyAcademyStudentsInput): Promise<Outcome<AcademyStudentsPage>> =>
     graphql(
-        `
-            query MyAcademyStudents($input: MyAcademyStudentsInput!) {
-                myAcademyStudents(request: $input) {
-                    data {
-                        items {
-                            id
-                            name
-                            email
-                            role
-                            status
-                            xp
-                        }
-                        total
-                    }
-                    message
-                    success
-                    error
-                }
-            }
-        `,
+        MyAcademyStudentsDocument,
         parseAcademyStudentsPage,
-        {
-            input,
-        },
+        { input },
     )
 
 /** Read one student detail after ownership is checked by Core. */
-export const myAcademyStudentDetail = (siteId: string, memberId: string): Promise<Outcome<AcademyStudentDetail>> =>
+export const myAcademyStudentDetail = (
+    siteId: string,
+    memberId: string,
+): Promise<Outcome<AcademyStudentDetail>> =>
     graphql(
-        `
-            query MyAcademyStudentDetail($request: MyAcademyStudentDetailRequest!) {
-                myAcademyStudentDetail(request: $request) {
-                    data {
-                        member {
-                            id
-                            name
-                            email
-                            role
-                            status
-                        }
-                        orders {
-                            id
-                            courseSlug
-                            status
-                            amountVnd
-                        }
-                        courses {
-                            slug
-                            title
-                            completed
-                            total
-                        }
-                    }
-                    message
-                    success
-                    error
-                }
-            }
-        `,
+        MyAcademyStudentDetailDocument,
         parseAcademyStudentDetail,
-        {
-            request: { siteId, memberId },
-        },
+        { request: { siteId, memberId } },
     )
 
 /** Read all safe provider states for one owned Academy. */
-export const myAcademyIntegrations = (siteId: string): Promise<Outcome<AcademyIntegrations>> =>
+export const myAcademyIntegrations = (siteId: string): Promise<Outcome<MyAcademyIntegrations>> =>
     graphql(
-        `
-            query MyAcademyIntegrations($request: MyAcademyIntegrationsRequest!) {
-                myAcademyIntegrations(request: $request) {
-                    data {
-                        credentials {
-                            key
-                            configured
-                            hint
-                            syncedAt
-                            verification
-                            verificationReason
-                            verifiedAt
-                        }
-                        customDomain {
-                            domain
-                            target
-                            dnsReady
-                            delivery
-                            detail
-                        }
-                        google {
-                            provider
-                            status
-                            clientId
-                            identifier
-                            consentMode
-                            reason
-                            deliveredAt
-                            verifiedAt
-                        }
-                        zalo {
-                            provider
-                            status
-                            clientId
-                            identifier
-                            consentMode
-                            reason
-                            deliveredAt
-                            verifiedAt
-                        }
-                        analytics {
-                            provider
-                            status
-                            clientId
-                            identifier
-                            consentMode
-                            reason
-                            deliveredAt
-                            verifiedAt
-                        }
-                        webhooks {
-                            id
-                            endpoint
-                            events
-                            enabled
-                            version
-                            lastDeliveryStatus
-                            lastDeliveredAt
-                        }
-                    }
-                    message
-                    success
-                    error
-                }
-            }
-        `,
+        MyAcademyIntegrationsDocument,
         parseAcademyIntegrations,
-        {
-            request: { siteId },
-        },
+        { request: { siteId } },
     )
 
 /** Read leads received by one owned Academy. */
@@ -189,29 +63,9 @@ export const myExpertSiteLeads = (
     siteId: string,
     limit = 20,
     offset = 0,
-): Promise<Outcome<ReadonlyArray<ExpertSiteLead>>> =>
+): Promise<Outcome<ReadonlyArray<ExpertSiteLeadFieldsFragment>>> =>
     graphql(
-        `
-            query MyExpertSiteLeads($request: MyExpertSiteLeadsRequest!) {
-                myExpertSiteLeads(request: $request) {
-                    data {
-                        id
-                        name
-                        contact
-                        message
-                        status
-                        note
-                    }
-                    message
-                    success
-                    error
-                }
-            }
-        `,
+        MyExpertSiteLeadsDocument,
         parseExpertSiteLeads,
-        {
-            request: { siteId, limit, offset },
-        },
+        { request: { siteId, limit, offset } },
     )
-
-/** Create a student in one owned Academy. */

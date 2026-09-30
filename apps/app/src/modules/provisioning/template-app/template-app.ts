@@ -1,8 +1,11 @@
+import type { CatalogItemFieldsFragment, ExpertDeploymentSnapshotFieldsFragment } from "@/modules/api/__generated__/core"
+
 import { type Outcome } from "@nivo/api"
-import type { ExpertDeploymentSnapshot } from "@/modules/api/expert-sites"
-import type { CatalogItemRow } from "@/modules/api/commerce"
+
+
 
 /** The durable state shown by the Template App provisioning journey. */
+
 export type TemplateFlow =
     | { readonly phase: "catalog_loading" }
     | { readonly phase: "unsupported"; readonly name: string }
@@ -46,7 +49,7 @@ export const deploymentPhase = (status: string): "preparing" | "ready" | "failed
 export const settleDeployment = (
     siteId: string,
     subject: string,
-    snapshot: ExpertDeploymentSnapshot | null,
+    snapshot: ExpertDeploymentSnapshotFieldsFragment | null,
     failedProvision: string,
 ): TemplateFlow => {
     if (snapshot === null) return { phase: "accepted", siteId, subject }
@@ -78,8 +81,8 @@ export const templateFlowWithDeploymentEvent = (
 type TemplateFlowFromAnswersInput = {
     readonly templateKey: string | null
     readonly resumeSiteId: string | null
-    readonly catalog: Outcome<ReadonlyArray<CatalogItemRow>> | undefined
-    readonly deployment: Outcome<ExpertDeploymentSnapshot | null> | undefined
+    readonly catalog: Outcome<ReadonlyArray<CatalogItemFieldsFragment>> | undefined
+    readonly deployment: Outcome<ExpertDeploymentSnapshotFieldsFragment | null> | undefined
     readonly accessReady: boolean
     readonly submitted: TemplateFlow | null
     readonly isSubmitting: boolean

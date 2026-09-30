@@ -1,9 +1,10 @@
-import { createContext, type ReactNode } from "react"
-import type { AgentosModuleStudio } from "@/modules/api/agentos-module-studio"
 
+import type { MyAgentosCustomModuleStudioQuery } from "@/modules/api/__generated__/core"
+
+import { createContext, type ReactNode } from "react"
 /** One page-owned studio read shared by sibling connected blocks. */
 type AgentOSModuleStudioProjection = {
-    readonly studio: AgentosModuleStudio | undefined
+    readonly studio: NonNullable<MyAgentosCustomModuleStudioQuery["myAgentosCustomModuleStudio"]["data"]> | undefined
     readonly refresh: () => Promise<void>
 }
 

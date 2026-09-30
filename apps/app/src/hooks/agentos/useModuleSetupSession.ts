@@ -1,6 +1,8 @@
+
+import type { MyAgentosModuleRuntimeQuery } from "@/modules/api/__generated__/core"
+
 import { useCallback, useRef, useState } from "react"
 import { useTranslations } from "next-intl"
-import type { AgentosModuleRuntime } from "../../modules/api/agentos-module-runtime"
 import { setupSessionFor } from "../../modules/agentos/module-page/setup-draft"
 import {
     confirmationEvidence,
@@ -14,7 +16,7 @@ type SetupFeedback = { readonly refused?: "send" | "apply"; readonly unconfirmed
 /** The runtime state and shared commands the setup session state machine connects. */
 interface ModuleSetupSessionInput {
     readonly installationId: string
-    readonly runtime: AgentosModuleRuntime | null
+    readonly runtime: NonNullable<MyAgentosModuleRuntimeQuery["myAgentosModuleRuntime"]["data"]> | null
     readonly controls: ModuleRuntimeControls
 }
 

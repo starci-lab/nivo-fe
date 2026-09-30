@@ -1,5 +1,7 @@
 import { createGraphqlClient, isNumber, isNullableString, isRecord, isString, parseEach, type Outcome } from "@nivo/api"
 import { ACADEMY_API_URL } from "@/modules/config"
+import { CoursesDocument, SubmitLeadDocument } from "./__generated__/graphql"
+import type { CoursesQuery, SubmitLeadInput, SubmitLeadMutation } from "./__generated__/graphql"
 
 /**
  * The two public operations an academy's landing page needs, through the same core-API client the
@@ -16,17 +18,8 @@ import { ACADEMY_API_URL } from "@/modules/config"
  */
 const { graphql } = createGraphqlClient({ endpoint: ACADEMY_API_URL, credentials: "omit" })
 
-/** One course in the catalog. A subset of `CourseEntity` -- what a landing page can show. */
-export interface Course {
-    id: string
-    slug: string
-    title: string
-    summary: string | null
-    priceText: string | null
-    sortIndex: number
-}
-
-const parseCourse = (input: unknown): Course | null =>
+/** Checks one course row at the catalog response boundary. */
+const parseCourse = (input: unknown): NonNullable<CoursesQuery["courses"]["data"]>[number] | null =>
     isRecord(input) &&
     isString(input.id) &&
     isString(input.slug) &&
@@ -44,7 +37,9 @@ const parseCourse = (input: unknown): Course | null =>
           }
         : null
 
-const parseLeadReceipt = (input: unknown): { id: string } | null =>
+const parseLeadReceipt = (
+    input: unknown,
+): NonNullable<SubmitLeadMutation["submitLead"]["data"]> | null =>
     isRecord(input) && isString(input.id) ? { id: input.id } : null
 
 /**
@@ -59,25 +54,11 @@ const parseLeadReceipt = (input: unknown): { id: string } | null =>
  *
  * @returns The catalog in the expert's own order, or why there is none.
  */
-export const fetchCourses = async (): Promise<Outcome<Array<Course>>> => {
+export const fetchCourses = async (): Promise<
+    Outcome<Array<NonNullable<CoursesQuery["courses"]["data"]>[number]>>
+> => {
     const result = await graphql(
-        `
-            query Courses {
-                courses {
-                    success
-                    message
-                    error
-                    data {
-                        id
-                        slug
-                        title
-                        summary
-                        priceText
-                        sortIndex
-                    }
-                }
-            }
-        `,
+        CoursesDocument,
         (data) => {
             const courses = parseEach(data, parseCourse)
             return courses === null ? null : [...courses]
@@ -86,13 +67,6 @@ export const fetchCourses = async (): Promise<Outcome<Array<Course>>> => {
         { revalidate: 60 },
     )
     return result.ok ? { ok: true, data: result.data.sort((a, b) => a.sortIndex - b.sortIndex) } : result
-}
-
-/** What the lead form collects. `contact` is a phone number or an email -- the backend takes either. */
-export interface LeadSubmission {
-    name: string
-    contact: string
-    message?: string
 }
 
 /**
@@ -104,20 +78,11 @@ export interface LeadSubmission {
  * @param input - The reader's name and how to reach them.
  * @returns The receipt, or the API's own words for the refusal.
  */
-export const submitLead = (input: LeadSubmission): Promise<Outcome<{ id: string }>> =>
+export const submitLead = (
+    input: SubmitLeadInput,
+): Promise<Outcome<NonNullable<SubmitLeadMutation["submitLead"]["data"]>>> =>
     graphql(
-        `
-            mutation SubmitLead($input: SubmitLeadInput!) {
-                submitLead(request: $input) {
-                    success
-                    message
-                    error
-                    data {
-                        id
-                    }
-                }
-            }
-        `,
+        SubmitLeadDocument,
         parseLeadReceipt,
         { input },
     )

@@ -1,7 +1,10 @@
-import type { CatalogCategory } from "@/modules/api/commerce"
+
+import type { CatalogCategory } from "@/modules/api/__generated__/core"
+
 import type { CollabTaskStatus } from "@/modules/api/collab"
 
 /** The optional narrowing an Office task list is read with; every field is part of its cache key. */
+
 export type CollabTasksFilter = {
     readonly personMemberId?: string
     readonly moduleInstallationId?: string

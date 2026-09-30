@@ -1,4 +1,6 @@
-import type { AcademyIntegrations } from "../api/academy"
+import type { MyAcademyIntegrations } from "../api/__generated__/core"
+
+import { AcademyCredentialVerification } from "../api/__generated__/core"
 import type { BadgeTone, InputKind } from "@starci/grammar/common"
 import type { NivoQueryFailure } from "../query"
 
@@ -117,7 +119,7 @@ export const academyIntegrationToneOf = (status: string): "neutral" | "success" 
     return "neutral"
 }
 
-const providerOf = (answer: AcademyIntegrations | null | undefined, id: AcademyIntegrationProviderId) => {
+const providerOf = (answer: MyAcademyIntegrations | null | undefined, id: AcademyIntegrationProviderId) => {
     if (answer === null || answer === undefined) return undefined
     if (id === "google") return answer.google
     if (id === "zalo") return answer.zalo
@@ -125,17 +127,19 @@ const providerOf = (answer: AcademyIntegrations | null | undefined, id: AcademyI
     return undefined
 }
 
-const credentialCountOf = (answer: AcademyIntegrations | null | undefined, prefix: string) =>
+const credentialCountOf = (answer: MyAcademyIntegrations | null | undefined, prefix: string) =>
     answer?.credentials.filter((item) => item.key.startsWith(prefix)).length ?? 0
 
-const verifiedCredentialOf = (answer: AcademyIntegrations | null | undefined, prefixes: ReadonlyArray<string>) =>
+const verifiedCredentialOf = (answer: MyAcademyIntegrations | null | undefined, prefixes: ReadonlyArray<string>) =>
     answer?.credentials.some(
-        (item) => prefixes.some((prefix) => item.key.startsWith(prefix)) && item.verification === "verified",
+        (item) =>
+            prefixes.some((prefix) => item.key.startsWith(prefix)) &&
+            item.verification === AcademyCredentialVerification.Verified,
     ) === true
 
 /** Project safe provider data into cards without including write-only credential values. */
 export const academyIntegrationCardFactsOf = (
-    answer: AcademyIntegrations | null | undefined,
+    answer: MyAcademyIntegrations | null | undefined,
 ): ReadonlyArray<AcademyIntegrationCardFact> => {
     const domain = answer?.customDomain
     const paymentCount =

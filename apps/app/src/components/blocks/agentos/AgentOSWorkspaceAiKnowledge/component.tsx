@@ -1,3 +1,6 @@
+
+import type { MyAgentosAiKnowledgeReadinessData } from "@/modules/api/__generated__/core"
+
 import { DETAILS_CLASS_NAME, CONTENT_CLASS_NAME, ROW_CLASS_NAME } from "./classNames"
 import {
     EmptyNotice as DirectionEmpty,
@@ -13,14 +16,13 @@ import {
 } from "@starci/grammar/common"
 import { AgentOSKnowledgeOriginList } from "@/components/blocks/agentos/AgentOSKnowledgeOriginList"
 import { AgentOSReadinessComponentList } from "@/components/blocks/agentos/AgentOSReadinessComponentList"
-import type { AgentosAiKnowledgeReadiness } from "@/modules/api/agentos-knowledge"
 import { LifecycleStep, type LifecycleStepData, QueryNoticeView, type QueryNoticeViewData } from "@nivo/ui"
 /** Resolved bilingual copy for the workspace AI and knowledge operating surface. */
 export type AgentOSWorkspaceAiKnowledgeProps = {
     readonly state:
         "loading" | "key-configuring" | "ready" | "refused" | "testing" | "recovering" | "success" | "failed"
     readonly props: {
-        readonly readiness?: AgentosAiKnowledgeReadiness
+        readonly readiness?: MyAgentosAiKnowledgeReadinessData
         /** The failure the connected half composed for a settled failed readiness read. */
         readonly notice?: QueryNoticeViewData
         readonly labels: AgentOSWorkspaceAiKnowledgeCopy
@@ -94,7 +96,7 @@ type AgentOSWorkspaceAiKnowledgeCopy = {
 export type AgentOSWorkspaceAiKnowledgeViewProps = {
     readonly state:
         "loading" | "key-configuring" | "ready" | "refused" | "testing" | "recovering" | "success" | "failed"
-    readonly readiness?: AgentosAiKnowledgeReadiness
+    readonly readiness?: MyAgentosAiKnowledgeReadinessData
     readonly labels: AgentOSWorkspaceAiKnowledgeLabels
     readonly onTest: () => void
     readonly onRecover: () => void
@@ -105,7 +107,7 @@ const toneOf = (state: AgentOSWorkspaceAiKnowledgeViewProps["state"]): BadgeTone
     if (state === "ready" || state === "success") return "success"
     return state === "refused" ? "danger" : "warning"
 }
-const refusingStage = (readiness: AgentosAiKnowledgeReadiness | undefined) => {
+const refusingStage = (readiness: MyAgentosAiKnowledgeReadinessData | undefined) => {
     if (readiness?.credentialStatus !== "configured") return 0
     const badModel = readiness.components.some(
         (item) =>
@@ -118,7 +120,7 @@ const refusingStage = (readiness: AgentosAiKnowledgeReadiness | undefined) => {
 }
 const currentStage = (
     state: AgentOSWorkspaceAiKnowledgeViewProps["state"],
-    readiness: AgentosAiKnowledgeReadiness | undefined,
+    readiness: MyAgentosAiKnowledgeReadinessData | undefined,
 ) => {
     if (state === "recovering") return 2
     if (state === "testing" || state === "ready" || state === "success") return 4
@@ -141,7 +143,7 @@ const readinessStepLabel = (
 }
 const readinessSteps = (
     state: AgentOSWorkspaceAiKnowledgeViewProps["state"],
-    readiness: AgentosAiKnowledgeReadiness | undefined,
+    readiness: MyAgentosAiKnowledgeReadinessData | undefined,
     labels: AgentOSWorkspaceAiKnowledgeCopy,
 ): ReadonlyArray<LifecycleStepData> => {
     const current = currentStage(state, readiness)

@@ -1,0 +1,57 @@
+query MyAgentosAiKnowledgeReadiness($request: MyAgentosAiKnowledgeReadinessRequest!) {
+    myAgentosAiKnowledgeReadiness(request: $request) {
+        data {
+            provider
+            chatModel
+            embeddingProfile
+            embeddingDimension
+            credentialStatus
+            credentialMaskedHint
+            qdrantHealth
+            readinessStatus
+            aiReady
+            readinessOperationId
+            knowledgeRecoveryOperationId
+            failureCode
+            testedAt
+            components {
+                component
+                verdict
+            }
+            origins {
+                origin
+                version
+                digest
+                documentCount
+                lastUpdatedAt
+            }
+        }
+        message
+        success
+        error
+    }
+}
+
+mutation RunAgentosAiReadinessTest($input: RunAgentosAiReadinessTestInput!) {
+    runAgentosAiReadinessTest(request: $input) {
+        data {
+            operationId
+            status
+        }
+        message
+        success
+        error
+    }
+}
+
+mutation ReindexAgentWorkspaceKnowledge($input: ReindexAgentWorkspaceKnowledgeInput!) {
+    reindexAgentWorkspaceKnowledge(request: $input) {
+        data {
+            operationId
+            status
+        }
+        message
+        success
+        error
+    }
+}

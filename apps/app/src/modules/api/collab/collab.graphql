@@ -1,0 +1,523 @@
+fragment CollabFailureFields on CollabGatewayFailureType {
+    kind
+    op
+    reason
+    retryable
+}
+
+fragment CollabGroupFields on CollabGroupType {
+    groupId
+    isDefaultOffice
+    name
+    workspaceId
+}
+
+fragment CollabOfficeFields on CollabOfficeType {
+    group {
+        ...CollabGroupFields
+    }
+    participants {
+        displayName
+        kind
+        memberId
+        moduleInstallationId
+        role
+        status
+    }
+    viewer {
+        memberId
+        role
+    }
+}
+
+fragment CollabMessageFields on CollabMessageType {
+    addressedModuleInstallationId
+    addressedModuleKey
+    answersQuestionId
+    authorKind
+    authorMemberId
+    authorModuleInstallationId
+    body
+    groupId
+    intentId
+    messageId
+    occurredAt
+    workspaceId
+}
+
+fragment CollabBindingFields on CollabBindingType {
+    askerMemberId
+    bindingId
+    commandName
+    commandVersion
+    groupId
+    intentId
+    receipt {
+        disposition
+        reason
+        receiptId
+    }
+    receiverModuleInstallationId
+    receiverModuleKey
+    routingRuleId
+    sourceMessageId
+    status
+    workspaceId
+}
+
+fragment CollabQuestionFields on CollabTaskQuestionType {
+    answerMessageId
+    answeredAt
+    askedAt
+    body
+    moduleInstallationId
+    questionId
+    status
+    taskId
+    workspaceId
+}
+
+fragment CollabApprovalFields on CollabApprovalType {
+    action
+    approvalId
+    cardMessageId
+    consequence
+    decidedAt
+    decidedByMemberId
+    decision
+    groupId
+    heldActionKey
+    releaseIntentId
+    requiredRole
+    status
+    taskId
+    workspaceId
+}
+
+fragment CollabTaskFields on CollabTaskType {
+    askedByDisplayName
+    askedByMemberId
+    assignedToDisplayName
+    assignedToMemberId
+    bindingId
+    cardMessageId
+    createdAt
+    groupId
+    intentId
+    outcome
+    owningModuleDisplayName
+    owningModuleInstallationId
+    owningModuleKey
+    routingRuleId
+    statement
+    status
+    taskId
+    updatedAt
+    version
+    waiting {
+        approval {
+            ...CollabApprovalFields
+        }
+        kind
+        question {
+            ...CollabQuestionFields
+        }
+    }
+    workspaceId
+}
+
+fragment CollabTargetFields on CollabTaskCardTargetType {
+    bindingId
+    cardMessageId
+    groupId
+}
+
+fragment CollabTurnFields on CollabTurnStateType {
+    decision
+    handledAt
+    handledByMemberId
+    state
+}
+
+fragment CollabNoticeFields on CollabTurnNoticeType {
+    approvalId
+    deliveredAt
+    groupId
+    intentKey
+    noticeId
+    raisedAt
+    recipientMemberId
+    resolvedAt
+    retiredAt
+    status
+    taskId
+    turnIdentity
+    turnKind
+    workspaceId
+}
+
+fragment CollabMemberFields on CollabMemberType {
+    displayName
+    kind
+    memberId
+    moduleInstallationId
+    role
+    status
+    workspaceId
+}
+
+query OpenCollabOffice($request: CollabOpenOfficeRequest!) {
+    collabOpenOffice(request: $request) {
+        failure {
+            ...CollabFailureFields
+        }
+        ok
+        op
+        result {
+            office {
+                ...CollabOfficeFields
+            }
+            op
+        }
+    }
+}
+
+query ReadCollabGroup($request: CollabReadGroupRequest!) {
+    collabReadGroup(request: $request) {
+        failure {
+            ...CollabFailureFields
+        }
+        ok
+        op
+        result {
+            op
+            page {
+                cards {
+                    ...CollabBindingFields
+                }
+                group {
+                    ...CollabGroupFields
+                }
+                messages {
+                    ...CollabMessageFields
+                }
+                nextCursor
+            }
+        }
+    }
+}
+
+query ListCollabTasks($request: CollabListTasksRequest!) {
+    collabListTasks(request: $request) {
+        failure {
+            ...CollabFailureFields
+        }
+        ok
+        op
+        result {
+            op
+            page {
+                nextCursor
+                tasks {
+                    ...CollabTaskFields
+                }
+            }
+        }
+    }
+}
+
+query ReadCollabTask($request: CollabReadTaskRequest!) {
+    collabReadTask(request: $request) {
+        failure {
+            ...CollabFailureFields
+        }
+        ok
+        op
+        result {
+            op
+            read {
+                card {
+                    ...CollabTargetFields
+                }
+                outcome
+                task {
+                    ...CollabTaskFields
+                }
+            }
+        }
+    }
+}
+
+query ReadCollabAvailableCommands($request: CollabAvailableCommandsRequest!) {
+    collabAvailableCommands(request: $request) {
+        failure {
+            ...CollabFailureFields
+        }
+        ok
+        op
+        result {
+            op
+            offer {
+                availableModules
+                commands {
+                    name
+                    version
+                }
+                member {
+                    displayName
+                    memberId
+                    moduleInstallationId
+                    moduleKey
+                    status
+                    workspaceId
+                }
+                status
+            }
+        }
+    }
+}
+
+query ReadCollabNotices($request: CollabReadNoticesRequest!) {
+    collabReadNotices(request: $request) {
+        failure {
+            ...CollabFailureFields
+        }
+        ok
+        op
+        result {
+            op
+            page {
+                nextCursor
+                notices {
+                    notice {
+                        ...CollabNoticeFields
+                    }
+                    target {
+                        approvalId
+                        cardMessageId
+                        groupId
+                        taskId
+                    }
+                    turn {
+                        ...CollabTurnFields
+                    }
+                }
+            }
+        }
+    }
+}
+
+query OpenCollabNotice($request: CollabOpenNoticeRequest!) {
+    collabOpenNotice(request: $request) {
+        failure {
+            ...CollabFailureFields
+        }
+        ok
+        op
+        result {
+            op
+            notice {
+                notice {
+                    ...CollabNoticeFields
+                }
+                outcome
+                target {
+                    approvalId
+                    cardMessageId
+                    groupId
+                    taskId
+                }
+                turn {
+                    ...CollabTurnFields
+                }
+            }
+        }
+    }
+}
+
+query ReconcileCollabRequest($request: CollabReconcileRequest!) {
+    collabReconcileRequest(request: $request) {
+        failure {
+            ...CollabFailureFields
+        }
+        ok
+        op
+        result {
+            op
+            reconcile {
+                binding {
+                    ...CollabBindingFields
+                }
+                outcome
+            }
+        }
+    }
+}
+
+mutation PostCollabMessage($request: CollabPostMessageRequest!) {
+    collabPostMessage(request: $request) {
+        failure {
+            ...CollabFailureFields
+        }
+        ok
+        op
+        result {
+            answer {
+                outcome
+                question {
+                    ...CollabQuestionFields
+                }
+                reason
+                retryable
+                task {
+                    ...CollabTaskFields
+                }
+            }
+            op
+            route {
+                availableModules
+                binding {
+                    ...CollabBindingFields
+                }
+                clarification {
+                    ...CollabMessageFields
+                }
+                commands {
+                    name
+                    version
+                }
+                kind
+                message {
+                    ...CollabMessageFields
+                }
+                reason
+            }
+        }
+    }
+}
+
+mutation PressCollabApprovalButton($request: CollabPressApprovalButtonRequest!) {
+    collabPressApprovalButton(request: $request) {
+        failure {
+            ...CollabFailureFields
+        }
+        ok
+        op
+        result {
+            op
+            press {
+                answer {
+                    approvalId
+                    decidedAt
+                    decidedByDisplayName
+                    decidedByMemberId
+                    decidedByRole
+                    decision
+                    groupId
+                    heldActionKey
+                    releaseIntentId
+                    taskId
+                }
+                card {
+                    action
+                    approvalId
+                    buttons
+                    cardMessageId
+                    consequence
+                    decidedAt
+                    decidedByDisplayName
+                    decidedByMemberId
+                    decidedByRole
+                    decision
+                    groupId
+                    heldActionKey
+                    releaseIntentId
+                    requiredRole
+                    status
+                    taskId
+                    workspaceId
+                }
+                outcome
+                task {
+                    ...CollabTaskFields
+                }
+            }
+        }
+    }
+}
+
+mutation InviteCollabMemberByEmail($request: CollabInviteByEmailRequest!) {
+    collabInviteByEmail(request: $request) {
+        failure {
+            ...CollabFailureFields
+        }
+        ok
+        op
+        result {
+            membership {
+                member {
+                    ...CollabMemberFields
+                }
+                outcome
+            }
+            op
+        }
+    }
+}
+
+mutation AcceptCollabInvitation($request: CollabAcceptInvitationRequest!) {
+    collabAcceptInvitation(request: $request) {
+        failure {
+            ...CollabFailureFields
+        }
+        ok
+        op
+        result {
+            membership {
+                member {
+                    ...CollabMemberFields
+                }
+                outcome
+            }
+            op
+        }
+    }
+}
+
+mutation WithdrawCollabInvitation($request: CollabWithdrawInvitationRequest!) {
+    collabWithdrawInvitation(request: $request) {
+        failure {
+            ...CollabFailureFields
+        }
+        ok
+        op
+        result {
+            membership {
+                member {
+                    ...CollabMemberFields
+                }
+                outcome
+            }
+            op
+        }
+    }
+}
+
+mutation ChangeCollabMemberRole($request: CollabChangeMemberRoleRequest!) {
+    collabChangeMemberRole(request: $request) {
+        failure {
+            ...CollabFailureFields
+        }
+        ok
+        op
+        result {
+            membership {
+                member {
+                    ...CollabMemberFields
+                }
+                outcome
+            }
+            op
+        }
+    }
+}

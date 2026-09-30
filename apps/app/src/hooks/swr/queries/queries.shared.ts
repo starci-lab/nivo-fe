@@ -1,11 +1,14 @@
+import type { WorkspacePurchaseEntryInput } from "@/modules/api/__generated__/core"
+
 import { type AccountingEvidenceInput, type AccountingInstallationScope, type AccountingResultDetailInput, type AccountingRoutineResultInput, type AccountingSummaryQueryInput } from "@/modules/api/accounting"
 import { type NivoQueryKey } from "../swr.shared"
-import { type WorkspaceCheckoutEntryRequest } from "@/modules/api/workspace-controlplane"
+
 import { type SalesActionRequest, type SalesInstallationScope, type SalesCommandRequest, type SalesDecisionRequestRequest, type SalesHandoffRequest, type SalesOpportunityRequest, type SalesPipelineRequest, type SalesPolicyRequest, type SalesReadinessRequest } from "@/modules/api/sales"
 
 /* One hook per file, one registered read per hook. */
 
 /** Cache identity for one evidence identity inside one installation. */
+
 export const accountingEvidenceQueryKey = (
     scope: AccountingInstallationScope,
     input: AccountingEvidenceInput,
@@ -227,7 +230,7 @@ export const salesReadinessQueryKey = (scope: SalesInstallationScope, input: Sal
  */
 
 /** Cache identity of one entry resolution: the purchase and the workspace the caller claims ready. */
-export const workspaceCheckoutEntryQueryKey = (request: WorkspaceCheckoutEntryRequest): NivoQueryKey => [
+export const workspaceCheckoutEntryQueryKey = (request: WorkspacePurchaseEntryInput): NivoQueryKey => [
     "workspace-checkout",
     "entry",
     request.purchaseId,

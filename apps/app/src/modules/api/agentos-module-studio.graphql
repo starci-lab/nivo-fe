@@ -1,0 +1,197 @@
+fragment AgentosCustomModuleFields on AgentosCustomModuleEntity {
+    id
+    agentWorkspaceId
+    name
+    status
+    progress
+    missingFields
+    currentQuestion
+    specificationVersion
+    installationId
+    failureCode
+}
+
+fragment AgentosModuleStudioFields on AgentosModuleStudioView {
+    module {
+        ...AgentosCustomModuleFields
+    }
+    profileFacts {
+        key
+        value
+    }
+    messages {
+        id
+        role
+        content
+        sequence
+    }
+    attachments {
+        id
+        fileName
+        mediaType
+        sizeBytes
+        status
+        ingestionStatus
+        detectedMediaType
+        sha256
+        chunkCount
+        indexedAt
+        retrievalRemovedAt
+        objectDeletionStatus
+        objectDeletionDueAt
+        failureCode
+    }
+    integrations {
+        id
+        providerKey
+        maskedHint
+        status
+    }
+    specification {
+        id
+        version
+        status
+    }
+}
+
+fragment AgentosModuleUploadCapabilityFields on PrepareAgentosModuleAttachmentUploadView {
+    module {
+        ...AgentosCustomModuleFields
+    }
+    profileFacts {
+        key
+        value
+    }
+    messages {
+        id
+        role
+        content
+        sequence
+    }
+    attachments {
+        id
+        fileName
+        mediaType
+        sizeBytes
+        status
+        ingestionStatus
+        detectedMediaType
+        sha256
+        chunkCount
+        indexedAt
+        retrievalRemovedAt
+        objectDeletionStatus
+        objectDeletionDueAt
+        failureCode
+    }
+    integrations {
+        id
+        providerKey
+        maskedHint
+        status
+    }
+    specification {
+        id
+        version
+        status
+    }
+    attachmentId
+    uploadUrl
+    uploadMethod
+    uploadExpiresAt
+}
+
+query MyAgentosCustomModuleStudio($request: MyAgentosCustomModuleStudioRequest!) {
+    myAgentosCustomModuleStudio(request: $request) {
+        data {
+            ...AgentosModuleStudioFields
+        }
+        message
+        success
+        error
+    }
+}
+
+mutation StartAgentosCustomModuleIntake($input: StartAgentosCustomModuleIntakeInput!) {
+    startAgentosCustomModuleIntake(request: $input) {
+        data {
+            ...AgentosModuleStudioFields
+        }
+        message
+        success
+        error
+    }
+}
+
+mutation AnswerAgentosCustomModuleIntake($input: AnswerAgentosCustomModuleIntakeInput!) {
+    answerAgentosCustomModuleIntake(request: $input) {
+        data {
+            ...AgentosModuleStudioFields
+        }
+        message
+        success
+        error
+    }
+}
+
+mutation PrepareAgentosModuleAttachmentUpload($input: PrepareAgentosModuleAttachmentUploadInput!) {
+    prepareAgentosModuleAttachmentUpload(request: $input) {
+        data {
+            ...AgentosModuleUploadCapabilityFields
+        }
+        message
+        success
+        error
+    }
+}
+
+mutation FinalizeAgentosModuleAttachment($input: FinalizeAgentosModuleAttachmentInput!) {
+    finalizeAgentosModuleAttachment(request: $input) {
+        data {
+            ...AgentosModuleStudioFields
+        }
+        message
+        success
+        error
+    }
+}
+
+mutation SaveAgentosModuleIntegrationSecret($input: SaveAgentosModuleIntegrationSecretInput!) {
+    saveAgentosModuleIntegrationSecret(request: $input) {
+        data {
+            ...AgentosModuleStudioFields
+        }
+        message
+        success
+        error
+    }
+}
+
+mutation PublishAgentosCustomModule($input: PublishAgentosCustomModuleInput!) {
+    publishAgentosCustomModule(request: $input) {
+        data {
+            ...AgentosModuleStudioFields
+        }
+        message
+        success
+        error
+    }
+}
+
+mutation RemoveAgentosModuleAttachment($input: RemoveAgentosModuleAttachmentInput!) {
+    removeAgentosModuleAttachment(request: $input) {
+        data
+        message
+        success
+        error
+    }
+}
+
+mutation RemoveAgentosModuleIntegrationSecret($input: RemoveAgentosModuleIntegrationSecretInput!) {
+    removeAgentosModuleIntegrationSecret(request: $input) {
+        data
+        message
+        success
+        error
+    }
+}

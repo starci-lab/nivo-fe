@@ -1,13 +1,14 @@
+import type { AcademyStudentView } from "../../../../modules/api/__generated__/core"
+
 import type { ReactNode } from "react"
 import { Avatar } from "@nivo/ui"
 import { SurfaceCard, Button, Button as CoreButton, Text, TextAction, Badge } from "@starci/grammar/common"
 import type { AcademyStudentCrmActions, AcademyStudentCrmLabels } from "../../../../modules/academy/student-crm"
-import type { AcademyStudent } from "../../../../modules/api/academy"
 import { ACADEMY_STUDENT_CRM_ROSTER_CLASS_NAME } from "./classNames"
 
 type AcademyStudentCrmRosterProps = {
     readonly state: "resting" | "empty" | "failed" | "answered"
-    readonly students: ReadonlyArray<AcademyStudent>
+    readonly students: ReadonlyArray<AcademyStudentView>
     readonly notice?: ReactNode
     readonly labels: AcademyStudentCrmLabels
     readonly on: AcademyStudentCrmActions
@@ -28,7 +29,7 @@ const restingRows = (labels: AcademyStudentCrmLabels) =>
     ))
 
 type StudentRowProps = {
-    readonly student: AcademyStudent
+    readonly student: AcademyStudentView
     readonly labels: AcademyStudentCrmLabels
     readonly on: AcademyStudentCrmActions
 }
@@ -47,7 +48,7 @@ const StudentRow = ({ student, labels, on }: StudentRowProps) => (
     </div>
 )
 
-const studentRows = (students: ReadonlyArray<AcademyStudent>, labels: AcademyStudentCrmLabels, on: AcademyStudentCrmActions) =>
+const studentRows = (students: ReadonlyArray<AcademyStudentView>, labels: AcademyStudentCrmLabels, on: AcademyStudentCrmActions) =>
     students.map((student) => <StudentRow key={student.id} student={student} labels={labels} on={on} />)
 
 /** Draw the student roster and its empty, loading, and failure states. */

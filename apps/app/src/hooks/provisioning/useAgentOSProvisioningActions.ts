@@ -1,16 +1,15 @@
 
+import type { WorkspaceCheckoutPurchaseStatusFieldsFragment } from "@/modules/api/__generated__/core"
+
 import { useState, type Dispatch, type SetStateAction } from "react"
 import { useTranslations } from "next-intl"
 import { agentosHome, newWorkspaceCheckout, purchase as purchaseRoute } from "@/modules/routes"
+import { resolveWorkspaceCheckoutEntry } from "@/modules/api/workspace-controlplane"
+import { useMutateRecoverWorkspacePurchaseSwr } from "../swr/mutations/useMutateRecoverWorkspacePurchaseSwr"
 import {
-    resolveWorkspaceCheckoutEntry,
-    type WorkspaceCheckoutStatusView,
-} from "@/modules/api/workspace-controlplane"
-import {
-    useMutateRecoverWorkspacePurchaseSwr,
     useMutateRunAgentosAiReadinessTestSwr,
-    useRouter,
-} from "@/hooks"
+} from "../swr/mutations/useMutateRunAgentosAiReadinessTestSwr"
+import { useRouter } from "../i18n/useRouter"
 import { entryPathOf, observedIdentitiesOf, purchaseOf } from "@/modules/agentos/purchase-source"
 import {
     phaseFromPurchase,
@@ -24,6 +23,7 @@ import type { useAgentOSProvisioningPhase } from "./useAgentOSProvisioningPhase"
 import { agentOSCopyOf } from "./provisioning.shared"
 
 type FlowState = ReturnType<typeof useAgentOSProvisioningFlow>
+
 type PhaseState = ReturnType<typeof useAgentOSProvisioningPhase>
 type EntryRefusal = {
     readonly workspaceId: string
@@ -71,7 +71,7 @@ export const useAgentOSProvisioningActions = (input: UseAgentOSProvisioningActio
         if (chosen !== undefined) setOfferIdentity({ offerId: chosen.offerId, offerVersion: chosen.offerVersion })
     }
 
-    const recover = async (purchase: WorkspaceCheckoutStatusView, fallback: AgentOSFlow): Promise<void> => {
+    const recover = async (purchase: WorkspaceCheckoutPurchaseStatusFieldsFragment, fallback: AgentOSFlow): Promise<void> => {
         if (recoverPurchase.isMutating) return
         const statusAnswer = flowState.statusQuery.data
         const response = await recoverPurchase.trigger({

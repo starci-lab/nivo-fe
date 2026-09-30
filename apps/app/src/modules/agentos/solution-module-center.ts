@@ -1,5 +1,9 @@
+
+
+import type { AgentosModuleInstallationEntity, AgentosSolutionModuleSummary } from "@/modules/api/__generated__/core"
+
 import type { ReactNode } from "react"
-import type { AgentosModuleInstallation, AgentosSolutionModule } from "../api/agentos-modules"
+
 import type { NivoQueryReading } from "../query"
 
 /** The badge tone a solution module card or ledger row is drawn in. */
@@ -130,8 +134,8 @@ export const solutionSectionState = <TValue>(
 
 /** Project catalog entries and already-installed counts into visible offer cards. */
 export const solutionCatalogCards = (
-    catalog: ReadonlyArray<AgentosSolutionModule> | undefined,
-    installations: ReadonlyArray<AgentosModuleInstallation> | undefined,
+    catalog: ReadonlyArray<AgentosSolutionModuleSummary> | undefined,
+    installations: ReadonlyArray<AgentosModuleInstallationEntity> | undefined,
     copy: AgentOSSolutionModuleCenterCopy,
 ): ReadonlyArray<AgentOSSolutionModuleCard> =>
     (catalog ?? []).map((module) => {
@@ -153,8 +157,8 @@ export const solutionCatalogCards = (
 
 /** Project known installations to cards and destination-bound ledger rows. */
 export const solutionInstallationCards = (
-    installations: ReadonlyArray<AgentosModuleInstallation> | undefined,
-    catalog: ReadonlyArray<AgentosSolutionModule> | undefined,
+    installations: ReadonlyArray<AgentosModuleInstallationEntity> | undefined,
+    catalog: ReadonlyArray<AgentosSolutionModuleSummary> | undefined,
     locale: string,
     workspaceId: string,
     copy: AgentOSSolutionModuleCenterCopy,
@@ -162,7 +166,7 @@ export const solutionInstallationCards = (
     readonly cards: ReadonlyArray<AgentOSSolutionModuleCard>
     readonly rows: ReadonlyArray<AgentOSSolutionLedgerRow>
 } => {
-    const catalogByKey = new Map<string, AgentosSolutionModule>()
+    const catalogByKey = new Map<string, AgentosSolutionModuleSummary>()
     for (const item of catalog ?? []) catalogByKey.set(item.key, item)
     const rows = (installations ?? []).map((installation) => {
         const module = catalogByKey.get(installation.moduleKey)

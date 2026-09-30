@@ -1,6 +1,7 @@
-import { SurfaceCard, Button, Input, Heading, Text } from "@starci/grammar/common"
-import type { AgentosModuleStudio } from "@/modules/api/agentos-module-studio"
 
+import type { MyAgentosCustomModuleStudioQuery } from "@/modules/api/__generated__/core"
+
+import { SurfaceCard, Button, Input, Heading, Text } from "@starci/grammar/common"
 /** Durable conversation projection and the one current answer operation. */
 export type AgentOSModuleInterviewProps = AgentOSModuleInterviewViewProps
 /** Resolved copy for the interview block. */
@@ -17,7 +18,7 @@ type AgentOSModuleInterviewLabels = {
 }
 /** Conversation projection, draft answer and copy the pure interview draws. */
 type AgentOSModuleInterviewData = {
-    readonly studio?: AgentosModuleStudio
+    readonly studio?: NonNullable<MyAgentosCustomModuleStudioQuery["myAgentosCustomModuleStudio"]["data"]>
     readonly answer: string
     readonly pending: boolean
     readonly labels: AgentOSModuleInterviewLabels

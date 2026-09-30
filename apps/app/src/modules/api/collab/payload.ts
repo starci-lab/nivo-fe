@@ -1,6 +1,6 @@
 import { failed, isRecord, type FailureKind, type Outcome } from "@nivo/api"
 import { isCollabFailureKind, parseCollabOperation } from "./payload.guards"
-import type { CollabFailureKind, CollabGatewayReply, CollabServed } from "./types"
+import type { CollabFailureKind, CollabOperation, CollabServed } from "./types"
 
 const COLLAB_FAILURE_KIND_MAP: Readonly<Record<CollabFailureKind, FailureKind>> = {
     unauthenticated: "refused",
@@ -15,55 +15,36 @@ const COLLAB_FAILURE_KIND_MAP: Readonly<Record<CollabFailureKind, FailureKind>> 
 export const collabFailure = (kind: CollabFailureKind, code: string, reason: string, retryable: boolean) =>
     failed(COLLAB_FAILURE_KIND_MAP[kind], { code, reason, retryable })
 
-/** Checks untrusted GraphQL JSON against the Collab gateway reply shape. */
-export const readReply = (value: unknown): CollabGatewayReply | null => {
+/**
+ * Narrow one generated GraphQL operation result and preserve the boundary's failure vocabulary.
+ */
+export const collabOutcomeOfReply = (value: unknown, expected: CollabOperation): Outcome<CollabServed> => {
     if (!isRecord(value) || typeof value.ok !== "boolean") {
-        return null
+        return collabFailure("unknown", "COLLAB_UNKNOWN", "malformed", true)
     }
-    if (value.ok === true) {
+    if (value.ok) {
         const op = parseCollabOperation(value.op)
-        return op !== null && isRecord(value.result) ? { ok: true, op, result: value.result } : null
+        return op === expected && isRecord(value.result)
+            ? { ok: true, data: { op, result: value.result } }
+            : collabFailure("unknown", "COLLAB_UNKNOWN", "malformed", true)
     }
     const failure = value.failure
     if (
-        isRecord(failure) &&
-        isCollabFailureKind(failure.kind) &&
-        typeof failure.reason === "string" &&
-        typeof failure.retryable === "boolean"
+        !isRecord(failure) ||
+        !isCollabFailureKind(failure.kind) ||
+        typeof failure.reason !== "string" ||
+        typeof failure.retryable !== "boolean"
     ) {
-        return {
-            ok: false,
-            failure: {
-                op: parseCollabOperation(failure.op),
-                kind: failure.kind,
-                reason: failure.reason,
-                retryable: failure.retryable,
-            },
-        }
+        return collabFailure("unknown", "COLLAB_UNKNOWN", "malformed", true)
     }
-    return null
-}
-
-/**
- * What one reply of the gateway says, as the shared outcome: the served operation and its result
- * record, or the failure kind the gateway stated under its own `COLLAB_<KIND>` code.
- */
-export const collabOutcomeOfReply = (reply: CollabGatewayReply): Outcome<CollabServed> => {
-    if (reply.ok) {
-        return { ok: true, data: { op: reply.op, result: reply.result } }
+    const failureOperation = failure.op === null ? null : parseCollabOperation(failure.op)
+    if (failure.op !== null && (failureOperation === null || failureOperation !== expected)) {
+        return collabFailure("unknown", "COLLAB_UNKNOWN", "malformed", true)
     }
     return collabFailure(
-        reply.failure.kind,
-        `COLLAB_${reply.failure.kind.toUpperCase()}`,
-        reply.failure.reason,
-        reply.failure.retryable,
+        failure.kind,
+        `COLLAB_${failure.kind.toUpperCase()}`,
+        failure.reason,
+        failure.retryable,
     )
 }
-
-/**
- * The default binding: one tagged-request document to the shared core GraphQL endpoint,
- * `collabGatewayRead` for reads and `collabGatewayCommand` for writes - the door
- * `CollabGatewayResolver` serves (`sds.collab.chat-gateway` rev 4). The request argument
- * is exactly `{workspaceId, op, input}`; the field's GraphQLJSON payload is the typed
- * outcome itself, read bare rather than through the shared envelope unwrap.
- */

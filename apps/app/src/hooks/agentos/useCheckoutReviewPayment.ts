@@ -1,11 +1,9 @@
+import type { WorkspaceCheckoutOfferFieldsFragment, WorkspaceCheckoutStartInput } from "../../modules/api/__generated__/core"
+
 import { useState } from "react"
-import { useMutateWorkspaceCheckoutStartSwr, useRouter } from ".."
-import type {
-    WorkspaceCheckoutAnswer,
-    WorkspaceCheckoutOffer,
-    WorkspaceCheckoutPaymentRail,
-    WorkspaceCheckoutStartRequest,
-} from "../../modules/api/workspace-controlplane"
+import { useMutateWorkspaceCheckoutStartSwr } from "../swr/mutations/useMutateWorkspaceCheckoutStartSwr"
+import { useRouter } from "../i18n/useRouter"
+import type { WorkspaceCheckoutAnswer, WorkspaceCheckoutPaymentRail } from "../../modules/api/workspace-controlplane"
 import {
     purchaseStatusPath,
     redirectDestination,
@@ -29,7 +27,7 @@ type CheckoutReviewPaymentCopy = {
 
 /** Props for {@link CheckoutReviewPayment}. */
 type CheckoutReviewPaymentProps = {
-    readonly offer: WorkspaceCheckoutOffer | null
+    readonly offer: WorkspaceCheckoutOfferFieldsFragment | null
     readonly renewalEntitlementId?: string
     readonly copy: CheckoutReviewPaymentCopy
 }
@@ -122,7 +120,7 @@ export const useCheckoutReviewPayment = ({ offer, renewalEntitlementId, copy }: 
 
     const requestPayment = async (): Promise<void> => {
         if (offer === null || rail === null || startCheckout.isMutating) return
-        const request: WorkspaceCheckoutStartRequest = {
+        const request: WorkspaceCheckoutStartInput = {
             retryKey: retryKeyFor(offer),
             offerId: offer.offerId,
             offerVersion: offer.offerVersion,

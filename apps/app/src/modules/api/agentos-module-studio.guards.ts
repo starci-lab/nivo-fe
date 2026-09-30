@@ -5,17 +5,19 @@
 
 import { isNullableString, isNumber, isOneOf, isRecord, isString, isStringArray, parseEach } from "@nivo/api"
 import type {
-    AgentosCustomModule,
-    AgentosModuleStudio,
-    AgentosModuleUploadCapability,
-} from "./agentos-module-studio"
+    MyAgentosCustomModuleStudioQuery,
+    PrepareAgentosModuleAttachmentUploadMutation,
+} from "./__generated__/core"
 
-type StudioMessage = AgentosModuleStudio["messages"][number]
-type StudioAttachment = AgentosModuleStudio["attachments"][number]
-type StudioIntegration = AgentosModuleStudio["integrations"][number]
-type StudioSpecification = NonNullable<AgentosModuleStudio["specification"]>
+type Studio = NonNullable<MyAgentosCustomModuleStudioQuery["myAgentosCustomModuleStudio"]["data"]>
+type CustomModule = Studio["module"]
+type StudioMessage = Studio["messages"][number]
+type StudioAttachment = Studio["attachments"][number]
+type StudioIntegration = Studio["integrations"][number]
+type StudioSpecification = NonNullable<Studio["specification"]>
+type UploadCapability = NonNullable<PrepareAgentosModuleAttachmentUploadMutation["prepareAgentosModuleAttachmentUpload"]["data"]>
 
-const parseCustomModule = (value: unknown): AgentosCustomModule | null =>
+const parseCustomModule = (value: unknown): CustomModule | null =>
     isRecord(value) &&
     isString(value.id) &&
     isString(value.agentWorkspaceId) &&
@@ -41,7 +43,7 @@ const parseCustomModule = (value: unknown): AgentosCustomModule | null =>
           }
         : null
 
-const parseProfileFact = (value: unknown): AgentosModuleStudio["profileFacts"][number] | null =>
+const parseProfileFact = (value: unknown): Studio["profileFacts"][number] | null =>
     isRecord(value) && isString(value.key) && isString(value.value)
         ? { key: value.key, value: value.value }
         : null
@@ -116,7 +118,7 @@ const parseStudioSpecification = (value: unknown): StudioSpecification | null =>
         : null
 
 /** Parse the `data` of `myAgentosCustomModuleStudio` and every studio mutation. */
-export const parseModuleStudio = (input: unknown): AgentosModuleStudio | null => {
+export const parseModuleStudio = (input: unknown): Studio | null => {
     if (!isRecord(input)) return null
     const module_ = parseCustomModule(input.module)
     const profileFacts = parseEach(input.profileFacts, parseProfileFact)
@@ -141,7 +143,7 @@ export const parseModuleStudio = (input: unknown): AgentosModuleStudio | null =>
 }
 
 /** Parse the `data` of `prepareAgentosModuleAttachmentUpload`: the studio plus the capability. */
-export const parseModuleUploadCapability = (input: unknown): AgentosModuleUploadCapability | null => {
+export const parseModuleUploadCapability = (input: unknown): UploadCapability | null => {
     if (!isRecord(input)) return null
     const studio = parseModuleStudio(input)
     if (

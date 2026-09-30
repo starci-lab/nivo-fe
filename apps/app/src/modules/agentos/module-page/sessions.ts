@@ -1,8 +1,10 @@
-import type { AgentosModuleRuntime, AgentosRuntimeSession } from "../../api/agentos-module-runtime"
+
+import type { MyAgentosModuleRuntimeQuery } from "@/modules/api/__generated__/core"
+
 import type { ModulePageCopy } from "../module-page-copy"
 
 /** The version number of the context the installation currently serves, if one is applied. */
-export const activeVersionFor = (runtime: AgentosModuleRuntime): number | null =>
+export const activeVersionFor = (runtime: NonNullable<MyAgentosModuleRuntimeQuery["myAgentosModuleRuntime"]["data"]>): number | null =>
     runtime.contextVersions.find((context) => context.id === runtime.installation.activeContextVersionId)?.version ??
     null
 
@@ -11,7 +13,7 @@ export const executeSessionTitleFor = (title: string, index: number, copy: Modul
     title === "New Execute session" ? copy.shell.conversation({ number: index + 1 }) : title
 
 /** The primary operations session identity, or the first session once none is named. */
-export const primarySessionFor = (runtime: AgentosModuleRuntime): string | null => {
+export const primarySessionFor = (runtime: NonNullable<MyAgentosModuleRuntimeQuery["myAgentosModuleRuntime"]["data"]>): string | null => {
     const primaryId = runtime.installation.primaryOpsSessionId
     return primaryId !== null && runtime.executeSessions.some((session) => session.id === primaryId)
         ? primaryId
@@ -19,22 +21,22 @@ export const primarySessionFor = (runtime: AgentosModuleRuntime): string | null 
 }
 
 /** The execute session a stale or absent selection resolves to. */
-export const executeSessionIdFor = (runtime: AgentosModuleRuntime, selectedId: string | null): string | null =>
+export const executeSessionIdFor = (runtime: NonNullable<MyAgentosModuleRuntimeQuery["myAgentosModuleRuntime"]["data"]>, selectedId: string | null): string | null =>
     runtime.executeSessions.some((session) => session.id === selectedId) ? selectedId : primarySessionFor(runtime)
 
 /** The session a stale or absent selection resolves to, or null when none exists. */
 export const executeSessionFor = (
-    runtime: AgentosModuleRuntime,
+    runtime: NonNullable<MyAgentosModuleRuntimeQuery["myAgentosModuleRuntime"]["data"]>,
     selectedId: string | null,
-): AgentosRuntimeSession | null => {
+): NonNullable<MyAgentosModuleRuntimeQuery["myAgentosModuleRuntime"]["data"]>["setupSessions"][number] | null => {
     const id = executeSessionIdFor(runtime, selectedId)
     return runtime.executeSessions.find((session) => session.id === id) ?? null
 }
 
 /** The heading one selected execute session shows: the primary label, a title, or the empty state. */
 export const selectedSessionTitleFor = (
-    selectedSession: AgentosModuleRuntime["executeSessions"][number] | null,
-    runtime: AgentosModuleRuntime,
+    selectedSession: NonNullable<MyAgentosModuleRuntimeQuery["myAgentosModuleRuntime"]["data"]>["executeSessions"][number] | null,
+    runtime: NonNullable<MyAgentosModuleRuntimeQuery["myAgentosModuleRuntime"]["data"]>,
     copy: ModulePageCopy,
 ): string => {
     if (selectedSession === null) return copy.shell.noExecuteSession

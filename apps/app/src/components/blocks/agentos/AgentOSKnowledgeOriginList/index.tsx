@@ -1,9 +1,10 @@
-import { AgentOSKnowledgeOriginListBase, type AgentOSKnowledgeOriginListLabels } from "./component"
-import type { AgentosAiKnowledgeReadiness } from "@/modules/api/agentos-knowledge"
 
+import type { MyAgentosAiKnowledgeReadinessData } from "@/modules/api/__generated__/core"
+
+import { AgentOSKnowledgeOriginListBase, type AgentOSKnowledgeOriginListLabels } from "./component"
 /** Keep provenance presentation independently reusable inside workspace AI surfaces. */
 type AgentOSKnowledgeOriginListProps = {
-    readonly origins: AgentosAiKnowledgeReadiness["origins"]
+    readonly origins: MyAgentosAiKnowledgeReadinessData["origins"]
     readonly labels: AgentOSKnowledgeOriginListLabels
     readonly loading?: boolean
 }

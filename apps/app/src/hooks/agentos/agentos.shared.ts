@@ -1,3 +1,10 @@
+import type { ConfigureAgentWorkspaceChannelMutationVariables, ManageAgentosModuleRuntimeMutationVariables, MyAgentosModuleRuntimeQuery } from "@/modules/api/__generated__/core"
+
+import type { AgentWorkspaceChannelSettingView } from "@/modules/api/agentos-module-runtime"
+
+
+
+
 /*
  * The shared machinery behind the AgentOS shell hooks (CU-SHELL-CONNECTED).
  *
@@ -20,12 +27,6 @@ import {
     type ShellRead,
     type ShellSourceEnvelope,
 } from "@/modules/api/agentos-shell"
-import type {
-    AgentosModuleRuntime,
-    AgentWorkspaceChannelSetting,
-    ConfigureAgentWorkspaceChannelInput,
-    ManageAgentosModuleRuntimeInput,
-} from "../../modules/api/agentos-module-runtime"
 import { type Failure, type Outcome } from "@nivo/api"
 import {
     initialShellObservationSnapshot,
@@ -338,8 +339,8 @@ interface ModuleCredentialEnvironment {
     readonly installationId: string
     readonly displayName: string
     readonly configureChannel: (
-        input: ConfigureAgentWorkspaceChannelInput,
-    ) => Promise<Outcome<AgentWorkspaceChannelSetting>>
+        input: ConfigureAgentWorkspaceChannelMutationVariables["input"],
+    ) => Promise<Outcome<AgentWorkspaceChannelSettingView>>
     readonly perform: ModuleRuntimeControls["perform"]
     readonly setPending: (pending: boolean) => void
     readonly setActionRefused: (refused: boolean) => void
@@ -414,11 +415,11 @@ export interface ModuleRuntimeControls {
     readonly setPending: (pending: boolean) => void
     readonly setActionRefused: (refused: boolean) => void
     readonly perform: (
-        input: ManageAgentosModuleRuntimeInput,
+        input: ManageAgentosModuleRuntimeMutationVariables["input"],
         markRefused?: boolean,
-    ) => Promise<AgentosModuleRuntime | null>
+    ) => Promise<NonNullable<MyAgentosModuleRuntimeQuery["myAgentosModuleRuntime"]["data"]> | null>
     readonly settleRuntime: (
-        settled: (candidate: AgentosModuleRuntime) => boolean,
+        settled: (candidate: NonNullable<MyAgentosModuleRuntimeQuery["myAgentosModuleRuntime"]["data"]>) => boolean,
         markRefused?: boolean,
-    ) => Promise<AgentosModuleRuntime | null>
+    ) => Promise<NonNullable<MyAgentosModuleRuntimeQuery["myAgentosModuleRuntime"]["data"]> | null>
 }

@@ -1,6 +1,33 @@
-import { type Outcome } from "@nivo/api"
+﻿import { type Outcome } from "@nivo/api"
+import {
+    BeginAcademyZaloAuthorizationDocument,
+    CreateAcademyWebhookDocument,
+    DisableAcademyWebhookDocument,
+    DisconnectAcademyGoogleOAuthDocument,
+    RotateAcademyWebhookSecretDocument,
+    SaveAcademyAnalyticsDocument,
+    SaveAcademyCredentialDocument,
+    SaveAcademyGoogleOAuthDocument,
+    SetAcademyCustomDomainDocument,
+} from "../__generated__/core"
+import type {
+    AcademyCredentialSaveResultType,
+    AcademyCustomDomainStateType,
+    AcademyProviderStatusType,
+    AcademyWebhookSecretResultType,
+    AcademyWebhookStatusType,
+    BeginAcademyZaloAuthorizationInput,
+    BeginAcademyZaloAuthorizationResult,
+    CreateAcademyWebhookInput,
+    DisableAcademyWebhookInput,
+    DisconnectAcademyGoogleOAuthRequest,
+    RotateAcademyWebhookSecretInput,
+    SaveAcademyAnalyticsInput,
+    SaveAcademyCredentialInput,
+    SaveAcademyGoogleOAuthInput,
+    SetAcademyCustomDomainInput,
+} from "../__generated__/core"
 import { graphql } from "../graphql"
-import type { AcademyCustomDomainState } from "../../academy"
 import {
     parseAcademyCredentialSaveResult,
     parseAcademyCustomDomainState,
@@ -9,272 +36,94 @@ import {
     parseAcademyWebhookStatus,
     parseAcademyZaloAuthorization,
 } from "./payload.guards"
-import type {
-    AcademyCredentialSaveResult,
-    AcademyProviderStatus,
-    AcademyWebhookSecretResult,
-    AcademyWebhookStatus,
-    AcademyZaloAuthorization,
-    CreateAcademyWebhookInput,
-    RotateAcademyWebhookSecretInput,
-    SaveAcademyAnalyticsInput,
-    SaveAcademyCredentialInput,
-    SaveAcademyGoogleOAuthInput,
-    SetAcademyCustomDomainInput,
-} from "./types"
 
 /** Store one Academy credential and return delivery status, never its value. */
 export const saveAcademyCredential = (
     input: SaveAcademyCredentialInput,
-): Promise<Outcome<AcademyCredentialSaveResult>> =>
+): Promise<Outcome<AcademyCredentialSaveResultType>> =>
     graphql(
-        `
-            mutation SaveAcademyCredential($input: SaveAcademyCredentialInput!) {
-                saveAcademyCredential(request: $input) {
-                    data {
-                        credential {
-                            key
-                            configured
-                            hint
-                            syncedAt
-                            verification
-                            verificationReason
-                            verifiedAt
-                        }
-                        delivery
-                        detail
-                    }
-                    message
-                    success
-                    error
-                }
-            }
-        `,
+        SaveAcademyCredentialDocument,
         parseAcademyCredentialSaveResult,
-        {
-            input,
-        },
+        { input },
     )
 
 /** Store or clear one Academy custom domain. */
 export const setAcademyCustomDomain = (
     input: SetAcademyCustomDomainInput,
-): Promise<Outcome<AcademyCustomDomainState>> =>
+): Promise<Outcome<AcademyCustomDomainStateType>> =>
     graphql(
-        `
-            mutation SetAcademyCustomDomain($input: SetAcademyCustomDomainInput!) {
-                setAcademyCustomDomain(request: $input) {
-                    data {
-                        domain
-                        target
-                        dnsReady
-                        delivery
-                        detail
-                    }
-                    message
-                    success
-                    error
-                }
-            }
-        `,
+        SetAcademyCustomDomainDocument,
         parseAcademyCustomDomainState,
-        {
-            input,
-        },
+        { input },
     )
 
 /** Save write-only Google OAuth credentials. */
-export const saveAcademyGoogleOAuth = (input: SaveAcademyGoogleOAuthInput): Promise<Outcome<AcademyProviderStatus>> =>
+export const saveAcademyGoogleOAuth = (
+    input: SaveAcademyGoogleOAuthInput,
+): Promise<Outcome<AcademyProviderStatusType>> =>
     graphql(
-        `
-            mutation SaveAcademyGoogleOAuth($input: SaveAcademyGoogleOAuthInput!) {
-                saveAcademyGoogleOAuth(request: $input) {
-                    data {
-                        provider
-                        status
-                        clientId
-                        identifier
-                        consentMode
-                        reason
-                        deliveredAt
-                        verifiedAt
-                    }
-                    message
-                    success
-                    error
-                }
-            }
-        `,
+        SaveAcademyGoogleOAuthDocument,
         parseAcademyProviderStatus,
-        {
-            input,
-        },
+        { input },
     )
 
 /** Disconnect the Academy Google login provider. */
-export const disconnectAcademyGoogleOAuth = (siteId: string): Promise<Outcome<AcademyProviderStatus>> =>
+export const disconnectAcademyGoogleOAuth = (
+    siteId: string,
+): Promise<Outcome<AcademyProviderStatusType>> =>
     graphql(
-        `
-            mutation DisconnectAcademyGoogleOAuth($request: DisconnectAcademyGoogleOAuthRequest!) {
-                disconnectAcademyGoogleOAuth(request: $request) {
-                    data {
-                        provider
-                        status
-                        clientId
-                        identifier
-                        consentMode
-                        reason
-                        deliveredAt
-                        verifiedAt
-                    }
-                    message
-                    success
-                    error
-                }
-            }
-        `,
+        DisconnectAcademyGoogleOAuthDocument,
         parseAcademyProviderStatus,
-        {
-            request: { siteId },
-        },
+        { request: { siteId } satisfies DisconnectAcademyGoogleOAuthRequest },
     )
 
 /** Begin a short-lived Zalo OA authorization flow. */
-export const beginAcademyZaloAuthorization = (siteId: string): Promise<Outcome<AcademyZaloAuthorization>> =>
+export const beginAcademyZaloAuthorization = (
+    siteId: string,
+): Promise<Outcome<BeginAcademyZaloAuthorizationResult>> =>
     graphql(
-        `
-            mutation BeginAcademyZaloAuthorization($input: BeginAcademyZaloAuthorizationInput!) {
-                beginAcademyZaloAuthorization(request: $input) {
-                    data {
-                        authorizationUrl
-                        expiresAt
-                    }
-                    message
-                    success
-                    error
-                }
-            }
-        `,
+        BeginAcademyZaloAuthorizationDocument,
         parseAcademyZaloAuthorization,
-        {
-            input: {
-                siteId,
-            },
-        },
+        { input: { siteId } satisfies BeginAcademyZaloAuthorizationInput },
     )
 
 /** Save one analytics identifier and consent mode. */
-export const saveAcademyAnalytics = (input: SaveAcademyAnalyticsInput): Promise<Outcome<AcademyProviderStatus>> =>
+export const saveAcademyAnalytics = (
+    input: SaveAcademyAnalyticsInput,
+): Promise<Outcome<AcademyProviderStatusType>> =>
     graphql(
-        `
-            mutation SaveAcademyAnalytics($input: SaveAcademyAnalyticsInput!) {
-                saveAcademyAnalytics(request: $input) {
-                    data {
-                        provider
-                        status
-                        clientId
-                        identifier
-                        consentMode
-                        reason
-                        deliveredAt
-                        verifiedAt
-                    }
-                    message
-                    success
-                    error
-                }
-            }
-        `,
+        SaveAcademyAnalyticsDocument,
         parseAcademyProviderStatus,
-        {
-            input,
-        },
+        { input },
     )
 
 /** Create a signed Academy webhook and reveal its signing secret once. */
-export const createAcademyWebhook = (input: CreateAcademyWebhookInput): Promise<Outcome<AcademyWebhookSecretResult>> =>
+export const createAcademyWebhook = (
+    input: CreateAcademyWebhookInput,
+): Promise<Outcome<AcademyWebhookSecretResultType>> =>
     graphql(
-        `
-            mutation CreateAcademyWebhook($input: CreateAcademyWebhookInput!) {
-                createAcademyWebhook(request: $input) {
-                    data {
-                        id
-                        endpoint
-                        events
-                        enabled
-                        version
-                        lastDeliveryStatus
-                        lastDeliveredAt
-                        signingSecret
-                    }
-                    message
-                    success
-                    error
-                }
-            }
-        `,
+        CreateAcademyWebhookDocument,
         parseAcademyWebhookSecretResult,
-        {
-            input,
-        },
+        { input },
     )
 
 /** Rotate a webhook secret with optimistic version fencing. */
 export const rotateAcademyWebhookSecret = (
     input: RotateAcademyWebhookSecretInput,
-): Promise<Outcome<AcademyWebhookSecretResult>> =>
+): Promise<Outcome<AcademyWebhookSecretResultType>> =>
     graphql(
-        `
-            mutation RotateAcademyWebhookSecret($input: RotateAcademyWebhookSecretInput!) {
-                rotateAcademyWebhookSecret(request: $input) {
-                    data {
-                        id
-                        endpoint
-                        events
-                        enabled
-                        version
-                        lastDeliveryStatus
-                        lastDeliveredAt
-                        signingSecret
-                    }
-                    message
-                    success
-                    error
-                }
-            }
-        `,
+        RotateAcademyWebhookSecretDocument,
         parseAcademyWebhookSecretResult,
-        {
-            input,
-        },
+        { input },
     )
 
 /** Disable one Academy webhook. */
-export const disableAcademyWebhook = (siteId: string, webhookId: string): Promise<Outcome<AcademyWebhookStatus>> =>
+export const disableAcademyWebhook = (
+    siteId: string,
+    webhookId: string,
+): Promise<Outcome<AcademyWebhookStatusType>> =>
     graphql(
-        `
-            mutation DisableAcademyWebhook($input: DisableAcademyWebhookInput!) {
-                disableAcademyWebhook(request: $input) {
-                    data {
-                        id
-                        endpoint
-                        events
-                        enabled
-                        version
-                        lastDeliveryStatus
-                        lastDeliveredAt
-                    }
-                    message
-                    success
-                    error
-                }
-            }
-        `,
+        DisableAcademyWebhookDocument,
         parseAcademyWebhookStatus,
-        {
-            input: {
-                siteId,
-                webhookId,
-            },
-        },
+        { input: { siteId, webhookId } satisfies DisableAcademyWebhookInput },
     )

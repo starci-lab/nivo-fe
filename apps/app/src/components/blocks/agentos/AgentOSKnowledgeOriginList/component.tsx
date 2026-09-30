@@ -1,3 +1,6 @@
+
+import type { MyAgentosAiKnowledgeReadinessData } from "@/modules/api/__generated__/core"
+
 import { ROW_CLASS_NAME } from "./classNames"
 import {
     EmptyNotice as DirectionEmpty,
@@ -6,7 +9,6 @@ import {
     Badge,
     Text,
 } from "@starci/grammar/common"
-import type { AgentosAiKnowledgeReadiness } from "@/modules/api/agentos-knowledge"
 /** Public API role for AgentOSKnowledgeOriginListLabels. */
 export type AgentOSKnowledgeOriginListLabels = {
     readonly title: string
@@ -22,7 +24,7 @@ type AgentOSKnowledgeOriginListBaseLabels = {
 }
 /** Settled source rows consumed by the pure provenance renderer. */
 type AgentOSKnowledgeOriginListData = {
-    readonly origins: AgentosAiKnowledgeReadiness["origins"]
+    readonly origins: MyAgentosAiKnowledgeReadinessData["origins"]
     readonly labels: AgentOSKnowledgeOriginListBaseLabels
     readonly loading?: boolean
 }

@@ -12,34 +12,34 @@
 
 import { isBoolean, isNullableNumber, isNullableString, isNumber, isOneOf, isRecord, isString, parseEach } from "@nivo/api"
 import type {
-    ChatbotChannelBinding,
-    ChatbotCommandResult,
-    ChatbotConversation,
-    ChatbotMessage,
-    ChatbotWorkbench,
-} from "./chatbot"
+    ChatbotActionPayload,
+    ChatbotChannelPayload,
+    ChatbotConversationPayload,
+    ChatbotMessagePayload,
+    ChatbotWorkbenchQuery,
+} from "../__generated__/agentos-controlplane"
 import type {
     WorkspaceCheckoutAnswer,
-    WorkspaceCheckoutBillingEntry,
-    WorkspaceCheckoutEligibilityFact,
-    WorkspaceCheckoutEntryDestination,
     WorkspaceCheckoutEntryOutcome,
-    WorkspaceCheckoutLedgerFact,
-    WorkspaceCheckoutOffer,
-    WorkspaceCheckoutPaymentAction,
-    WorkspaceCheckoutProvisioningFact,
-    WorkspaceCheckoutRefundFact,
-    WorkspaceCheckoutSelection,
-    WorkspaceCheckoutSourceFact,
-    WorkspaceCheckoutStatusView,
 } from "./checkout-types"
 import type {
-    WorkspaceProvisioningSaga,
-    WorkspaceProvisioningSagaStep,
-    WorkspaceProvisioningSagaView,
-} from "./purchase-types"
+    ProvisioningSagaEntity,
+    ProvisioningSagaStepEntity,
+    WorkspaceBillingEntryType,
+    WorkspaceEntryDestinationType,
+    WorkspaceOfferSelectionType,
+    WorkspaceOfferType,
+    WorkspacePaymentActionType,
+    WorkspaceProvisioningFactType,
+    WorkspacePurchaseLedgerFactType,
+    WorkspacePurchaseStatusType,
+    WorkspaceRefundStatusFactType,
+    WorkspaceServiceEligibilityFactType,
+    WorkspaceSourceFactType,
+    WorkspaceProvisioningSagaQuery,
+} from "../__generated__/core"
 
-const parseChatbotChannelBinding = (value: unknown): ChatbotChannelBinding | null =>
+const parseChatbotChannelBinding = (value: unknown): ChatbotChannelPayload | null =>
     isRecord(value) &&
     isString(value.id) &&
     isString(value.installationId) &&
@@ -57,7 +57,7 @@ const parseChatbotChannelBinding = (value: unknown): ChatbotChannelBinding | nul
           }
         : null
 
-const parseChatbotConversation = (value: unknown): ChatbotConversation | null =>
+const parseChatbotConversation = (value: unknown): ChatbotConversationPayload | null =>
     isRecord(value) &&
     isString(value.id) &&
     isString(value.installationId) &&
@@ -77,7 +77,7 @@ const parseChatbotConversation = (value: unknown): ChatbotConversation | null =>
           }
         : null
 
-const parseChatbotMessage = (value: unknown): ChatbotMessage | null =>
+const parseChatbotMessage = (value: unknown): ChatbotMessagePayload | null =>
     isRecord(value) &&
     isString(value.id) &&
     isString(value.conversationId) &&
@@ -101,7 +101,7 @@ const parseChatbotMessage = (value: unknown): ChatbotMessage | null =>
           }
         : null
 
-const parseChatbotWorkbench = (value: unknown): ChatbotWorkbench | null => {
+const parseChatbotWorkbench = (value: unknown): ChatbotWorkbenchQuery["chatbotWorkbench"] | null => {
     if (!isRecord(value) || !isString(value.installationId) || !isString(value.lifecycleState)) return null
     if (!isNullableNumber(value.approvedVersion)) return null
     const channels = parseEach(value.channels, parseChatbotChannelBinding)
@@ -118,26 +118,27 @@ const parseChatbotWorkbench = (value: unknown): ChatbotWorkbench | null => {
     }
 }
 
-/** Parse the `data` of `chatbotWorkspaceWorkbench`: `{ chatbotWorkbench: ChatbotWorkbench }`. */
-export const parseChatbotWorkbenchAnswer = (input: unknown): ChatbotWorkbench | null =>
-    isRecord(input) ? parseChatbotWorkbench(input.chatbotWorkbench) : null
+/** Parse the `chatbotWorkbench` result from the control-plane schema. */
+export const parseChatbotWorkbenchAnswer = (input: unknown): ChatbotWorkbenchQuery["chatbotWorkbench"] | null =>
+    parseChatbotWorkbench(input)
 
-/** Parse one command result record inside the `data` of `chatbotWorkspaceCommand`. */
-export const parseChatbotCommandResult = (input: unknown): ChatbotCommandResult | null => {
-    if (!isRecord(input) || !isString(input.id) || !isString(input.installationId) || !isString(input.state)) {
+/** Parse one command result from the control-plane schema. */
+export const parseChatbotCommandResult = (input: unknown): ChatbotActionPayload | null => {
+    if (
+        !isRecord(input) ||
+        !isString(input.id) ||
+        !isString(input.installationId) ||
+        !isString(input.state) ||
+        !isNullableString(input.authorizationUrl)
+    ) {
         return null
     }
-    const result: {
-        id: string
-        installationId: string
-        state: string
-        authorizationUrl?: string | null
-    } = { id: input.id, installationId: input.installationId, state: input.state }
-    if (input.authorizationUrl !== undefined) {
-        if (!isNullableString(input.authorizationUrl)) return null
-        result.authorizationUrl = input.authorizationUrl
+    return {
+        id: input.id,
+        installationId: input.installationId,
+        state: input.state,
+        authorizationUrl: input.authorizationUrl,
     }
-    return result
 }
 
 const CHECKOUT_STATES = [
@@ -155,7 +156,7 @@ const CHECKOUT_STATES = [
     "payment-cancelled",
 ] as const
 
-const parseCheckoutOffer = (value: unknown): WorkspaceCheckoutOffer | null =>
+const parseCheckoutOffer = (value: unknown): WorkspaceOfferType | null =>
     isRecord(value) &&
     isString(value.offerId) &&
     isString(value.offerVersion) &&
@@ -179,7 +180,7 @@ const parseCheckoutOffer = (value: unknown): WorkspaceCheckoutOffer | null =>
           }
         : null
 
-const parseCheckoutSelection = (value: unknown): WorkspaceCheckoutSelection | null =>
+const parseCheckoutSelection = (value: unknown): WorkspaceOfferSelectionType | null =>
     isRecord(value) &&
     isString(value.offerId) &&
     isString(value.offerVersion) &&
@@ -187,7 +188,7 @@ const parseCheckoutSelection = (value: unknown): WorkspaceCheckoutSelection | nu
         ? { offerId: value.offerId, offerVersion: value.offerVersion, state: value.state }
         : null
 
-const parseSourceFact = (value: unknown): WorkspaceCheckoutSourceFact | null =>
+const parseSourceFact = (value: unknown): WorkspaceSourceFactType | null =>
     isRecord(value) &&
     isString(value.source) &&
     isString(value.state) &&
@@ -201,7 +202,7 @@ const parseSourceFact = (value: unknown): WorkspaceCheckoutSourceFact | null =>
           }
         : null
 
-const parseProvisioningFact = (value: unknown): WorkspaceCheckoutProvisioningFact | null => {
+const parseProvisioningFact = (value: unknown): WorkspaceProvisioningFactType | null => {
     if (!isRecord(value) || !isNullableString(value.disposition) || !isNullableString(value.reason)) return null
     const fact = parseSourceFact(value)
     return fact === null ? null : { ...fact, disposition: value.disposition, reason: value.reason }
@@ -209,7 +210,7 @@ const parseProvisioningFact = (value: unknown): WorkspaceCheckoutProvisioningFac
 
 const parseRenewalAction = (
     value: unknown,
-): NonNullable<WorkspaceCheckoutEligibilityFact["renewalAction"]> | null =>
+): NonNullable<WorkspaceServiceEligibilityFactType["renewalAction"]> | null =>
     isRecord(value) &&
     isString(value.operation) &&
     isString(value.offerId) &&
@@ -225,7 +226,7 @@ const parseRenewalAction = (
           }
         : null
 
-const parseEligibilityFact = (value: unknown): WorkspaceCheckoutEligibilityFact | null => {
+const parseEligibilityFact = (value: unknown): WorkspaceServiceEligibilityFactType | null => {
     if (
         !isRecord(value) ||
         !isNullableString(value.reason) ||
@@ -252,7 +253,7 @@ const parseEligibilityFact = (value: unknown): WorkspaceCheckoutEligibilityFact 
     }
 }
 
-const parseBillingEntry = (value: unknown): WorkspaceCheckoutBillingEntry | null =>
+const parseBillingEntry = (value: unknown): WorkspaceBillingEntryType | null =>
     isRecord(value) &&
     isString(value.entryId) &&
     isString(value.purchaseId) &&
@@ -286,7 +287,7 @@ const parseBillingEntry = (value: unknown): WorkspaceCheckoutBillingEntry | null
           }
         : null
 
-const parseLedgerFact = (value: unknown): WorkspaceCheckoutLedgerFact | null => {
+const parseLedgerFact = (value: unknown): WorkspacePurchaseLedgerFactType | null => {
     if (
         !isRecord(value) ||
         !isString(value.source) ||
@@ -307,13 +308,13 @@ const parseLedgerFact = (value: unknown): WorkspaceCheckoutLedgerFact | null => 
     }
 }
 
-const parseRefundFact = (value: unknown): WorkspaceCheckoutRefundFact | null => {
+const parseRefundFact = (value: unknown): WorkspaceRefundStatusFactType | null => {
     if (!isRecord(value) || !isString(value.projection) || !isNullableString(value.refundEntryId)) return null
     const fact = parseSourceFact(value)
     return fact === null ? null : { ...fact, projection: value.projection, refundEntryId: value.refundEntryId }
 }
 
-const parseStatusView = (value: unknown): WorkspaceCheckoutStatusView | null => {
+const parseStatusView = (value: unknown): WorkspacePurchaseStatusType | null => {
     if (!isRecord(value) || !isString(value.purchaseId) || !isOneOf(value.state, CHECKOUT_STATES)) return null
     const offer = parseCheckoutOffer(value.offer)
     const payment = parseSourceFact(value.payment)
@@ -323,22 +324,15 @@ const parseStatusView = (value: unknown): WorkspaceCheckoutStatusView | null => 
     if (offer === null || payment === null || billing === null || provisioning === null || readiness === null) {
         return null
     }
-    const serviceEligibility =
-        value.serviceEligibility === null || value.serviceEligibility === undefined
-            ? null
-            : parseEligibilityFact(value.serviceEligibility)
-    const ledger =
-        value.ledger === null || value.ledger === undefined ? null : parseLedgerFact(value.ledger)
-    const refund = value.refund === null || value.refund === undefined ? null : parseRefundFact(value.refund)
-    const refundStatus =
-        value.refundStatus === null || value.refundStatus === undefined
-            ? null
-            : parseSourceFact(value.refundStatus)
+    const serviceEligibility = value.serviceEligibility === null ? null : parseEligibilityFact(value.serviceEligibility)
+    const ledger = value.ledger === null ? null : parseLedgerFact(value.ledger)
+    const refund = value.refund === null ? null : parseRefundFact(value.refund)
+    const refundStatus = value.refundStatus === null ? null : parseSourceFact(value.refundStatus)
     if (
-        (value.serviceEligibility !== null && value.serviceEligibility !== undefined && serviceEligibility === null) ||
-        (value.ledger !== null && value.ledger !== undefined && ledger === null) ||
-        (value.refund !== null && value.refund !== undefined && refund === null) ||
-        (value.refundStatus !== null && value.refundStatus !== undefined && refundStatus === null) ||
+        (value.serviceEligibility !== null && serviceEligibility === null) ||
+        (value.ledger !== null && ledger === null) ||
+        (value.refund !== null && refund === null) ||
+        (value.refundStatus !== null && refundStatus === null) ||
         !isString(value.lastConfirmedAt)
     ) {
         return null
@@ -359,7 +353,7 @@ const parseStatusView = (value: unknown): WorkspaceCheckoutStatusView | null => 
     }
 }
 
-const parsePaymentAction = (value: unknown): WorkspaceCheckoutPaymentAction | null =>
+const parsePaymentAction = (value: unknown): WorkspacePaymentActionType | null =>
     isRecord(value) &&
     isString(value.paymentAttemptId) &&
     isString(value.provider) &&
@@ -397,23 +391,23 @@ const parseCheckoutRefused = (value: Record<string, unknown>): CheckoutRefused |
         code: CheckoutRefused["code"]
         nextAction?: "login-sign-in" | "login-register" | "login-verify-email"
         purchaseId?: string
-        offers?: ReadonlyArray<WorkspaceCheckoutOffer>
-        purchase?: WorkspaceCheckoutStatusView
+        offers?: ReadonlyArray<WorkspaceOfferType>
+        purchase?: WorkspacePurchaseStatusType
     } = { status: "refused", code: value.code }
-    if (value.nextAction !== undefined) {
+    if (value.nextAction !== null) {
         if (!isOneOf(value.nextAction, ["login-sign-in", "login-register", "login-verify-email"])) return null
         answer.nextAction = value.nextAction
     }
-    if (value.purchaseId !== undefined) {
+    if (value.purchaseId !== null) {
         if (!isString(value.purchaseId)) return null
         answer.purchaseId = value.purchaseId
     }
-    if (value.offers !== undefined) {
+    if (value.offers !== null) {
         const offers = parseEach(value.offers, parseCheckoutOffer)
         if (offers === null) return null
         answer.offers = offers
     }
-    if (value.purchase !== undefined) {
+    if (value.purchase !== null) {
         const purchase = parseStatusView(value.purchase)
         if (purchase === null) return null
         answer.purchase = purchase
@@ -435,13 +429,8 @@ export const parseWorkspaceCheckoutAnswer = (input: unknown): WorkspaceCheckoutA
             if (!isNullableString(input.purchaseId)) return null
             const purchase = parseStatusView(input.purchase)
             if (purchase === null) return null
-            const paymentAction =
-                input.paymentAction === null || input.paymentAction === undefined
-                    ? null
-                    : parsePaymentAction(input.paymentAction)
-            if (input.paymentAction !== null && input.paymentAction !== undefined && paymentAction === null) {
-                return null
-            }
+            const paymentAction = input.paymentAction === null ? null : parsePaymentAction(input.paymentAction)
+            if (input.paymentAction !== null && paymentAction === null) return null
             return { status: "prepared", purchaseId: input.purchaseId, purchase, paymentAction }
         }
         case "status": {
@@ -454,24 +443,24 @@ export const parseWorkspaceCheckoutAnswer = (input: unknown): WorkspaceCheckoutA
         case "unavailable": {
             if (input.code !== "source-unavailable" || !isString(input.source)) return null
             const purchaseId = input.purchaseId
-            if (purchaseId !== undefined && !isString(purchaseId)) return null
-            return purchaseId === undefined
+            if (purchaseId !== null && !isString(purchaseId)) return null
+            return purchaseId === null
                 ? { status: "unavailable", code: "source-unavailable", source: input.source }
                 : { status: "unavailable", code: "source-unavailable", source: input.source, purchaseId }
         }
         case "conflict": {
             if (!isOneOf(input.code, ["retry-identity-conflict", "observed-identity-mismatch"])) return null
             const purchaseId = input.purchaseId
-            if (purchaseId !== undefined && !isString(purchaseId)) return null
-            return purchaseId === undefined
+            if (purchaseId !== null && !isString(purchaseId)) return null
+            return purchaseId === null
                 ? { status: "conflict", code: input.code }
                 : { status: "conflict", code: input.code, purchaseId }
         }
         case "outcome-unknown": {
             if (input.code !== "outcome-unknown") return null
             const purchaseId = input.purchaseId
-            if (purchaseId !== undefined && !isString(purchaseId)) return null
-            return purchaseId === undefined
+            if (purchaseId !== null && !isString(purchaseId)) return null
+            return purchaseId === null
                 ? { status: "outcome-unknown", code: "outcome-unknown" }
                 : { status: "outcome-unknown", code: "outcome-unknown", purchaseId }
         }
@@ -480,7 +469,7 @@ export const parseWorkspaceCheckoutAnswer = (input: unknown): WorkspaceCheckoutA
     }
 }
 
-const parseEntryDestination = (value: unknown): WorkspaceCheckoutEntryDestination | null =>
+const parseEntryDestination = (value: unknown): WorkspaceEntryDestinationType | null =>
     isRecord(value) &&
     isString(value.workspaceId) &&
     isString(value.ownerId) &&
@@ -509,7 +498,7 @@ const ENTRY_REFUSAL_CODES = [
 ] as const
 
 const optionalPurchaseId = (value: Record<string, unknown>): { purchaseId?: string } | null => {
-    if (value.purchaseId === undefined) return {}
+    if (value.purchaseId === null) return {}
     if (!isString(value.purchaseId)) return null
     return { purchaseId: value.purchaseId }
 }
@@ -558,7 +547,7 @@ export const parseWorkspaceCheckoutEntryOutcome = (input: unknown): WorkspaceChe
     }
 }
 
-const parseSagaRow = (value: unknown): WorkspaceProvisioningSaga | null =>
+const parseSagaRow = (value: unknown): ProvisioningSagaEntity | null =>
     isRecord(value) &&
     isString(value.id) &&
     isString(value.jobId) &&
@@ -607,7 +596,7 @@ const parseSagaRow = (value: unknown): WorkspaceProvisioningSaga | null =>
         : null
 
 /** Parse the `data` of `retryProvisioningSaga`/`cancelProvisioningSaga`: one saga row. */
-export const parseProvisioningSaga = (input: unknown): WorkspaceProvisioningSaga | null => parseSagaRow(input)
+export const parseProvisioningSaga = (input: unknown): ProvisioningSagaEntity | null => parseSagaRow(input)
 
 const SAGA_STEP_STATUSES = [
     "pending",
@@ -620,7 +609,7 @@ const SAGA_STEP_STATUSES = [
     "skipped",
 ] as const
 
-const parseSagaStep = (value: unknown): WorkspaceProvisioningSagaStep | null =>
+const parseSagaStep = (value: unknown): ProvisioningSagaStepEntity | null =>
     isRecord(value) &&
     isString(value.id) &&
     isString(value.stepKey) &&
@@ -645,7 +634,9 @@ const parseSagaStep = (value: unknown): WorkspaceProvisioningSagaStep | null =>
         : null
 
 /** Parse the `data` of `myProvisioningSaga`: `{ saga, steps }`. */
-export const parseProvisioningSagaView = (input: unknown): WorkspaceProvisioningSagaView | null => {
+export const parseProvisioningSagaView = (
+    input: unknown,
+): NonNullable<WorkspaceProvisioningSagaQuery["myProvisioningSaga"]["data"]> | null => {
     if (!isRecord(input)) return null
     const saga = parseSagaRow(input.saga)
     const steps = parseEach(input.steps, parseSagaStep)

@@ -1,5 +1,6 @@
+import type { AuthPayload, SignOutScope } from "../api/__generated__/core"
+
 import { createContext } from "react"
-import type { AuthPayload, SignOutScope } from "../api/auth"
 
 /** Whether anybody is signed in, and whether that answer is settled yet. */
 export type SessionState =

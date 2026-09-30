@@ -1,5 +1,7 @@
 import { CORE_API_URL } from "@/modules/config"
-import type { OauthProvider } from "./types"
+
+/** One identity provider the authentication entry offers. */
+export type OauthProvider = "google" | "github"
 
 /**
  * Where a provider hand-off starts.

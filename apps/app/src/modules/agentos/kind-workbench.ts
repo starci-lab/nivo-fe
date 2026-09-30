@@ -1,5 +1,7 @@
+
+import type { MyAgentosModuleRuntimeQuery } from "@/modules/api/__generated__/core"
+
 import type { ComponentType } from "react"
-import type { AgentosRuntimeOperationEvent, AgentosRuntimeTask } from "../api/agentos-module-runtime"
 
 type RuntimeWorkbenchGenericCaptionValues = { readonly version: string }
 type RuntimeWorkbenchKnowledgeCaptionValues = { readonly kind: string; readonly version: string }
@@ -70,8 +72,8 @@ export type WorkbenchProps = {
     readonly moduleId: string
     readonly kindKey: string
     readonly workbenchVersion: string
-    readonly tasks?: ReadonlyArray<AgentosRuntimeTask>
-    readonly events?: ReadonlyArray<AgentosRuntimeOperationEvent>
+    readonly tasks?: ReadonlyArray<NonNullable<MyAgentosModuleRuntimeQuery["myAgentosModuleRuntime"]["data"]>["tasks"][number]>
+    readonly events?: ReadonlyArray<NonNullable<MyAgentosModuleRuntimeQuery["myAgentosModuleRuntime"]["data"]>["operationEvents"][number]>
 }
 
 /** Extensible workbench table; adding a key does not edit the Module Studio shell. */
@@ -84,8 +86,8 @@ export type KindWorkbenchBlockProps = WorkbenchProps & {
 }
 
 /** Active work items are the task states the workbench may currently act on. */
-export const activeTasks = (props: WorkbenchProps): ReadonlyArray<AgentosRuntimeTask> =>
+export const activeTasks = (props: WorkbenchProps): ReadonlyArray<NonNullable<MyAgentosModuleRuntimeQuery["myAgentosModuleRuntime"]["data"]>["tasks"][number]> =>
     props.tasks?.filter((task) => task.status === "open" || task.status === "in_progress") ?? []
 
 /** The first active task in the owner's established order. */
-export const nextTask = (props: WorkbenchProps): AgentosRuntimeTask | undefined => activeTasks(props)[0]
+export const nextTask = (props: WorkbenchProps): NonNullable<MyAgentosModuleRuntimeQuery["myAgentosModuleRuntime"]["data"]>["tasks"][number] | undefined => activeTasks(props)[0]

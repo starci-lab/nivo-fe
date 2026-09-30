@@ -53,7 +53,7 @@ export const sendShellRequest = async (
             arrived: false,
             failure: failed("refused", {
                 code: "UNAUTHENTICATED",
-                reason: "No access token is held, so no request left the browser.",
+                reason: "UNAUTHENTICATED",
             }),
         }
     }
@@ -71,7 +71,7 @@ export const sendShellRequest = async (
             failure: failed("refused", {
                 status: sent.status,
                 code: "UNAUTHENTICATED",
-                reason: "Core refused the bearer token.",
+                reason: "UNAUTHENTICATED",
             }),
         }
     if (sent.status !== null && sent.body !== null)

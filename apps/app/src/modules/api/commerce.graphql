@@ -1,0 +1,193 @@
+fragment DomainFields on DomainEntity {
+    id
+    name
+    status
+    expiresAt
+    autoRenew
+}
+
+fragment WalletFields on WalletEntity {
+    id
+    balanceVnd
+}
+
+fragment WalletTransactionFields on WalletTransactionEntity {
+    id
+    amountVnd
+    type
+    note
+    createdAt
+}
+
+fragment WalletTopUpPayLinkFields on WalletTopUpPayLink {
+    paymentId
+    gateway
+    referenceId
+    checkoutUrl
+    qrCode
+    checkoutFields
+    amountVnd
+    chargedAmountVnd
+}
+
+fragment InvoiceFields on InvoiceEntity {
+    id
+    amountVnd
+    status
+    dueAt
+    paidAt
+    catalogOrder {
+        id
+        renewsAt
+        autoRenew
+        catalogItem {
+            id
+            name
+            billingModel
+        }
+        catalogTier {
+            id
+            name
+        }
+    }
+}
+
+fragment CatalogOrderFields on CatalogOrderEntity {
+    id
+    status
+    renewsAt
+    autoRenew
+    catalogItem {
+        id
+        name
+        billingModel
+    }
+    catalogTier {
+        id
+        name
+    }
+}
+
+fragment CatalogItemFields on CatalogItemEntity {
+    id
+    slug
+    name
+    tagline
+    templateKey
+    tiers {
+        id
+        tierKey
+        name
+        priceMonthlyVnd
+        orderIndex
+    }
+}
+
+query MyDomains {
+    myDomains {
+        data {
+            ...DomainFields
+        }
+        message
+        success
+        error
+    }
+}
+
+query MyWallet {
+    myWallet {
+        data {
+            ...WalletFields
+        }
+        message
+        success
+        error
+    }
+}
+
+query MyWalletTransactions {
+    myWalletTransactions {
+        data {
+            ...WalletTransactionFields
+        }
+        message
+        success
+        error
+    }
+}
+
+mutation CreateWalletTopUpPayLink($input: CreateWalletTopUpPayLinkInput!) {
+    createWalletTopUpPayLink(request: $input) {
+        data {
+            ...WalletTopUpPayLinkFields
+        }
+        message
+        success
+        error
+    }
+}
+
+query MyInvoices {
+    myInvoices {
+        data {
+            ...InvoiceFields
+        }
+        message
+        success
+        error
+    }
+}
+
+mutation PayInvoice($input: PayInvoiceInput!) {
+    payInvoice(request: $input) {
+        data {
+            ...InvoiceFields
+        }
+        message
+        success
+        error
+    }
+}
+
+query MyCatalogOrders {
+    myCatalogOrders {
+        data {
+            ...CatalogOrderFields
+        }
+        message
+        success
+        error
+    }
+}
+
+query CatalogItems($request: CatalogItemsRequest!) {
+    catalogItems(request: $request) {
+        data {
+            ...CatalogItemFields
+        }
+        message
+        success
+        error
+    }
+}
+
+mutation OrderAgentOs($input: OrderCatalogItemInput!) {
+    orderCatalogItem(request: $input) {
+        data {
+            id
+            status
+            catalogItem {
+                id
+                name
+                billingModel
+            }
+            catalogTier {
+                id
+                name
+            }
+        }
+        message
+        success
+        error
+    }
+}

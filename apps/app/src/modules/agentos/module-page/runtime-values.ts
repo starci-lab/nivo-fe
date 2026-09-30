@@ -1,4 +1,6 @@
-import type { AgentosModuleRuntime } from "../../api/agentos-module-runtime"
+
+import type { MyAgentosModuleRuntimeQuery } from "@/modules/api/__generated__/core"
+
 import type { AgentosRuntimeValue } from "../../api/agentos-runtime-tree"
 import type { NivoQueryReading } from "../../query"
 
@@ -15,9 +17,9 @@ export const runtimeValueText = (value: AgentosRuntimeValue): string => {
 
 /** The runtime one workspace owns once the reading is ready; anything else is absent here. */
 export const runtimeForWorkspace = (
-    reading: NivoQueryReading<AgentosModuleRuntime>,
+    reading: NivoQueryReading<NonNullable<MyAgentosModuleRuntimeQuery["myAgentosModuleRuntime"]["data"]>>,
     workspaceId: string,
-): AgentosModuleRuntime | null =>
+): NonNullable<MyAgentosModuleRuntimeQuery["myAgentosModuleRuntime"]["data"]> | null =>
     reading.status === "ready" && reading.data.installation.agentWorkspaceId === workspaceId ? reading.data : null
 
 /**
@@ -25,7 +27,7 @@ export const runtimeForWorkspace = (
  * runtime: the page reports it as a not-found, never as a refusal.
  */
 export const foreignRuntimeFor = (
-    reading: NivoQueryReading<AgentosModuleRuntime>,
+    reading: NivoQueryReading<NonNullable<MyAgentosModuleRuntimeQuery["myAgentosModuleRuntime"]["data"]>>,
     workspaceId: string,
 ): boolean => reading.status === "ready" && runtimeForWorkspace(reading, workspaceId) === null
 

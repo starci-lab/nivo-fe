@@ -1,7 +1,7 @@
 import { useState } from "react"
 import { useLocale, useTranslations } from "next-intl"
 import { useSubmitAcademyLead } from "./useSubmitAcademyLead"
-import type { Course } from "../../modules/api/academy"
+import type { CoursesQuery } from "../../modules/api/__generated__/graphql"
 import { DEFAULT_LOCALE, isLocale } from "@/modules/i18n"
 import {
     academySectionsOf,
@@ -12,7 +12,9 @@ import {
 } from "../../modules/academy/academy-sections"
 
 /** Own translations, authored-content projection and transient browser action state. */
-export const useAcademySections = (courses: ReadonlyArray<Course>): AcademySectionsBaseProps => {
+export const useAcademySections = (
+    courses: ReadonlyArray<NonNullable<CoursesQuery["courses"]["data"]>[number]>,
+): AcademySectionsBaseProps => {
     const rawLocale = useLocale()
     const locale = isLocale(rawLocale) ? rawLocale : DEFAULT_LOCALE
     const hero = useTranslations("landing.hero")

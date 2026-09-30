@@ -1,9 +1,12 @@
+import type { InvoiceFieldsFragment } from "@/modules/api/__generated__/core"
+
 import { DEFAULT_LOCALE } from "@/modules/i18n"
-import type { InvoiceRow } from "@/modules/api/commerce"
+
 import { isTopUpSession } from "./waypoint.guards"
 import type { PaymentResultView, WalletLedgerRow } from "./types"
 
 /** Payment evidence retained while the provider round trip is in progress. */
+
 export type TopUpSession = {
     readonly amountVnd: number
     readonly startingBalanceVnd: number
@@ -19,7 +22,7 @@ export type WalletWaypoint = {
 
 
 /** Tone an invoice row with the status it actually reports. */
-export const invoiceTone = (status: InvoiceRow["status"]): WalletLedgerRow["tone"] => {
+export const invoiceTone = (status: InvoiceFieldsFragment["status"]): WalletLedgerRow["tone"] => {
     if (status === "paid") return "success"
     if (status === "unpaid") return "warning"
     return "neutral"

@@ -1,7 +1,10 @@
+import type { AuthPayload } from "../api/__generated__/core"
+
 import { useLocale } from "next-intl"
 import { useCallback, useEffect, useId, useMemo, useRef, useState, type ComponentProps } from "react"
 import useSWRImmutable from "swr/immutable"
-import { refreshSession, signOut as signOutMutation, type AuthPayload, type SignOutScope } from "../api/auth"
+import { SignOutScope } from "../api/__generated__/core"
+import { refreshSession, signOut as signOutMutation } from "../api/auth"
 import { setAccessTokenReader, setLocaleReader } from "../api/graphql"
 import { authorityEndingFrom, SessionContext } from "./session.shared"
 import type { Session, SessionEndReport, SessionState } from "./session.shared"
@@ -104,7 +107,7 @@ export const SessionProvider = (props: SessionProviderProps) => {
          * this browser's in-memory access and custody epoch exactly as a completed one does - the
          * person lands on Login either way, as sds.login.session-custody requires.
          */
-        if (scope === "everywhere") {
+        if (scope === SignOutScope.Everywhere) {
             try {
                 const answer = await signOutMutation({
                     scope,

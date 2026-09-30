@@ -1,9 +1,12 @@
-import type { AgentWorkspaceRuntime } from "@/modules/api/agentos-workspaces"
+
+import type { AgentWorkspaceControlCenterFieldsFragment } from "@/modules/api/__generated__/core"
+
 import { HelmComponentStatusTable } from "@nivo/ui"
 import { HorizontalScrollRegion as DirectionScroll, EmptyNotice, SurfaceCard } from "@starci/grammar/common"
+
 /** Public-safe Helm snapshot and resolved labels consumed by the stack block. */
 type HelmStackSnapshotProps = {
-    readonly runtime: AgentWorkspaceRuntime | null
+    readonly runtime: AgentWorkspaceControlCenterFieldsFragment["runtime"] | null
     readonly labels: {
         readonly section: string
         readonly unavailable: string

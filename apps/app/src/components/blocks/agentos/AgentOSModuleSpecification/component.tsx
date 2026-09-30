@@ -1,7 +1,8 @@
+
+import type { MyAgentosCustomModuleStudioQuery } from "@/modules/api/__generated__/core"
+
 import { Checkbox } from "@nivo/ui"
 import { SurfaceCard, Button, EmptyNotice, Heading, Text } from "@starci/grammar/common"
-import type { AgentosModuleStudio } from "@/modules/api/agentos-module-studio"
-
 /** Exact versioned specification state and acknowledgement action. */
 export type AgentOSModuleSpecificationProps = AgentOSModuleSpecificationViewProps
 /** Resolved copy for the specification block. */
@@ -17,7 +18,7 @@ type AgentOSModuleSpecificationLabels = {
 }
 /** Specification projection, acknowledgement flag and copy the pure block draws. */
 type AgentOSModuleSpecificationData = {
-    readonly studio?: AgentosModuleStudio
+    readonly studio?: NonNullable<MyAgentosCustomModuleStudioQuery["myAgentosCustomModuleStudio"]["data"]>
     readonly acknowledged: boolean
     readonly pending: boolean
     readonly labels: AgentOSModuleSpecificationLabels

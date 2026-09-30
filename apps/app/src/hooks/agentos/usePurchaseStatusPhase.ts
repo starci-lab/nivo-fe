@@ -1,6 +1,9 @@
+import type { WorkspaceCheckoutPurchaseStatusFieldsFragment } from "@/modules/api/__generated__/core"
+
 import { useCallback, useEffect } from "react"
-import { useProvisioningRealtime, type ProvisioningTarget } from "@/hooks"
-import type { WorkspaceCheckoutAnswer, WorkspaceCheckoutStatusView } from "@/modules/api/workspace-controlplane"
+import { useProvisioningRealtime } from "../realtime/useProvisioningRealtime"
+import { type ProvisioningTarget } from "../realtime/realtime.shared"
+import type { WorkspaceCheckoutAnswer } from "@/modules/api/workspace-controlplane"
 import { settle, type Outcome } from "@nivo/api"
 import {
     HOLD_PHASES,
@@ -18,10 +21,11 @@ type UsePurchaseStatusPhaseInput = {
     readonly error: Error | undefined
     readonly sessionRestoring: boolean
     readonly accessToken: string | null
-    readonly purchaseOverride: WorkspaceCheckoutStatusView | null
+    readonly purchaseOverride: WorkspaceCheckoutPurchaseStatusFieldsFragment | null
     readonly refreshStatus: () => Promise<unknown>
     readonly statusValidating: boolean
     readonly recovering: boolean
+
 }
 
 /** Resolve the confirmed phase and own its realtime, polling and reconnect lifecycle. */

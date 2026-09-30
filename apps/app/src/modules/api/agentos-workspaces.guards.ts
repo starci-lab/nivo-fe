@@ -1,26 +1,19 @@
-/**
- * The parsers of the agentos-workspace documents' payloads. One per shape the operations select;
- * each returns the value or null, which `graphql` reports as `unavailable`.
- */
+/** Runtime parsers for the generated AgentOS workspace document payloads. */
 
 import { isBoolean, isNullableBoolean, isNullableNumber, isNullableString, isNumber, isOneOf, isRecord, isString, parseEach } from "@nivo/api"
 import type {
-    AgentWorkspaceAppCapability,
-    AgentWorkspaceAppLaunch,
-    AgentWorkspaceControlCenter,
-    AgentWorkspaceRecovery,
-    AgentWorkspaceRow,
-    AgentWorkspaceRuntime,
-    AgentWorkspaceRuntimeComponent,
-    AgentWorkspaceRuntimeStorage,
-    AgentWorkspaceRuntimeTotals,
-    RenewedAgentWorkspaceAppLaunch,
-} from "./agentos-workspaces"
+    IssueAgentWorkspaceAppLaunchMutation,
+    ManageAgentWorkspaceMutation,
+    MyAgentWorkspaceControlCenterQuery,
+    MyAgentWorkspaceQuery,
+    RenewAgentWorkspaceAppLaunchMutation,
+    RevokeAgentWorkspaceAppLaunchMutation,
+} from "./__generated__/core"
 
-const parseAgentWorkspaceRow = (value: unknown): AgentWorkspaceRow | null => {
-    if (!isRecord(value) || !isString(value.id) || !isNullableString(value.name) || !isString(value.status)) {
-        return null
-    }
+const parseAgentWorkspaceRow = (
+    value: unknown,
+): NonNullable<MyAgentWorkspaceQuery["myAgentWorkspace"]["data"]>[number] | null => {
+    if (!isRecord(value) || !isString(value.id) || !isNullableString(value.name) || !isString(value.status)) return null
     const catalogOrder =
         value.catalogOrder === null
             ? null
@@ -32,14 +25,20 @@ const parseAgentWorkspaceRow = (value: unknown): AgentWorkspaceRow | null => {
 }
 
 /** Parse the `data` of `myAgentWorkspace` (a list despite the singular name). */
-export const parseAgentWorkspaceRows = (input: unknown): ReadonlyArray<AgentWorkspaceRow> | null =>
+export const parseAgentWorkspaceRows = (
+    input: unknown,
+): ReadonlyArray<NonNullable<MyAgentWorkspaceQuery["myAgentWorkspace"]["data"]>[number]> | null =>
     parseEach(input, parseAgentWorkspaceRow)
 
 /** Parse the `data` of `manageAgentWorkspace`, the same row shape as the list entry. */
-export const parseAgentWorkspaceRowAnswer = (input: unknown): AgentWorkspaceRow | null =>
+export const parseAgentWorkspaceRowAnswer = (
+    input: unknown,
+): NonNullable<ManageAgentWorkspaceMutation["manageAgentWorkspace"]["data"]> | null =>
     parseAgentWorkspaceRow(input)
 
-const parseAppCapability = (value: unknown): AgentWorkspaceAppCapability | null =>
+const parseAppCapability = (
+    value: unknown,
+): NonNullable<MyAgentWorkspaceControlCenterQuery["myAgentWorkspaceControlCenter"]["data"]>["apps"][number] | null =>
     isRecord(value) &&
     isOneOf(value.app, ["OPENCLAW", "N8N"]) &&
     isOneOf(value.accessMode, ["NIVO_CONSOLE", "EXTERNAL_LAUNCH", "UNAVAILABLE"]) &&
@@ -55,7 +54,9 @@ const parseAppCapability = (value: unknown): AgentWorkspaceAppCapability | null 
           }
         : null
 
-const parseRuntimeComponent = (value: unknown): AgentWorkspaceRuntimeComponent | null =>
+const parseRuntimeComponent = (
+    value: unknown,
+): NonNullable<NonNullable<MyAgentWorkspaceControlCenterQuery["myAgentWorkspaceControlCenter"]["data"]>["runtime"]>["components"][number] | null =>
     isRecord(value) &&
     isString(value.key) &&
     isString(value.kind) &&
@@ -97,7 +98,9 @@ const parseRuntimeComponent = (value: unknown): AgentWorkspaceRuntimeComponent |
           }
         : null
 
-const parseRuntimeStorage = (value: unknown): AgentWorkspaceRuntimeStorage | null =>
+const parseRuntimeStorage = (
+    value: unknown,
+): NonNullable<NonNullable<MyAgentWorkspaceControlCenterQuery["myAgentWorkspaceControlCenter"]["data"]>["runtime"]>["storage"][number] | null =>
     isRecord(value) &&
     isString(value.key) &&
     isString(value.kind) &&
@@ -107,7 +110,9 @@ const parseRuntimeStorage = (value: unknown): AgentWorkspaceRuntimeStorage | nul
         ? { key: value.key, kind: value.kind, size: value.size, policy: value.policy, status: value.status }
         : null
 
-const parseRuntimeTotals = (value: unknown): AgentWorkspaceRuntimeTotals | null =>
+const parseRuntimeTotals = (
+    value: unknown,
+): NonNullable<NonNullable<MyAgentWorkspaceControlCenterQuery["myAgentWorkspaceControlCenter"]["data"]>["runtime"]>["totals"] | null =>
     isRecord(value) &&
     isNullableNumber(value.cpuUsageMillicores) &&
     isNumber(value.cpuRequestMillicores) &&
@@ -131,7 +136,9 @@ const parseRuntimeTotals = (value: unknown): AgentWorkspaceRuntimeTotals | null 
           }
         : null
 
-const parseRuntime = (value: unknown): AgentWorkspaceRuntime | null => {
+const parseRuntime = (
+    value: unknown,
+): NonNullable<NonNullable<MyAgentWorkspaceControlCenterQuery["myAgentWorkspaceControlCenter"]["data"]>["runtime"]> | null => {
     if (
         !isRecord(value) ||
         !isString(value.instanceId) ||
@@ -170,7 +177,9 @@ const parseRuntime = (value: unknown): AgentWorkspaceRuntime | null => {
     }
 }
 
-const parseRecovery = (value: unknown): AgentWorkspaceRecovery | null =>
+const parseRecovery = (
+    value: unknown,
+): NonNullable<NonNullable<MyAgentWorkspaceControlCenterQuery["myAgentWorkspaceControlCenter"]["data"]>["recovery"]> | null =>
     isRecord(value) &&
     isString(value.state) &&
     isNullableString(value.phase) &&
@@ -201,7 +210,9 @@ const parseRecovery = (value: unknown): AgentWorkspaceRecovery | null =>
         : null
 
 /** Parse the `data` of `myAgentWorkspaceControlCenter`. */
-export const parseAgentWorkspaceControlCenter = (input: unknown): AgentWorkspaceControlCenter | null => {
+export const parseAgentWorkspaceControlCenter = (
+    input: unknown,
+): NonNullable<MyAgentWorkspaceControlCenterQuery["myAgentWorkspaceControlCenter"]["data"]> | null => {
     if (!isRecord(input)) return null
     const workspace = input.workspace
     if (
@@ -217,7 +228,7 @@ export const parseAgentWorkspaceControlCenter = (input: unknown): AgentWorkspace
     if (apps === null) return null
     const runtime = input.runtime === null ? null : parseRuntime(input.runtime)
     if (input.runtime !== null && runtime === null) return null
-    let instance: AgentWorkspaceControlCenter["instance"] = null
+    let instance: NonNullable<MyAgentWorkspaceControlCenterQuery["myAgentWorkspaceControlCenter"]["data"]>["instance"] = null
     if (input.instance !== null) {
         const raw = input.instance
         if (
@@ -248,13 +259,9 @@ export const parseAgentWorkspaceControlCenter = (input: unknown): AgentWorkspace
             planVcpu: raw.planVcpu,
         }
     }
-    const center: {
-        workspace: AgentWorkspaceControlCenter["workspace"]
-        instance: AgentWorkspaceControlCenter["instance"]
-        apps: ReadonlyArray<AgentWorkspaceAppCapability>
-        runtime: AgentWorkspaceRuntime | null
-        recovery?: AgentWorkspaceRecovery | null
-    } = {
+    const recovery = input.recovery === null ? null : parseRecovery(input.recovery)
+    if (input.recovery !== null && recovery === null) return null
+    return {
         workspace: {
             id: workspace.id,
             name: workspace.name,
@@ -264,28 +271,22 @@ export const parseAgentWorkspaceControlCenter = (input: unknown): AgentWorkspace
         instance,
         apps,
         runtime,
+        recovery,
     }
-    // `recovery` is an additive seam field: absent on a backend that does not publish it yet.
-    if (input.recovery !== undefined) {
-        if (input.recovery === null) {
-            center.recovery = null
-        } else {
-            const recovery = parseRecovery(input.recovery)
-            if (recovery === null) return null
-            center.recovery = recovery
-        }
-    }
-    return center
 }
 
 /** Parse the `data` of `issueAgentWorkspaceAppLaunch`. */
-export const parseAgentWorkspaceAppLaunch = (input: unknown): AgentWorkspaceAppLaunch | null =>
+export const parseAgentWorkspaceAppLaunch = (
+    input: unknown,
+): NonNullable<IssueAgentWorkspaceAppLaunchMutation["issueAgentWorkspaceAppLaunch"]["data"]> | null =>
     isRecord(input) && isString(input.launchId) && isString(input.redirectUrl) && isString(input.expiresAt)
         ? { launchId: input.launchId, redirectUrl: input.redirectUrl, expiresAt: input.expiresAt }
         : null
 
 /** Parse the `data` of `renewAgentWorkspaceAppLaunch`. */
-export const parseRenewedAgentWorkspaceAppLaunch = (input: unknown): RenewedAgentWorkspaceAppLaunch | null =>
+export const parseRenewedAgentWorkspaceAppLaunch = (
+    input: unknown,
+): NonNullable<RenewAgentWorkspaceAppLaunchMutation["renewAgentWorkspaceAppLaunch"]["data"]> | null =>
     isRecord(input) && isString(input.launchId) && isString(input.expiresAt)
         ? { launchId: input.launchId, expiresAt: input.expiresAt }
         : null
@@ -293,7 +294,7 @@ export const parseRenewedAgentWorkspaceAppLaunch = (input: unknown): RenewedAgen
 /** Parse the `data` of `revokeAgentWorkspaceAppLaunch`. */
 export const parseRevokedAgentWorkspaceAppLaunch = (
     input: unknown,
-): { readonly launchId: string; readonly revoked: boolean } | null =>
+): NonNullable<RevokeAgentWorkspaceAppLaunchMutation["revokeAgentWorkspaceAppLaunch"]["data"]> | null =>
     isRecord(input) && isString(input.launchId) && isBoolean(input.revoked)
         ? { launchId: input.launchId, revoked: input.revoked }
         : null

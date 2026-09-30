@@ -1,30 +1,44 @@
-/**
+﻿/**
  * The parsers of the Academy bridge documents' payloads. One per shape the operations select; each
  * returns the value or null, which `graphql` reports as `unavailable`. No credential value is ever
  * read - the wire shapes carry statuses and hints only.
  */
 
-import type { AcademyCustomDomainState } from "../../academy"
 import { isBoolean, isNullableString, isNumber, isRecord, isString, isStringArray, parseEach } from "@nivo/api"
+import {
+    AcademyConfigDelivery,
+    AcademyCredentialVerification,
+    ExpertSiteLeadStatus,
+} from "../__generated__/core"
 import type {
-    AcademyCourseAccess,
-    AcademyCredentialSaveResult,
-    AcademyCredentialStatus,
+    AcademyCourseAccessView,
+    AcademyCredentialSaveResultType,
+    AcademyCredentialStatusType,
+    AcademyCustomDomainStateType,
     AcademyGrowthSnapshot,
-    AcademyIntegrations,
-    AcademyProviderStatus,
-    AcademyStudent,
-    AcademyStudentCourseProgress,
+    MyAcademyIntegrations,
+    AcademyProviderStatusType,
+    AcademyStudentView,
+    AcademyStudentCourseProgressView,
     AcademyStudentDetail,
-    AcademyStudentOrder,
+    AcademyStudentOrderView,
     AcademyStudentsPage,
-    AcademyWebhookSecretResult,
-    AcademyWebhookStatus,
-    AcademyZaloAuthorization,
-    DraftedLeadReply,
-    ExpertSiteLead,
-    RevokedAcademyCourseAccess,
-} from "./types"
+    AcademyWebhookSecretResultType,
+    AcademyWebhookStatusType,
+    BeginAcademyZaloAuthorizationResult,
+    DraftedLeadReplyType,
+    ExpertSiteLeadFieldsFragment,
+    RevokedAcademyAccessView,
+} from "../__generated__/core"
+
+const isAcademyCredentialVerification = (value: unknown): value is AcademyCredentialVerification =>
+    Object.values(AcademyCredentialVerification).some((verification) => verification === value)
+
+const isAcademyConfigDelivery = (value: unknown): value is AcademyConfigDelivery =>
+    Object.values(AcademyConfigDelivery).some((delivery) => delivery === value)
+
+const isExpertSiteLeadStatus = (value: unknown): value is ExpertSiteLeadStatus =>
+    Object.values(ExpertSiteLeadStatus).some((status) => status === value)
 
 /** Parse the `data` of `myAcademyGrowthSnapshot`. */
 export const parseAcademyGrowthSnapshot = (input: unknown): AcademyGrowthSnapshot | null =>
@@ -44,7 +58,7 @@ export const parseAcademyGrowthSnapshot = (input: unknown): AcademyGrowthSnapsho
         : null
 
 /** Parse one student row - also the `data` of the create, update and set-status commands. */
-export const parseAcademyStudent = (input: unknown): AcademyStudent | null =>
+export const parseAcademyStudent = (input: unknown): AcademyStudentView | null =>
     isRecord(input) &&
     isString(input.id) &&
     isString(input.name) &&
@@ -62,7 +76,7 @@ export const parseAcademyStudent = (input: unknown): AcademyStudent | null =>
           }
         : null
 
-const parseStudentOrder = (value: unknown): AcademyStudentOrder | null =>
+const parseStudentOrder = (value: unknown): AcademyStudentOrderView | null =>
     isRecord(value) &&
     isString(value.id) &&
     isString(value.courseSlug) &&
@@ -71,7 +85,7 @@ const parseStudentOrder = (value: unknown): AcademyStudentOrder | null =>
         ? { id: value.id, courseSlug: value.courseSlug, status: value.status, amountVnd: value.amountVnd }
         : null
 
-const parseCourseProgress = (value: unknown): AcademyStudentCourseProgress | null =>
+const parseCourseProgress = (value: unknown): AcademyStudentCourseProgressView | null =>
     isRecord(value) &&
     isString(value.slug) &&
     isString(value.title) &&
@@ -111,13 +125,13 @@ export const parseAcademyStudentDetail = (input: unknown): AcademyStudentDetail 
     }
 }
 
-const parseCredentialStatus = (value: unknown): AcademyCredentialStatus | null =>
+const parseCredentialStatus = (value: unknown): AcademyCredentialStatusType | null =>
     isRecord(value) &&
     isString(value.key) &&
     isBoolean(value.configured) &&
     isNullableString(value.hint) &&
     isNullableString(value.syncedAt) &&
-    isString(value.verification) &&
+    isAcademyCredentialVerification(value.verification) &&
     isNullableString(value.verificationReason) &&
     isNullableString(value.verifiedAt)
         ? {
@@ -132,7 +146,7 @@ const parseCredentialStatus = (value: unknown): AcademyCredentialStatus | null =
         : null
 
 /** Parse the `data` of `saveAcademyGoogleOAuth`/`disconnectAcademyGoogleOAuth`/`saveAcademyAnalytics`. */
-export const parseAcademyProviderStatus = (input: unknown): AcademyProviderStatus | null =>
+export const parseAcademyProviderStatus = (input: unknown): AcademyProviderStatusType | null =>
     isRecord(input) &&
     isString(input.provider) &&
     isString(input.status) &&
@@ -155,7 +169,7 @@ export const parseAcademyProviderStatus = (input: unknown): AcademyProviderStatu
         : null
 
 /** Parse the `data` of `disableAcademyWebhook` - the status without a revealed secret. */
-export const parseAcademyWebhookStatus = (input: unknown): AcademyWebhookStatus | null =>
+export const parseAcademyWebhookStatus = (input: unknown): AcademyWebhookStatusType | null =>
     isRecord(input) &&
     isString(input.id) &&
     isString(input.endpoint) &&
@@ -176,19 +190,19 @@ export const parseAcademyWebhookStatus = (input: unknown): AcademyWebhookStatus 
         : null
 
 /** Parse the `data` of `createAcademyWebhook`/`rotateAcademyWebhookSecret`. */
-export const parseAcademyWebhookSecretResult = (input: unknown): AcademyWebhookSecretResult | null => {
+export const parseAcademyWebhookSecretResult = (input: unknown): AcademyWebhookSecretResultType | null => {
     if (!isRecord(input) || !isString(input.signingSecret)) return null
     const webhook = parseAcademyWebhookStatus(input)
     return webhook === null ? null : { ...webhook, signingSecret: input.signingSecret }
 }
 
 /** Parse one custom-domain state record, the `data` of `setAcademyCustomDomain`. */
-export const parseAcademyCustomDomainState = (input: unknown): AcademyCustomDomainState | null =>
+export const parseAcademyCustomDomainState = (input: unknown): AcademyCustomDomainStateType | null =>
     isRecord(input) &&
     isNullableString(input.domain) &&
     isString(input.target) &&
     isBoolean(input.dnsReady) &&
-    isString(input.delivery) &&
+    isAcademyConfigDelivery(input.delivery) &&
     isString(input.detail)
         ? {
               domain: input.domain,
@@ -200,7 +214,7 @@ export const parseAcademyCustomDomainState = (input: unknown): AcademyCustomDoma
         : null
 
 /** Parse the `data` of `myAcademyIntegrations`. */
-export const parseAcademyIntegrations = (input: unknown): AcademyIntegrations | null => {
+export const parseAcademyIntegrations = (input: unknown): MyAcademyIntegrations | null => {
     if (!isRecord(input)) return null
     const credentials = parseEach(input.credentials, parseCredentialStatus)
     const customDomain =
@@ -225,13 +239,13 @@ export const parseAcademyIntegrations = (input: unknown): AcademyIntegrations | 
 }
 
 /** Parse one lead record - also the `data` of `updateExpertSiteLead`. */
-export const parseExpertSiteLead = (input: unknown): ExpertSiteLead | null =>
+export const parseExpertSiteLead = (input: unknown): ExpertSiteLeadFieldsFragment | null =>
     isRecord(input) &&
     isString(input.id) &&
     isString(input.name) &&
     isString(input.contact) &&
     isNullableString(input.message) &&
-    isString(input.status) &&
+    isExpertSiteLeadStatus(input.status) &&
     isNullableString(input.note)
         ? {
               id: input.id,
@@ -244,15 +258,15 @@ export const parseExpertSiteLead = (input: unknown): ExpertSiteLead | null =>
         : null
 
 /** Parse the `data` of `myExpertSiteLeads`. */
-export const parseExpertSiteLeads = (input: unknown): ReadonlyArray<ExpertSiteLead> | null =>
+export const parseExpertSiteLeads = (input: unknown): ReadonlyArray<ExpertSiteLeadFieldsFragment> | null =>
     parseEach(input, parseExpertSiteLead)
 
 /** Parse the `data` of `draftLeadReply`. */
-export const parseDraftedLeadReply = (input: unknown): DraftedLeadReply | null =>
+export const parseDraftedLeadReply = (input: unknown): DraftedLeadReplyType | null =>
     isRecord(input) && isString(input.reply) ? { reply: input.reply } : null
 
 /** Parse the `data` of `grantAcademyCourseAccess`. */
-export const parseAcademyCourseAccess = (input: unknown): AcademyCourseAccess | null =>
+export const parseAcademyCourseAccess = (input: unknown): AcademyCourseAccessView | null =>
     isRecord(input) &&
     isString(input.id) &&
     isString(input.email) &&
@@ -262,20 +276,21 @@ export const parseAcademyCourseAccess = (input: unknown): AcademyCourseAccess | 
         : null
 
 /** Parse the `data` of `revokeAcademyCourseAccess`. */
-export const parseRevokedAcademyCourseAccess = (input: unknown): RevokedAcademyCourseAccess | null =>
+export const parseRevokedAcademyCourseAccess = (input: unknown): RevokedAcademyAccessView | null =>
     isRecord(input) && isNumber(input.revoked) && isBoolean(input.keptPaidPurchase)
         ? { revoked: input.revoked, keptPaidPurchase: input.keptPaidPurchase }
         : null
 
 /** Parse the `data` of `saveAcademyCredential`. */
-export const parseAcademyCredentialSaveResult = (input: unknown): AcademyCredentialSaveResult | null => {
-    if (!isRecord(input) || !isString(input.delivery) || !isString(input.detail)) return null
+export const parseAcademyCredentialSaveResult = (input: unknown): AcademyCredentialSaveResultType | null => {
+    if (!isRecord(input) || !isAcademyConfigDelivery(input.delivery) || !isString(input.detail)) return null
     const credential = parseCredentialStatus(input.credential)
     return credential === null ? null : { credential, delivery: input.delivery, detail: input.detail }
 }
 
 /** Parse the `data` of `beginAcademyZaloAuthorization`. */
-export const parseAcademyZaloAuthorization = (input: unknown): AcademyZaloAuthorization | null =>
+export const parseAcademyZaloAuthorization = (input: unknown): BeginAcademyZaloAuthorizationResult | null =>
     isRecord(input) && isString(input.authorizationUrl) && isString(input.expiresAt)
         ? { authorizationUrl: input.authorizationUrl, expiresAt: input.expiresAt }
         : null
+

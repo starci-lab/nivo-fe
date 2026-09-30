@@ -1,7 +1,9 @@
+import type { MyAcademyIntegrations } from "../../modules/api/__generated__/core"
+
 import { useCallback, useMemo, useState } from "react"
 import { useTranslations } from "next-intl"
-import { useMutateAcademyIntegrationSwr, useQueryMyAcademyIntegrationsSwr } from ".."
-import type { AcademyIntegrations } from "../../modules/api/academy"
+import { useMutateAcademyIntegrationSwr } from "../swr/mutations/useMutateAcademyIntegrationSwr"
+import { useQueryMyAcademyIntegrationsSwr } from "../swr/queries/useQueryMyAcademyIntegrationsSwr"
 import { nivoQueryReading } from "../../modules/query"
 import type {
     AcademyIntegrationCard,
@@ -27,7 +29,7 @@ export const useAcademyIntegrationCenter = (siteId: string): AcademyIntegrationC
     const query = useQueryMyAcademyIntegrationsSwr(siteId)
     const integrationMutation = useMutateAcademyIntegrationSwr(siteId)
     const reading = nivoQueryReading(query.data)
-    const answer: AcademyIntegrations | null | undefined = reading.status === "ready" ? reading.data : undefined
+    const answer: MyAcademyIntegrations | null | undefined = reading.status === "ready" ? reading.data : undefined
     const [selectedId, setSelectedId] = useState<AcademyIntegrationProviderId>()
     const [values, setValues] = useState<Readonly<Record<string, string>>>({})
     const [pendingId, setPendingId] = useState<AcademyIntegrationProviderId>()

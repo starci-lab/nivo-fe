@@ -1,10 +1,10 @@
+import type { WorkspaceCheckoutPurchaseStatusFieldsFragment, WorkspacePurchaseEntryInput } from "@/modules/api/__generated__/core"
+
 import { useCallback, useEffect, useMemo, useState } from "react"
-import {
-    useMutateRecoverWorkspacePurchaseSwr,
-    useQueryWorkspaceCheckoutEntrySwr,
-    useRouter,
-} from "@/hooks"
-import type { WorkspaceCheckoutAnswer, WorkspaceCheckoutEntryRequest, WorkspaceCheckoutStatusView } from "@/modules/api/workspace-controlplane"
+import { useMutateRecoverWorkspacePurchaseSwr } from "../swr/mutations/useMutateRecoverWorkspacePurchaseSwr"
+import { useQueryWorkspaceCheckoutEntrySwr } from "../swr/queries/useQueryWorkspaceCheckoutEntrySwr"
+import { useRouter } from "../i18n/useRouter"
+import type { WorkspaceCheckoutAnswer } from "@/modules/api/workspace-controlplane"
 import { settle, type Outcome } from "@nivo/api"
 import type { PurchaseStatusCopy } from "@/modules/agentos/purchase-status/copy"
 import { entryPathOf, observedIdentitiesOf, purchaseOf } from "@/modules/agentos/purchase-source"
@@ -14,9 +14,10 @@ type UsePurchaseStatusActionsInput = {
     readonly purchaseId: string
     readonly surface?: "provisioning"
     readonly statusAnswer: Outcome<WorkspaceCheckoutAnswer> | undefined
-    readonly statusPurchase: WorkspaceCheckoutStatusView | null
+    readonly statusPurchase: WorkspaceCheckoutPurchaseStatusFieldsFragment | null
     readonly copy: PurchaseStatusCopy
     readonly refreshStatus: () => Promise<unknown>
+
 }
 
 type EntryTarget = {
@@ -27,7 +28,7 @@ type EntryTarget = {
 
 type ActionFeedback = {
     readonly answer: Outcome<WorkspaceCheckoutAnswer> | undefined
-    readonly purchaseOverride?: WorkspaceCheckoutStatusView
+    readonly purchaseOverride?: WorkspaceCheckoutPurchaseStatusFieldsFragment
     readonly recoverRefusal?: string
 }
 
@@ -54,7 +55,7 @@ export const usePurchaseStatusActions = ({
         preliminaryPurchase.readiness.reference !== null
             ? preliminaryPurchase.readiness.reference
             : null
-    const entryRequest = useMemo<WorkspaceCheckoutEntryRequest>(
+    const entryRequest = useMemo<WorkspacePurchaseEntryInput>(
         () => ({
             purchaseId,
             workspaceId: readyWorkspaceId ?? "",

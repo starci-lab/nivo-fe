@@ -1,11 +1,12 @@
+import type { MyAgentosModuleRuntimeQuery } from "@/modules/api/__generated__/core"
+
+import type { AgentosModuleTestSurfaceView } from "@/modules/api/agentos-module-tests"
+import type { AgentosRuntimeManifestView } from "@/modules/api/agentos-module-runtime"
+
+
+
 import type { ContextDraft } from "../../../components/blocks/agentos/ContextVersionBlock"
-import type {
-    AgentosModuleRuntime,
-    AgentosRuntimeManifest,
-    AgentosRuntimeSession,
-} from "../../api/agentos-module-runtime"
 import type { AgentosRuntimeValue } from "../../api/agentos-runtime-tree"
-import type { AgentosModuleTestSurface } from "../../api/agentos-module-tests"
 import type { ModulePageCopy } from "../module-page-copy"
 import { runtimeValueText, stringSetting } from "./runtime-values"
 
@@ -48,12 +49,12 @@ const readableGate = (key: string, copy: ModulePageCopy): string => {
     const known = Object.hasOwn(SETUP_GATE_LABELS, key) ? SETUP_GATE_LABELS[key] : undefined
     return known === undefined ? copy.setup.unknownGate({ key }) : copy.setup.gateLabels[known]
 }
-type SetupRequirement = NonNullable<AgentosRuntimeManifest["setup"]>["requirements"][number]
+type SetupRequirement = NonNullable<AgentosRuntimeManifestView["setup"]>["requirements"][number]
 type SetupGenerations = { readonly authority: number; readonly source: number; readonly retrieval: number }
 
 /** The gates one setup session reports: required keys first, legacy fields or evidence keys after. */
 const setupGatesFor = (
-    session: AgentosModuleRuntime["setupSession"],
+    session: NonNullable<MyAgentosModuleRuntimeQuery["myAgentosModuleRuntime"]["data"]>["setupSession"],
     requirements: ReadonlyArray<SetupRequirement>,
     legacyFields: ReadonlyArray<string>,
     generations: SetupGenerations,
@@ -122,9 +123,9 @@ export const draftFactsFor = (
  * name this context or this session digest, and every generation the draft was built under.
  */
 export const exactTestPassedFor = (
-    testSurface: AgentosModuleTestSurface | null,
-    runtime: AgentosModuleRuntime,
-    context: AgentosModuleRuntime["contextVersions"][number] | null,
+    testSurface: AgentosModuleTestSurfaceView | null,
+    runtime: NonNullable<MyAgentosModuleRuntimeQuery["myAgentosModuleRuntime"]["data"]>,
+    context: NonNullable<MyAgentosModuleRuntimeQuery["myAgentosModuleRuntime"]["data"]>["contextVersions"][number] | null,
     sessionId: string,
     digest: string | null,
 ): boolean => {
@@ -155,9 +156,9 @@ export const exactTestPassedFor = (
 
 /** The draft card one selected setup session produces, or null while no revision exists. */
 export const contextDraftFor = (
-    runtime: AgentosModuleRuntime,
-    setup: AgentosModuleRuntime["setupSession"],
-    testSurface: AgentosModuleTestSurface | null,
+    runtime: NonNullable<MyAgentosModuleRuntimeQuery["myAgentosModuleRuntime"]["data"]>,
+    setup: NonNullable<MyAgentosModuleRuntimeQuery["myAgentosModuleRuntime"]["data"]>["setupSession"],
+    testSurface: AgentosModuleTestSurfaceView | null,
     copy: ModulePageCopy,
 ): ContextDraft | null => {
     if (setup?.setupRevision === null || setup?.setupRevision === undefined || setup.setupStatus === null)
@@ -208,9 +209,9 @@ export const contextDraftFor = (
  * exists, then the session the runtime names, then the most recent one.
  */
 export const setupSessionFor = (
-    runtime: AgentosModuleRuntime,
+    runtime: NonNullable<MyAgentosModuleRuntimeQuery["myAgentosModuleRuntime"]["data"]>,
     selectedId: string | null,
-): AgentosRuntimeSession | null =>
+): NonNullable<MyAgentosModuleRuntimeQuery["myAgentosModuleRuntime"]["data"]>["setupSessions"][number] | null =>
     runtime.setupSessions.find((item) => item.id === selectedId) ??
     runtime.setupSession ??
     runtime.setupSessions.at(-1) ??

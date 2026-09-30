@@ -1,13 +1,27 @@
 import { type Outcome } from "@nivo/api"
+import {
+    ContinueBrokeredSignInDocument,
+    ExchangeOauthCodeDocument,
+    SignInDocument,
+    VerifyTwoFactorDocument,
+} from "../__generated__/core"
 import { graphql } from "../graphql"
-import { AUTH_PAYLOAD, BROKERED_PAYLOAD, SIGN_IN_PAYLOAD } from "./documents"
 import {
     parseAuthPayload,
     parseContinueBrokeredSignInPayload,
     parseExchangeOauthCodePayload,
     parseSignInPayload,
 } from "./guards"
-import type { AuthPayload, ContinueBrokeredSignInInput, ContinueBrokeredSignInPayload, ExchangeOauthCodeInput, ExchangeOauthCodePayload, SignInInput, SignInPayload, VerifyTwoFactorInput } from "./types"
+import type {
+    AuthPayload,
+    ContinueBrokeredSignInInput,
+    ContinueBrokeredSignInPayload,
+    ExchangeOauthCodeInput,
+    ExchangeOauthCodePayload,
+    SignInInput,
+    SignInPayload,
+    VerifyTwoFactorInput,
+} from "../__generated__/core"
 
 /**
  * Exchange an email and password for a session.
@@ -23,7 +37,7 @@ import type { AuthPayload, ContinueBrokeredSignInInput, ContinueBrokeredSignInPa
  */
 export const signIn = (input: SignInInput): Promise<Outcome<SignInPayload>> =>
     graphql(
-        `mutation SignIn($input: SignInInput!) { signIn(request: $input) { data ${SIGN_IN_PAYLOAD} message success error } }`,
+        SignInDocument,
         parseSignInPayload,
         {
             input,
@@ -31,14 +45,14 @@ export const signIn = (input: SignInInput): Promise<Outcome<SignInPayload>> =>
     )
 
 /**
- * Finish a sign-in that owed a second factor.
+ * Finish a sign-in that owes a second factor.
  *
  * @param input - The challenge token from the first step, and the code the reader typed.
  * @returns The session, or why the code was refused.
  */
 export const verifyTwoFactor = (input: VerifyTwoFactorInput): Promise<Outcome<AuthPayload>> =>
     graphql(
-        `mutation VerifyTwoFactor($input: VerifyTwoFactorInput!) { verifyTwoFactor(request: $input) { data ${AUTH_PAYLOAD} message success error } }`,
+        VerifyTwoFactorDocument,
         parseAuthPayload,
         {
             input,
@@ -63,7 +77,7 @@ export const verifyTwoFactor = (input: VerifyTwoFactorInput): Promise<Outcome<Au
  */
 export const exchangeOauthCode = (input: ExchangeOauthCodeInput): Promise<Outcome<ExchangeOauthCodePayload>> =>
     graphql(
-        `mutation ExchangeOauthCode($input: ExchangeOauthCodeInput!) { exchangeOauthCode(request: $input) { data ${BROKERED_PAYLOAD} message success error } }`,
+        ExchangeOauthCodeDocument,
         parseExchangeOauthCodePayload,
         {
             input,
@@ -87,7 +101,7 @@ export const continueBrokeredSignIn = (
     input: ContinueBrokeredSignInInput,
 ): Promise<Outcome<ContinueBrokeredSignInPayload>> =>
     graphql(
-        `mutation ContinueBrokeredSignIn($input: ContinueBrokeredSignInInput!) { continueBrokeredSignIn(request: $input) { data ${BROKERED_PAYLOAD} message success error } }`,
+        ContinueBrokeredSignInDocument,
         parseContinueBrokeredSignInPayload,
         {
             input,

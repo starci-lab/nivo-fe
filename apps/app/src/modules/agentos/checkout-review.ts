@@ -1,8 +1,6 @@
-import type {
-    WorkspaceCheckoutAnswer,
-    WorkspaceCheckoutOffer,
-    WorkspaceCheckoutPaymentRail,
-} from "../api/workspace-controlplane"
+import type { WorkspaceCheckoutOfferFieldsFragment } from "../api/__generated__/core"
+
+import type { WorkspaceCheckoutAnswer, WorkspaceCheckoutPaymentRail } from "../api/workspace-controlplane"
 import { type Outcome } from "@nivo/api"
 
 /** Resolved copy the connected owner supplies; no translation or transport lives here. */
@@ -133,7 +131,7 @@ export type CheckoutReviewFlowProps = {
 }
 
 /** The purchaser-scoped retry identity of one selection. */
-export const retryKeyFor = (offer: WorkspaceCheckoutOffer): string =>
+export const retryKeyFor = (offer: WorkspaceCheckoutOfferFieldsFragment): string =>
     `start-checkout:${offer.offerId}@${offer.offerVersion}`
 
 /** Route path of one purchase's status surface. */
@@ -151,14 +149,14 @@ export const frozenOfferFor = (
     answer: Outcome<WorkspaceCheckoutAnswer> | undefined,
     offerId: string,
     offerVersion: string,
-): WorkspaceCheckoutOffer | null => {
+): WorkspaceCheckoutOfferFieldsFragment | null => {
     if (!answer?.ok || answer.data.status !== "offers" || answer.data.selection.state !== "current") return null
     return answer.data.offers.find((offer) => offer.offerId === offerId && offer.offerVersion === offerVersion) ?? null
 }
 
 /** Bind the frozen offer's visible facts to its formatted amount and ledger copy. */
 export const checkoutFactsFor = (
-    offer: WorkspaceCheckoutOffer,
+    offer: WorkspaceCheckoutOfferFieldsFragment,
     amount: string,
     seller: string,
 ): CheckoutReviewFacts => ({

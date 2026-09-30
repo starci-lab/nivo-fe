@@ -1,58 +1,28 @@
-import { type Outcome } from "@nivo/api"
-import { graphql } from "../graphql"
-import { parseDraftedLeadReply, parseExpertSiteLead } from "./payload.guards"
+﻿import { type Outcome } from "@nivo/api"
+import { DraftLeadReplyDocument, UpdateExpertSiteLeadDocument } from "../__generated__/core"
 import type {
     DraftLeadReplyInput,
-    DraftedLeadReply,
-    ExpertSiteLead,
-    UpdateExpertSiteLeadInput
-} from "./types"
+    DraftedLeadReplyType,
+    ExpertSiteLeadFieldsFragment,
+    UpdateExpertSiteLeadInput,
+} from "../__generated__/core"
+import { graphql } from "../graphql"
+import { parseDraftedLeadReply, parseExpertSiteLead } from "./payload.guards"
 
 /** Update the follow-up state of one Academy lead. */
-export const updateExpertSiteLead = (input: UpdateExpertSiteLeadInput): Promise<Outcome<ExpertSiteLead>> =>
+export const updateExpertSiteLead = (
+    input: UpdateExpertSiteLeadInput,
+): Promise<Outcome<ExpertSiteLeadFieldsFragment>> =>
     graphql(
-        `
-            mutation UpdateExpertSiteLead($input: UpdateExpertSiteLeadInput!) {
-                updateExpertSiteLead(request: $input) {
-                    data {
-                        id
-                        name
-                        contact
-                        message
-                        status
-                        note
-                    }
-                    message
-                    success
-                    error
-                }
-            }
-        `,
+        UpdateExpertSiteLeadDocument,
         parseExpertSiteLead,
-        {
-            input,
-        },
+        { input },
     )
 
 /** Draft a reply for one Academy lead without sending it. */
-export const draftLeadReply = (input: DraftLeadReplyInput): Promise<Outcome<DraftedLeadReply>> =>
+export const draftLeadReply = (input: DraftLeadReplyInput): Promise<Outcome<DraftedLeadReplyType>> =>
     graphql(
-        `
-            mutation DraftLeadReply($input: DraftLeadReplyInput!) {
-                draftLeadReply(request: $input) {
-                    data {
-                        reply
-                    }
-                    message
-                    success
-                    error
-                }
-            }
-        `,
+        DraftLeadReplyDocument,
         parseDraftedLeadReply,
-        {
-            input,
-        },
+        { input },
     )
-
-/** Store one Academy credential and return delivery status, never its value. */

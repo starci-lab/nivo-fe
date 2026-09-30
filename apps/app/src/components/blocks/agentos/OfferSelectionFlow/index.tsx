@@ -1,12 +1,14 @@
 "use client"
 
+import type { WorkspaceCheckoutOfferFieldsFragment } from "@/modules/api/__generated__/core"
+
 import { useState } from "react"
 import { useFormatter, useLocale, useTranslations } from "next-intl"
 import { useSearchParams } from "next/navigation"
 import { getPathname } from "@/modules/i18n"
-import { useAccessToken, useSession } from "@/hooks"
-import { useQueryWorkspaceCheckoutOffersSwr } from "@/hooks"
-import type { WorkspaceCheckoutOffer } from "@/modules/api/workspace-controlplane"
+import { useAccessToken, useSession } from "@/hooks/auth"
+import { useQueryWorkspaceCheckoutOffersSwr } from "@/hooks/swr"
+
 import {
     OfferSelectionFlowBase,
     type OfferSelectionCopy,
@@ -59,8 +61,8 @@ const copyFor = (t: ReturnType<typeof useTranslations<"console.agentos.offerSele
 
 /** One boundary offer read into the view's field vocabulary; the amount keeps its currency inseparably. */
 const toViewOffer = (
-    offer: WorkspaceCheckoutOffer,
-    formatAmount: (offer: WorkspaceCheckoutOffer) => string,
+    offer: WorkspaceCheckoutOfferFieldsFragment,
+    formatAmount: (offer: WorkspaceCheckoutOfferFieldsFragment) => string,
 ): OfferSelectionOffer => ({
     offerId: offer.offerId,
     offerVersion: offer.offerVersion,
@@ -97,7 +99,7 @@ const OfferSelectionFlow = () => {
     const route = (href: string): string => getPathname({ locale, href })
     const links = { workspaces: route(WORKSPACES_PATH) }
     const loginHref = `${route(LOGIN_PATH)}?returnTo=${encodeURIComponent(route(OFFER_SELECTION_PATH))}`
-    const formatAmount = (offer: WorkspaceCheckoutOffer): string => {
+    const formatAmount = (offer: WorkspaceCheckoutOfferFieldsFragment): string => {
         const amount = Number(offer.amount)
         return Number.isFinite(amount)
             ? format.number(amount, { style: "currency", currency: offer.currency, currencyDisplay: "narrowSymbol" })

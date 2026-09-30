@@ -1,0 +1,199 @@
+fragment WorkspaceCheckoutOfferFields on WorkspaceOfferType {
+    offerId
+    offerVersion
+    displayName
+    includedOutcome
+    amount
+    currency
+    billingCadence
+    renewalMode
+    eligibility
+}
+
+fragment WorkspaceCheckoutSourceFields on WorkspaceSourceFactType {
+    source
+    state
+    reference
+    observedAt
+}
+
+fragment WorkspaceCheckoutPurchaseStatusFields on WorkspacePurchaseStatusType {
+    purchaseId
+    state
+    offer {
+        ...WorkspaceCheckoutOfferFields
+    }
+    payment {
+        ...WorkspaceCheckoutSourceFields
+    }
+    billing {
+        ...WorkspaceCheckoutSourceFields
+    }
+    provisioning {
+        source
+        state
+        reference
+        observedAt
+        disposition
+        reason
+    }
+    readiness {
+        source
+        state
+        reference
+        observedAt
+    }
+    serviceEligibility {
+        source
+        state
+        reference
+        observedAt
+        reason
+        heldSince
+        paidThrough
+        renewalEvidence
+        renewalAction {
+            operation
+            offerId
+            offerVersion
+            amount
+            currency
+        }
+    }
+    ledger {
+        source
+        state
+        ledgerState
+        observedAt
+        entries {
+            entryId
+            purchaseId
+            billingReceiptId
+            kind
+            amount
+            currency
+            linkedEntryId
+            observationId
+            actorPrincipal
+            reason
+            paymentRail
+            providerTransactionRef
+            accountingCopyState
+            postedAt
+        }
+    }
+    refund {
+        source
+        state
+        reference
+        observedAt
+        projection
+        refundEntryId
+    }
+    refundStatus {
+        ...WorkspaceCheckoutSourceFields
+    }
+    lastConfirmedAt
+}
+
+fragment WorkspaceCheckoutOutcomeFields on WorkspaceCheckoutOutcomeType {
+    status
+    code
+    nextAction
+    source
+    purchaseId
+    offers {
+        ...WorkspaceCheckoutOfferFields
+    }
+    selection {
+        offerId
+        offerVersion
+        state
+    }
+    purchase {
+        ...WorkspaceCheckoutPurchaseStatusFields
+    }
+    paymentAction {
+        paymentAttemptId
+        provider
+        kind
+        payload
+    }
+}
+
+fragment WorkspaceCheckoutEntryDestinationFields on WorkspaceEntryDestinationType {
+    workspaceId
+    ownerId
+    routeName
+    routeVersion
+    context
+}
+
+fragment WorkspaceCheckoutEntryOutcomeFields on WorkspacePurchaseEntryOutcomeType {
+    status
+    code
+    source
+    purchaseId
+    workspaceId
+    destination {
+        ...WorkspaceCheckoutEntryDestinationFields
+    }
+    purchase {
+        ...WorkspaceCheckoutPurchaseStatusFields
+    }
+}
+
+query WorkspaceCheckoutOffers($request: WorkspaceCheckoutOffersInput!) {
+    workspaceCheckoutOffers(request: $request) {
+        data {
+            ...WorkspaceCheckoutOutcomeFields
+        }
+        message
+        success
+        error
+    }
+}
+
+mutation WorkspaceCheckoutStart($request: WorkspaceCheckoutStartInput!) {
+    workspaceCheckoutStart(request: $request) {
+        data {
+            ...WorkspaceCheckoutOutcomeFields
+        }
+        message
+        success
+        error
+    }
+}
+
+query WorkspacePurchaseStatus($request: WorkspacePurchaseStatusInput!) {
+    workspacePurchaseStatus(request: $request) {
+        data {
+            ...WorkspaceCheckoutOutcomeFields
+        }
+        message
+        success
+        error
+    }
+}
+
+mutation WorkspacePurchaseRecover($request: WorkspacePurchaseRecoverInput!) {
+    workspacePurchaseRecover(request: $request) {
+        data {
+            ...WorkspaceCheckoutOutcomeFields
+        }
+        message
+        success
+        error
+    }
+}
+
+query WorkspacePurchaseEntry($request: WorkspacePurchaseEntryInput!) {
+    workspacePurchaseEntry(request: $request) {
+        data {
+            ...WorkspaceCheckoutEntryOutcomeFields
+        }
+        message
+        success
+        error
+    }
+}

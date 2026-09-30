@@ -1,0 +1,204 @@
+fragment AgentosModuleRuntimeFields on AgentosModuleRuntimePayload {
+    installation {
+        id
+        agentWorkspaceId
+        moduleKey
+        moduleVersion
+        displayName
+        kindKey
+        kindVersion
+        workbenchKey
+        workbenchVersion
+        runtimeManifest
+        settingsVersion
+        setupAuthorityGeneration
+        setupSourceGeneration
+        setupRetrievalGeneration
+        activeContextVersionId
+        liveEnabled
+        operatingMode
+        channelAccountRef
+        primaryOpsSessionId
+        status
+        failureCode
+        createdAt
+        updatedAt
+    }
+    setupSession {
+        id
+        installationId
+        createdByUserId
+        mode
+        title
+        isArchived
+        setupRevision
+        setupStatus
+        draftSnapshot
+        draftDigest
+        gateEvidence
+        basedOnContextVersionId
+        completedAt
+        createdAt
+        updatedAt
+    }
+    setupSessions {
+        id
+        installationId
+        createdByUserId
+        mode
+        title
+        isArchived
+        setupRevision
+        setupStatus
+        draftSnapshot
+        draftDigest
+        gateEvidence
+        basedOnContextVersionId
+        completedAt
+        createdAt
+        updatedAt
+    }
+    executeSessions {
+        id
+        installationId
+        createdByUserId
+        mode
+        title
+        isArchived
+        setupRevision
+        setupStatus
+        draftSnapshot
+        draftDigest
+        gateEvidence
+        basedOnContextVersionId
+        completedAt
+        createdAt
+        updatedAt
+    }
+    participants {
+        id
+        sessionId
+        userId
+    }
+    messages {
+        id
+        sessionId
+        actorUserId
+        contextVersionId
+        role
+        content
+        messageTree
+        operationEventId
+        taskId
+        sequence
+        createdAt
+    }
+    contextVersions {
+        id
+        installationId
+        createdByUserId
+        version
+        snapshot
+        digest
+        definitionDigest
+        authorityGeneration
+        sourceGeneration
+        retrievalGeneration
+        sourceSetupSessionId
+        createdAt
+    }
+    widgets {
+        id
+        messageId
+        rootComponent
+        rootVersion
+        tree
+    }
+    operationEvents {
+        id
+        installationId
+        contextVersionId
+        source
+        externalEventId
+        eventType
+        observedAt
+        kindKey
+        kindVersion
+        replyContractKey
+        replyContractVersion
+        toolSchemaDigest
+        payload
+        evidence
+        createdAt
+    }
+    tasks {
+        id
+        installationId
+        sourceEventId
+        contextVersionId
+        title
+        summary
+        priority
+        status
+        expectedVersion
+        workbenchKey
+        workbenchVersion
+        workbenchRef
+        evidence
+        dueAt
+        createdAt
+        updatedAt
+    }
+    credentials {
+        id
+        installationId
+        providerKey
+        maskedHint
+        status
+    }
+    settings
+    diagnostics
+}
+
+query MyAgentosModuleRuntime($request: MyAgentosModuleRuntimeRequest!) {
+    myAgentosModuleRuntime(request: $request) {
+        data {
+            ...AgentosModuleRuntimeFields
+        }
+        message
+        success
+        error
+    }
+}
+
+mutation ManageAgentosModuleRuntime($input: ManageAgentosModuleRuntimeInput!) {
+    manageAgentosModuleRuntime(request: $input) {
+        data {
+            ...AgentosModuleRuntimeFields
+        }
+        message
+        success
+        error
+    }
+}
+
+mutation ConfigureAgentWorkspaceChannel($input: ConfigureAgentWorkspaceChannelInput!) {
+    configureAgentWorkspaceChannel(request: $input) {
+        data {
+            provider
+            accountId
+            state
+            displayName
+            credentials {
+                key
+                required
+                configured
+                hint
+                syncedAt
+            }
+        }
+        message
+        success
+        error
+    }
+}

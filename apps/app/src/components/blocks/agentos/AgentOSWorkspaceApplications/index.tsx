@@ -1,5 +1,6 @@
+import type { AgentWorkspaceControlCenterFieldsFragment } from "@/modules/api/__generated__/core"
+
 import { CONTENT_CLASS_NAME } from "./classNames"
-import type { AgentWorkspaceAppCapability } from "@/modules/api/agentos-workspaces"
 import {
     Badge as DirectionBadge,
     Button as DirectionButton,
@@ -9,7 +10,7 @@ import {
 } from "@starci/grammar/common"
 /** Workspace capabilities and resolved copy consumed by the application block. */
 type AgentOSWorkspaceApplicationsProps = {
-    readonly apps: ReadonlyArray<AgentWorkspaceAppCapability>
+    readonly apps: ReadonlyArray<AgentWorkspaceControlCenterFieldsFragment["apps"][number]>
     readonly labels: {
         readonly section: string
         readonly openclaw: string
@@ -61,7 +62,7 @@ const LAUNCH_DETAIL_LABEL: Partial<Record<LaunchState, keyof ApplicationLabels>>
  * @returns The detail line, or `undefined` when there is nothing to say.
  */
 const detailFor = (
-    app: AgentWorkspaceAppCapability,
+    app: AgentWorkspaceControlCenterFieldsFragment["apps"][number],
     labels: ApplicationLabels,
     launchState: LaunchState,
     openClaw: boolean,

@@ -1,3 +1,5 @@
+import type { ChatbotMessagePayload, ChatbotWorkbenchFieldsFragment } from "@/modules/api/__generated__/agentos-controlplane"
+
 import {
     Badge,
     Button,
@@ -7,7 +9,7 @@ import {
     SurfaceCard,
     Text,
 } from "@starci/grammar/common"
-import type { ChatbotMessage, ChatbotWorkbench } from "@/modules/api/workspace-controlplane"
+
 import type { Formatter } from "../../../../modules/i18n/formatter"
 import { ChatbotChannelRail, ChatbotConversationRail, chatbotControlLabel } from "./ChatbotWorkbenchRails"
 import {
@@ -68,7 +70,7 @@ export type ChatbotWorkbenchBlockBaseCopy = {
 /** Settled workbench values the presentation draws without resolving the world itself. */
 export type ChatbotWorkbenchBlockBaseData = {
     readonly installationId: string
-    readonly workbench: ChatbotWorkbench | null
+    readonly workbench: ChatbotWorkbenchFieldsFragment | null
     readonly selectedConversationId: string | null
     readonly pending: boolean
     readonly refusedCode: string | null
@@ -140,7 +142,7 @@ const DELIVERY_STATE_LABELS: Readonly<Record<string, ChatbotStateLabelKey>> = {
     cancelled: "cancelled",
 }
 
-const deliveryLabel = (message: ChatbotMessage, copy: ChatbotWorkbenchBlockBaseCopy): string => {
+const deliveryLabel = (message: ChatbotMessagePayload, copy: ChatbotWorkbenchBlockBaseCopy): string => {
     if (message.deliveryState === "failed")
         return message.failureCode === PROVIDER_TERMINAL_NOT_DELIVERED
             ? copy.terminalNotDelivered

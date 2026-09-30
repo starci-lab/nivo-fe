@@ -14,7 +14,7 @@ import { CORE_API_URL } from "@/modules/config"
  *
  * THE MODULE-SIDE DOORS. The session store is a `modules/` owner, which may not import the hooks root,
  * so it binds its token and language readers through the setters here; a component binds through the
- * `useAccessTokenFrom` / `useLocaleFrom` hooks (`@/hooks`), which call the same setters.
+ * `useAccessTokenFrom` / `useLocaleFrom` hooks (`@/hooks/auth`), which call the same setters.
  */
 export const { graphql, graphqlEnvelope, graphqlFields, setAccessTokenReader, setLocaleReader } = createGraphqlClient({
     endpoint: CORE_API_URL,

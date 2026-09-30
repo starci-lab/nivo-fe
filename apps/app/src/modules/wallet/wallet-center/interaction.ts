@@ -1,4 +1,5 @@
-import type { WalletTopUpPayLink } from "@/modules/api/commerce"
+
+import type { WalletTopUpPayLinkFieldsFragment } from "@/modules/api/__generated__/core"
 
 /** Pending status and latest refusal for the invoice payment action. */
 export type InvoicePaymentState = { readonly pending: boolean; readonly error: string | null }
@@ -8,7 +9,7 @@ export type TopUpInteractionState = {
     readonly amount: string
     readonly pending: boolean
     readonly error: string | undefined
-    readonly checkout: WalletTopUpPayLink | undefined
+    readonly checkout: WalletTopUpPayLinkFieldsFragment | undefined
 }
 
 /** Initialize the payment modal from the route currently mounted. */

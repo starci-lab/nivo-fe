@@ -1,6 +1,8 @@
+
+import type { MyAgentosModuleRuntimeQuery } from "@/modules/api/__generated__/core"
+
 import { useCallback, useState } from "react"
 import { useMutateConfigureAgentWorkspaceChannelSwr } from "../swr/mutations/useMutateConfigureAgentWorkspaceChannelSwr"
-import type { AgentosModuleRuntime } from "../../modules/api/agentos-module-runtime"
 import type { AgentosRuntimeValue } from "../../modules/api/agentos-runtime-tree"
 import type { AgentOSModuleView } from "../../components/blocks/agentos/ModuleRouteShellBlock"
 import type { SettingsFormContentProps } from "../../modules/agentos/module-page/surface-types"
@@ -21,7 +23,7 @@ type ModuleSettingsValues = {
 interface ModuleSettingsInput {
     readonly workspaceId: string
     readonly installationId: string
-    readonly runtime: AgentosModuleRuntime | null
+    readonly runtime: NonNullable<MyAgentosModuleRuntimeQuery["myAgentosModuleRuntime"]["data"]> | null
     readonly view: AgentOSModuleView
     readonly controls: ModuleRuntimeControls
 }

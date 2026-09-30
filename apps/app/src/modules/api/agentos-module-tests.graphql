@@ -1,0 +1,98 @@
+fragment AgentosModuleTestFields on AgentosModuleTestPayload {
+    contract
+    runs {
+        id
+        installationId
+        moduleDefinitionId
+        contextVersionId
+        setupSessionId
+        draftDigest
+        requestedByUserId
+        kindKey
+        kindVersion
+        testContractKey
+        testContractVersion
+        scenarioKey
+        mode
+        definitionDigest
+        targetDigest
+        authorityGeneration
+        sourceGeneration
+        retrievalGeneration
+        status
+        scenarioInput
+        summary
+        completedAt
+        createdAt
+    }
+    run {
+        id
+        installationId
+        moduleDefinitionId
+        contextVersionId
+        setupSessionId
+        draftDigest
+        requestedByUserId
+        kindKey
+        kindVersion
+        testContractKey
+        testContractVersion
+        scenarioKey
+        mode
+        definitionDigest
+        targetDigest
+        authorityGeneration
+        sourceGeneration
+        retrievalGeneration
+        status
+        scenarioInput
+        summary
+        completedAt
+        createdAt
+    }
+    assertions {
+        id
+        runId
+        ordinal
+        assertionKey
+        label
+        verdict
+        expected
+        actual
+        evidence
+        createdAt
+    }
+}
+
+query MyAgentosModuleTestSurface($request: MyAgentosModuleTestSurfaceRequest!) {
+    myAgentosModuleTestSurface(request: $request) {
+        data {
+            ...AgentosModuleTestFields
+        }
+        message
+        success
+        error
+    }
+}
+
+query MyAgentosModuleTestRun($request: MyAgentosModuleTestRunRequest!) {
+    myAgentosModuleTestRun(request: $request) {
+        data {
+            ...AgentosModuleTestFields
+        }
+        message
+        success
+        error
+    }
+}
+
+mutation RunAgentosModuleTest($input: RunAgentosModuleTestInput!) {
+    runAgentosModuleTest(request: $input) {
+        data {
+            ...AgentosModuleTestFields
+        }
+        message
+        success
+        error
+    }
+}

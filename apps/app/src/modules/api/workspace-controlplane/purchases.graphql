@@ -1,0 +1,89 @@
+fragment WorkspaceProvisioningSagaFields on ProvisioningSagaEntity {
+    id
+    jobId
+    definitionKey
+    definitionVersion
+    resourceKind
+    resourceId
+    ownerId
+    status
+    direction
+    forwardCursor
+    compensationCursor
+    sequence
+    failureCode
+    failureReason
+    finishedAt
+    createdAt
+    updatedAt
+}
+
+fragment WorkspaceProvisioningSagaStepFields on ProvisioningSagaStepEntity {
+    id
+    stepKey
+    ordinal
+    isCompensable
+    forwardStatus
+    compensationStatus
+    lastError
+    createdAt
+    updatedAt
+}
+
+fragment WorkspaceProvisioningSagaViewFields on ProvisioningSagaView {
+    saga {
+        ...WorkspaceProvisioningSagaFields
+    }
+    steps {
+        ...WorkspaceProvisioningSagaStepFields
+    }
+}
+
+query WorkspaceProvisioningSaga($input: MyProvisioningSagaInput!) {
+    myProvisioningSaga(request: $input) {
+        data {
+            ...WorkspaceProvisioningSagaViewFields
+        }
+        message
+        success
+        error
+    }
+}
+
+mutation RetryWorkspaceProvisioningSaga($input: RetryProvisioningSagaInput!) {
+    retryProvisioningSaga(request: $input) {
+        data {
+            ...WorkspaceProvisioningSagaFields
+        }
+        message
+        success
+        error
+    }
+}
+
+mutation CancelWorkspaceProvisioningSaga($input: CancelProvisioningSagaInput!) {
+    cancelProvisioningSaga(request: $input) {
+        data {
+            ...WorkspaceProvisioningSagaFields
+        }
+        message
+        success
+        error
+    }
+}
+
+mutation ManageAgentWorkspace($input: ManageAgentWorkspaceInput!) {
+    manageAgentWorkspace(request: $input) {
+        data {
+            id
+            name
+            status
+            catalogOrder {
+                id
+            }
+        }
+        message
+        success
+        error
+    }
+}

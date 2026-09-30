@@ -1,0 +1,76 @@
+fragment ChatbotWorkbenchFields on ChatbotWorkbenchPayload {
+    installationId
+    lifecycleState
+    approvedVersion
+    channels {
+        id
+        installationId
+        provider
+        accountRef
+        state
+        credentialRef
+    }
+    conversations {
+        id
+        installationId
+        participantRef
+        handoffState
+        authorityEpoch
+        approvedVersion
+        lastMessageAt
+    }
+    messages {
+        id
+        conversationId
+        direction
+        sequence
+        body
+        deliveryState
+        providerOutboxId
+        failureCode
+        occurredAt
+    }
+}
+
+fragment ChatbotActionFields on ChatbotActionPayload {
+    id
+    installationId
+    state
+    authorizationUrl
+}
+
+query ChatbotWorkbench($request: ChatbotWorkbenchRequest!) {
+    chatbotWorkbench(request: $request) {
+        ...ChatbotWorkbenchFields
+    }
+}
+
+mutation BindChatbotChannel($request: BindChatbotChannelInput!) {
+    bindChatbotChannel(request: $request) {
+        ...ChatbotActionFields
+    }
+}
+
+mutation StartZaloChatbotAuthorization($request: StartZaloChatbotAuthorizationInput!) {
+    startZaloChatbotAuthorization(request: $request) {
+        ...ChatbotActionFields
+    }
+}
+
+mutation SetChatbotHandoff($request: ChangeChatbotHandoffInput!) {
+    setChatbotHandoff(request: $request) {
+        ...ChatbotActionFields
+    }
+}
+
+mutation ResolveChatbotHandoff($request: ChangeChatbotHandoffInput!) {
+    resolveChatbotHandoff(request: $request) {
+        ...ChatbotActionFields
+    }
+}
+
+mutation ReconcileChatbotDelivery($request: ReconcileChatbotDeliveryInput!) {
+    reconcileChatbotDelivery(request: $request) {
+        ...ChatbotActionFields
+    }
+}

@@ -1,7 +1,9 @@
+import type { CatalogItemFieldsFragment, CatalogOrderFieldsFragment, ExpertSiteFieldsFragment, InstanceFieldsFragment } from "../api/__generated__/core"
+
 import type { FleetStatus } from "../../components/blocks/provisioning/FleetRow"
-import type { CatalogItemRow, CatalogOrderRow } from "../api/commerce"
-import type { ExpertSiteRow } from "../api/expert-sites"
-import type { InstanceRow } from "../api/instances"
+
+
+
 import { type Outcome } from "@nivo/api"
 
 /** Public API role for one owned app or unbuilt order row. */
@@ -83,7 +85,7 @@ export type AppsDashboardCopy = {
 }
 
 /** Cheapest rung that actually publishes a monthly price. */
-const cheapestTier = (item: CatalogItemRow) => {
+const cheapestTier = (item: CatalogItemFieldsFragment) => {
     let cheapest: { readonly name: string; readonly priceMonthlyVnd: number } | undefined
     for (const tier of item.tiers ?? []) {
         const price = tier.priceMonthlyVnd
@@ -108,10 +110,10 @@ const fleetStatusOf = (wire: string): FleetStatus => wireStatuses[wire] ?? "not_
 
 /** Derive the owned section from the three answered sources it joins. */
 export const ownedSectionFor = (
-    sites: Outcome<ReadonlyArray<ExpertSiteRow>> | undefined,
-    instances: Outcome<ReadonlyArray<InstanceRow>> | undefined,
-    orders: Outcome<ReadonlyArray<CatalogOrderRow>> | undefined,
-    catalogue: Outcome<ReadonlyArray<CatalogItemRow>> | undefined,
+    sites: Outcome<ReadonlyArray<ExpertSiteFieldsFragment>> | undefined,
+    instances: Outcome<ReadonlyArray<InstanceFieldsFragment>> | undefined,
+    orders: Outcome<ReadonlyArray<CatalogOrderFieldsFragment>> | undefined,
+    catalogue: Outcome<ReadonlyArray<CatalogItemFieldsFragment>> | undefined,
     academyHostSuffix: string,
     copy: AppsDashboardCopy,
 ): OwnedSectionView => {
@@ -153,7 +155,7 @@ export const ownedSectionFor = (
 
 /** Derive catalogue rows from its exact current query answer. */
 export const catalogueSectionFor = (
-    catalogue: Outcome<ReadonlyArray<CatalogItemRow>> | undefined,
+    catalogue: Outcome<ReadonlyArray<CatalogItemFieldsFragment>> | undefined,
     money: (amountVnd: number) => string,
     copy: AppsDashboardCopy,
 ): CatalogueSectionView => {

@@ -1,10 +1,8 @@
 
+import type { WorkspaceCheckoutStartInput } from "@/modules/api/__generated__/core"
+
 import { type Outcome } from "@nivo/api"
-import {
-    startWorkspaceCheckoutPurchase,
-    type WorkspaceCheckoutAnswer,
-    type WorkspaceCheckoutStartRequest,
-} from "@/modules/api/workspace-controlplane"
+import { startWorkspaceCheckoutPurchase, type WorkspaceCheckoutAnswer } from "@/modules/api/workspace-controlplane"
 import { useNivoMutation } from "../useNivoMutation"
 import { MUTATION_WORKSPACE_CHECKOUT_START_SWR_KEY } from "../swr.shared"
 import { workspaceCheckoutStatusQueryKey } from "../queries/queries.shared"
@@ -17,6 +15,7 @@ import { workspaceCheckoutStatusQueryKey } from "../queries/queries.shared"
  */
 
 /** The purchase identity an admission answer names, or null when the answer names none. */
+
 const admittedPurchaseId = (answer: Outcome<WorkspaceCheckoutAnswer>): string | null => {
     if (!answer.ok || answer.data.status === "offers") return null
     return answer.data.purchaseId ?? null
@@ -31,7 +30,7 @@ const admittedPurchaseId = (answer: Outcome<WorkspaceCheckoutAnswer>): string | 
 export const useMutateWorkspaceCheckoutStartSwr = () =>
     useNivoMutation(
         MUTATION_WORKSPACE_CHECKOUT_START_SWR_KEY,
-        (request: WorkspaceCheckoutStartRequest) => startWorkspaceCheckoutPurchase(request),
+        (request: WorkspaceCheckoutStartInput) => startWorkspaceCheckoutPurchase(request),
         {
             invalidates: (_request, answer) => {
                 const purchaseId = admittedPurchaseId(answer)

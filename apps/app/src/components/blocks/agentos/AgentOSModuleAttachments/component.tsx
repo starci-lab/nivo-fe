@@ -1,8 +1,9 @@
+
+import type { MyAgentosCustomModuleStudioQuery } from "@/modules/api/__generated__/core"
+
 import { useState } from "react"
 import { Button, FileDropzone, SurfaceCard, Text } from "@starci/grammar/common"
 import { LifecycleStep, QueryNoticeView, type LifecycleStepData, type QueryNoticeViewData } from "@nivo/ui"
-import type { AgentosModuleStudio } from "@/modules/api/agentos-module-studio"
-
 /** Resolved copy for the shared attachment lifecycle. */
 type AgentOSModuleAttachmentsLabels = {
     readonly title: string
@@ -28,7 +29,7 @@ type AgentOSModuleAttachmentsLabels = {
 export type AgentOSModuleAttachmentsBaseProps = {
     readonly state: "attachments"
     readonly props: {
-        readonly studio?: Pick<AgentosModuleStudio, "attachments">
+        readonly studio?: Pick<NonNullable<MyAgentosCustomModuleStudioQuery["myAgentosCustomModuleStudio"]["data"]>, "attachments">
         readonly status: "loading" | "refused" | "failed" | "ready"
         readonly notice?: QueryNoticeViewData
         readonly pending: boolean

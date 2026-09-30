@@ -1,3 +1,6 @@
+
+import type { MyAgentosAiKnowledgeReadinessData } from "@/modules/api/__generated__/core"
+
 import { ROW_CLASS_NAME } from "./classNames"
 import {
     EmptyNotice as DirectionEmpty,
@@ -7,12 +10,11 @@ import {
     Text,
     type BadgeTone,
 } from "@starci/grammar/common"
-import type { AgentosAiKnowledgeReadiness } from "@/modules/api/agentos-knowledge"
 /** Resolved copy used by the readiness component evidence inventory. */
 export type AgentOSReadinessComponentListProps = {
     readonly state: "loading" | "ready"
     readonly props: {
-        readonly components: AgentosAiKnowledgeReadiness["components"]
+        readonly components: MyAgentosAiKnowledgeReadinessData["components"]
         readonly labels: AgentOSReadinessComponentListLabels
     }
 }
@@ -23,7 +25,7 @@ type AgentOSReadinessComponentListLabels = {
 }
 /** Settled component verdicts consumed by the pure evidence renderer. */
 export type AgentOSReadinessComponentListViewProps = {
-    readonly components: AgentosAiKnowledgeReadiness["components"]
+    readonly components: MyAgentosAiKnowledgeReadinessData["components"]
     readonly labels: AgentOSReadinessComponentListLabels
     readonly loading?: boolean
 }

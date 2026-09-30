@@ -1,0 +1,26 @@
+query Courses {
+    courses {
+        success
+        message
+        error
+        data {
+            id
+            slug
+            title
+            summary
+            priceText
+            sortIndex
+        }
+    }
+}
+
+mutation SubmitLead($input: SubmitLeadInput!) {
+    submitLead(request: $input) {
+        success
+        message
+        error
+        data {
+            id
+        }
+    }
+}

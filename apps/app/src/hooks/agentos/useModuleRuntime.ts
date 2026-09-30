@@ -1,12 +1,12 @@
+
+
+import type { ManageAgentosModuleRuntimeMutationVariables, MyAgentosModuleRuntimeQuery } from "@/modules/api/__generated__/core"
+
 import { useCallback, useRef, useState } from "react"
 import { useMutateManageAgentosModuleRuntimeSwr } from "../swr/mutations/useMutateManageAgentosModuleRuntimeSwr"
 import { useQueryMyAgentWorkspaceControlCenterSwr } from "../swr/queries/useQueryMyAgentWorkspaceControlCenterSwr"
 import { useQueryMyAgentosModuleRuntimeSwr } from "../swr/queries/useQueryMyAgentosModuleRuntimeSwr"
 import { useQueryMyAgentosModuleTestSurfaceSwr } from "../swr/queries/useQueryMyAgentosModuleTestSurfaceSwr"
-import type {
-    AgentosModuleRuntime,
-    ManageAgentosModuleRuntimeInput,
-} from "../../modules/api/agentos-module-runtime"
 import { type Outcome } from "@nivo/api"
 import type { AgentOSModuleView } from "../../components/blocks/agentos/ModuleRouteShellBlock"
 import { nivoQueryReading } from "../../modules/query"
@@ -26,9 +26,9 @@ interface ModuleRuntimeQueryInput {
 }
 
 type SettleWaiter = {
-    readonly predicate: (candidate: AgentosModuleRuntime) => boolean
+    readonly predicate: (candidate: NonNullable<MyAgentosModuleRuntimeQuery["myAgentosModuleRuntime"]["data"]>) => boolean
     readonly markRefused: boolean
-    readonly resolve: (runtime: AgentosModuleRuntime | null) => void
+    readonly resolve: (runtime: NonNullable<MyAgentosModuleRuntimeQuery["myAgentosModuleRuntime"]["data"]> | null) => void
     attempts: number
 }
 
@@ -49,7 +49,7 @@ export const useModuleRuntime = (input: ModuleRuntimeQueryInput) => {
     const [settling, setSettling] = useState(false)
     const settleWaiter = useRef<SettleWaiter | null>(null)
 
-    const closeSettle = useCallback((waiter: SettleWaiter, result: AgentosModuleRuntime | null) => {
+    const closeSettle = useCallback((waiter: SettleWaiter, result: NonNullable<MyAgentosModuleRuntimeQuery["myAgentosModuleRuntime"]["data"]> | null) => {
         settleWaiter.current = null
         setSettling(false)
         setPending(false)
@@ -57,7 +57,7 @@ export const useModuleRuntime = (input: ModuleRuntimeQueryInput) => {
         waiter.resolve(result)
     }, [])
     const settleAnswered = useCallback(
-        (answer: Outcome<AgentosModuleRuntime>) => {
+        (answer: Outcome<NonNullable<MyAgentosModuleRuntimeQuery["myAgentosModuleRuntime"]["data"]>>) => {
             const waiter = settleWaiter.current
             if (waiter === null) return
             waiter.attempts += 1
@@ -110,7 +110,7 @@ export const useModuleRuntime = (input: ModuleRuntimeQueryInput) => {
     }
 
     const perform = useCallback(
-        async (command: ManageAgentosModuleRuntimeInput, markRefused = true): Promise<AgentosModuleRuntime | null> => {
+        async (command: ManageAgentosModuleRuntimeMutationVariables["input"], markRefused = true): Promise<NonNullable<MyAgentosModuleRuntimeQuery["myAgentosModuleRuntime"]["data"]> | null> => {
             setPending(true)
             setActionRefused(false)
             const result = await triggerRuntime(command)
@@ -128,15 +128,15 @@ export const useModuleRuntime = (input: ModuleRuntimeQueryInput) => {
     )
     const settleRuntime = useCallback(
         (
-            predicate: (candidate: AgentosModuleRuntime) => boolean,
+            predicate: (candidate: NonNullable<MyAgentosModuleRuntimeQuery["myAgentosModuleRuntime"]["data"]>) => boolean,
             markRefused = true,
-        ): Promise<AgentosModuleRuntime | null> => {
+        ): Promise<NonNullable<MyAgentosModuleRuntimeQuery["myAgentosModuleRuntime"]["data"]> | null> => {
             // A newer wait abandons the one in flight: it settles nothing and touches no state.
             settleWaiter.current?.resolve(null)
             settleWaiter.current = { predicate, markRefused, resolve: () => undefined, attempts: 0 }
             setPending(true)
             setSettling(true)
-            return new Promise<AgentosModuleRuntime | null>((resolve) => {
+            return new Promise<NonNullable<MyAgentosModuleRuntimeQuery["myAgentosModuleRuntime"]["data"]> | null>((resolve) => {
                 settleWaiter.current = { predicate, markRefused, resolve, attempts: 0 }
             })
         },

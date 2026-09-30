@@ -1,5 +1,6 @@
+import type { AcademyStudentDetail, AcademyStudentView } from "../api/__generated__/core"
+
 import type { ReactNode } from "react"
-import type { AcademyStudent, AcademyStudentDetail } from "../api/academy"
 
 /** Resolved copy for the student CRM block. */
 export type AcademyStudentCrmLabels = {
@@ -24,7 +25,7 @@ export type AcademyStudentCrmLabels = {
 
 /** Atoms the pure student CRM draws; the connected half owns the student requests. */
 export type AcademyStudentCrmData = {
-    readonly students: ReadonlyArray<AcademyStudent>
+    readonly students: ReadonlyArray<AcademyStudentView>
     readonly detailState: "idle" | "resting" | "failed" | "answered"
     readonly detail?: AcademyStudentDetail
     readonly detailNotice?: ReactNode

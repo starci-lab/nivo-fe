@@ -1,14 +1,14 @@
 
+import type { AgentWorkspaceFieldsFragment } from "../../modules/api/__generated__/core"
+
 import { useSearchParams } from "next/navigation"
 import { useCallback, useState } from "react"
-import {
-    useMutateCollabAcceptInvitationSwr,
-    usePathname,
-    useQueryMyAgentWorkspacesSwr,
-    useRouter,
-    useSession,
-} from "@/hooks"
-import type { AgentWorkspaceRow } from "../../modules/api/agentos-workspaces"
+import { useMutateCollabAcceptInvitationSwr } from "../swr/mutations/useMutateCollabAcceptInvitationSwr"
+import { usePathname } from "../i18n/usePathname"
+import { useQueryMyAgentWorkspacesSwr } from "../swr/queries/useQueryMyAgentWorkspacesSwr"
+import { useRouter } from "../i18n/useRouter"
+import { useSession } from "../auth/useSession"
+
 import { parseRoleHint, type GroupChatTab } from "../../modules/collab/group-chat/model"
 import type { GroupChatPageView } from "../../modules/collab/group-chat/types"
 
@@ -43,7 +43,7 @@ export const useGroupChatTab = () => {
     const workspaceId = workspaceParam ?? ownedWorkspaceId
     const workspaceListed =
         workspaces.data?.ok === true
-            ? (workspaces.data.data.find((workspace: AgentWorkspaceRow) => workspace.id === workspaceId)?.name ?? null)
+            ? (workspaces.data.data.find((workspace: AgentWorkspaceFieldsFragment) => workspace.id === workspaceId)?.name ?? null)
             : null
 
     const selectTab = useCallback(

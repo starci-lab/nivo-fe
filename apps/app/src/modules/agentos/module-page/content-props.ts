@@ -1,7 +1,14 @@
+import type { MyAgentosModuleRuntimeQuery } from "@/modules/api/__generated__/core"
+
+import type { AgentosModuleTestSurfaceView } from "@/modules/api/agentos-module-tests"
+import type { AgentosModuleTestContractView } from "@/modules/api/agentos-module-tests"
+
+
+
 import type { ReactNode } from "react"
 import type { ContextDraft } from "../../../components/blocks/agentos/ContextVersionBlock"
-import type { AgentosModuleRuntime, AgentosRuntimeSession } from "../../api/agentos-module-runtime"
-import type { AgentosModuleTestContract, AgentosModuleTestSurface } from "../../api/agentos-module-tests"
+
+
 import type { AgentosRuntimeValue } from "../../api/agentos-runtime-tree"
 import type { Formatter } from "../../i18n/formatter"
 import type { ModulePageCopy } from "../module-page-copy"
@@ -25,7 +32,7 @@ import { testContextLabelFor } from "./test-target"
 
 /** The setup pane's connected slice: selection, flags, drafts and session commands. */
 export type ModuleSetupView = {
-    readonly selectedSetup: AgentosRuntimeSession | null
+    readonly selectedSetup: NonNullable<MyAgentosModuleRuntimeQuery["myAgentosModuleRuntime"]["data"]>["setupSessions"][number] | null
     readonly sendPending: boolean
     readonly applyPending: boolean
     readonly startPending: boolean
@@ -82,8 +89,8 @@ export type ModuleOperateView = {
 
 /** The test pane's connected slice: contract, scenario selection, mode and the run command. */
 export type ModuleTestView = {
-    readonly contract: AgentosModuleTestContract | undefined
-    readonly surface: AgentosModuleTestSurface | null
+    readonly contract: AgentosModuleTestContractView | undefined
+    readonly surface: AgentosModuleTestSurfaceView | null
     readonly selectedScenarioKey: string
     readonly mode: "exploratory" | "acceptance"
     readonly compactPane: TestSurfaceProps["compactPane"]
@@ -127,7 +134,7 @@ export type ModuleDiagnosticsView = {
 
 /** The connected facts setupContentPropsFor combines. */
 type SetupContentInput = {
-    readonly runtime: AgentosModuleRuntime
+    readonly runtime: NonNullable<MyAgentosModuleRuntimeQuery["myAgentosModuleRuntime"]["data"]>
     readonly activeVersion: number | null
     readonly draft: ContextDraft | null
     readonly pending: boolean
@@ -179,7 +186,7 @@ export const setupContentPropsFor = (input: SetupContentInput): SetupSurfaceProp
 
 /** The connected facts operateContentPropsFor combines. */
 type OperateContentInput = {
-    readonly runtime: AgentosModuleRuntime
+    readonly runtime: NonNullable<MyAgentosModuleRuntimeQuery["myAgentosModuleRuntime"]["data"]>
     readonly copy: ModulePageCopy
     readonly pending: boolean
     readonly refused: boolean
@@ -275,7 +282,7 @@ export const testContentPropsFor = (input: TestContentInput): TestSurfaceProps |
 
 /** The connected facts settingsContentPropsFor combines. */
 type SettingsContentInput = {
-    readonly runtime: AgentosModuleRuntime
+    readonly runtime: NonNullable<MyAgentosModuleRuntimeQuery["myAgentosModuleRuntime"]["data"]>
     readonly activeVersion: number | null
     readonly pending: boolean
     readonly refused: boolean
@@ -310,7 +317,7 @@ export const settingsContentPropsFor = (input: SettingsContentInput): SettingsSu
 
 /** The connected facts diagnosticsContentPropsFor combines. */
 type DiagnosticsContentInput = {
-    readonly runtime: AgentosModuleRuntime
+    readonly runtime: NonNullable<MyAgentosModuleRuntimeQuery["myAgentosModuleRuntime"]["data"]>
     readonly diagnostics: ModuleDiagnosticsView
 }
 

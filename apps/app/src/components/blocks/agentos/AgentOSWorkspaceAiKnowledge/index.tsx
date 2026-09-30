@@ -1,11 +1,13 @@
+
+import type { MyAgentosAiKnowledgeReadinessData } from "@/modules/api/__generated__/core"
+
 "use client"
 import {
     useMutateReindexAgentWorkspaceKnowledgeSwr,
     useMutateRunAgentosAiReadinessTestSwr,
     useQueryMyAgentosAiKnowledgeReadinessSwr,
-    useQueryNoticeData,
-} from "@/hooks"
-import { type AgentosAiKnowledgeReadiness } from "@/modules/api/agentos-knowledge"
+} from "@/hooks/swr"
+import { useQueryNoticeData } from "@/hooks/query"
 import { nivoQueryReading } from "@/modules/query"
 import { useFormatter, useTranslations } from "next-intl"
 import { useState } from "react"
@@ -23,7 +25,7 @@ export type AgentOSWorkspaceAiKnowledgeAction = {
 /** Complete only the exact operation receipt returned to this browser action. */
 export const resolveAgentOSWorkspaceAiKnowledgeAction = (
     action: AgentOSWorkspaceAiKnowledgeAction,
-    readiness: AgentosAiKnowledgeReadiness | null | undefined,
+    readiness: MyAgentosAiKnowledgeReadinessData | null | undefined,
 ): AgentOSWorkspaceAiKnowledgeAction => {
     if (
         action === null ||
@@ -55,7 +57,7 @@ export const resolveAgentOSWorkspaceAiKnowledgeAction = (
 }
 /** Resolve the visible state from the server lifecycle plus only the action started by this page. */
 export const resolveAgentOSWorkspaceAiKnowledgeState = (
-    readiness: AgentosAiKnowledgeReadiness | null | undefined,
+    readiness: MyAgentosAiKnowledgeReadinessData | null | undefined,
     action: AgentOSWorkspaceAiKnowledgeAction,
     actionRefused: boolean,
 ): AgentOSWorkspaceAiKnowledgeViewProps["state"] => {

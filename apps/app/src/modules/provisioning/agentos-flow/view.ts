@@ -1,8 +1,12 @@
-import type { AgentosAiKnowledgeReadiness } from "@/modules/api/agentos-knowledge"
-import type { WorkspaceCheckoutOffer } from "@/modules/api/workspace-controlplane"
+
+import type { WorkspaceCheckoutOfferFieldsFragment } from "@/modules/api/__generated__/core"
+
+import type { MyAgentosAiKnowledgeReadinessData } from "@/modules/api/__generated__/core"
+
 import type { AgentOSFlow } from "./index"
 
 type CopyCatalog = ((key: string) => string) & { readonly has: (key: string) => boolean }
+
 /** One resolved lifecycle milestone in the AgentOS progress rail. */
 type AgentOSStepView = {
     readonly ordinal: string
@@ -66,14 +70,14 @@ type AgentOSProvisioningViewInput = {
     readonly steps: ReadonlyArray<AgentOSStepView>
     readonly t: CopyCatalog
     readonly tShared: CopyCatalog
-    readonly readiness: AgentosAiKnowledgeReadiness | null | undefined
+    readonly readiness: MyAgentosAiKnowledgeReadinessData | null | undefined
     readonly readinessFailure: { readonly kind: string; readonly retryable: boolean; readonly text: string } | null
     readonly realtimeStatus: string
     readonly entryRefusal: string | null
     readonly reconciling: boolean
     readonly entryPending: boolean
     readonly aiRetryPending: boolean
-    readonly amountOf: (offer: WorkspaceCheckoutOffer) => string
+    readonly amountOf: (offer: WorkspaceCheckoutOfferFieldsFragment) => string
     readonly actions: {
         readonly submit: () => void
         readonly selectOffer: (id: string) => void

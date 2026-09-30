@@ -1,12 +1,12 @@
 "use client"
 
 import { useAcademySections } from "../../../../hooks/academy/useAcademySections"
-import type { Course } from "../../../../modules/api/academy"
+import type { CoursesQuery } from "../../../../modules/api/__generated__/graphql"
 import { AcademySectionsBase } from "./component"
 
 /** Catalog supplied by the server-rendered public page. */
 export type AcademySectionsProps = {
-    readonly courses: ReadonlyArray<Course>
+    readonly courses: ReadonlyArray<NonNullable<CoursesQuery["courses"]["data"]>[number]>
 }
 
 export type { AcademySection, LeadSubmit } from "../../../../modules/academy/academy-sections"
