@@ -28,7 +28,7 @@ apps/
     hooks/              Domain hooks
     modules/            App capabilities and integrations
 packages/nivo-ui/       Shared UI package
-scripts/                Repository tooling
+scripts/                Reserved for repository scripts (currently empty)
 e2e/                    Repository-level end-to-end tests
 ```
 

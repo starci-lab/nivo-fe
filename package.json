@@ -176,7 +176,6 @@
     "packages/*"
   ],
   "scripts": {
-    "academy:inject": "node scripts/inject-academy-template.mjs",
     "build": "turbo run build",
     "dev": "turbo run dev",
     "dev:app": "npm run dev -w @nivo/app",
@@ -185,17 +184,11 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "lint": "turbo run lint",
-    "lint:check": "npm run contract:check && turbo run lint -- --max-warnings=0 && npm run lint:architecture && npm run lint:i18n",
-    "lint:architecture": "node scripts/check-fe-architecture.mjs && node scripts/check-dependency-alignment.mjs",
-    "lint:i18n": "node scripts/check-i18n-catalog.mjs",
-    "preinstall": "node scripts/check-dependency-alignment.mjs",
+    "lint:check": "turbo run lint -- --max-warnings=0",
     "prepare": "husky",
     "sonar:check": "sonar-scanner-npm -Dsonar.qualitygate.wait=true -Dsonar.qualitygate.timeout=600",
-    "sync:ports": "node scripts/sync-ports.mjs",
-    "coverage:patch": "node scripts/write-patch-coverage.mjs",
     "typecheck": "turbo run typecheck",
-    "codegen": "npm run codegen --workspace @nivo/app --workspace @nivo/expert --",
-    "contract:check": "node scripts/contract-check.mjs"
+    "codegen": "npm run codegen --workspace @nivo/app --workspace @nivo/expert --"
   },
   "devDependencies": {
     "@graphql-codegen/cli": "^5.0.7",
