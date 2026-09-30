@@ -9,7 +9,6 @@ import {
 } from "@/hooks"
 import { AgentOSModuleStudioProjectionContext } from "@/modules/agentos/module-studio-projection"
 import { nivoQueryReading } from "@/modules/query"
-import type { AgentosModuleStudio } from "@/modules/api/agentos-module-studio"
 import { AgentOSModuleAttachmentsBase, type AgentOSModuleAttachmentsBaseProps } from "./component"
 
 type IndexedAttachment = {
@@ -113,7 +112,7 @@ const useAgentOSModuleAttachmentsView = (
     const projection = useContext(AgentOSModuleStudioProjectionContext)
     const workspaceId = props.workspaceId
     const moduleId = props.scope === "studio" ? props.moduleId : props.installationId
-    const query = useQueryMyAgentosCustomModuleStudioSwr(workspaceId, moduleId)
+    const query = useQueryMyAgentosCustomModuleStudioSwr(workspaceId, moduleId, { pollAttachments: true })
     const reading = nivoQueryReading(query.data)
     const noticeOf = useQueryNoticeData()
     const copy = useAttachmentCopy()
