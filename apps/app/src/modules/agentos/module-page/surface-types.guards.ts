@@ -5,9 +5,7 @@ import type {
     SetupSurfaceProps,
     TestSurfaceProps,
 } from "./surface-types"
-
-const isOneOf = <T extends string>(value: unknown, choices: ReadonlyArray<T>): value is T =>
-    typeof value === "string" && choices.some((choice) => choice === value)
+import { isOneOf } from "@/modules/api/wire"
 
 const DIAGNOSTICS_COMPACT_PANES: ReadonlyArray<DiagnosticsSurfaceProps["compactPane"]> = [
     "signals",
