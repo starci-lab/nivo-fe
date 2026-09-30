@@ -1,7 +1,7 @@
 "use client"
 
 import { useFormatter, useTranslations } from "next-intl"
-import { useOverviewData } from "@/hooks"
+import { useNow, useOverviewData } from "@/hooks"
 import type { DomainRow } from "@/modules/api/commerce"
 import { BILLING_CURRENCY } from "@/modules/config"
 import { OverviewSignalsBase, type OverviewSignalsCell } from "./component"
@@ -32,17 +32,19 @@ const STATUS_TONE: Readonly<Record<string, "warning" | "danger" | undefined>> = 
 }
 const EXPIRY_NOTICE_DAYS = 30
 const DAY_IN_MS = 86400000
-const expiryTone = (expiresAt: string | null): "warning" | undefined => {
-    if (expiresAt === null) return undefined
-    const remainingDays = (new Date(expiresAt).getTime() - Date.now()) / DAY_IN_MS
+const expiryTone = (expiresAt: string | null, now: number | null): "warning" | undefined => {
+    if (expiresAt === null || now === null) return undefined
+    const remainingDays = (new Date(expiresAt).getTime() - now) / DAY_IN_MS
     return remainingDays <= EXPIRY_NOTICE_DAYS ? "warning" : undefined
 }
-const dueTone = (dueAt: string): "danger" | undefined => (new Date(dueAt).getTime() < Date.now() ? "danger" : undefined)
+const dueTone = (dueAt: string, now: number | null): "danger" | undefined =>
+    now !== null && new Date(dueAt).getTime() < now ? "danger" : undefined
 
 /** Connect the account signal band to the shared overview answers. */
 export const OverviewSignals = (props: OverviewSignalsProps) => {
     const { label } = props
     const data = useOverviewData()
+    const now = useNow()
     const t = useTranslations("console")
     const format = useFormatter()
     const statusLabel = (value: string) => {
@@ -73,7 +75,7 @@ export const OverviewSignals = (props: OverviewSignalsProps) => {
         id,
         label: cellLabel,
         value: "",
-        status: t("state.loading"),
+        status: "",
         isSkeleton: true,
     })
     const failed = (id: string, cellLabel: string, code: string | undefined): OverviewSignalsCell => ({
@@ -145,7 +147,7 @@ export const OverviewSignals = (props: OverviewSignalsProps) => {
                   label: t("domains.title"),
                   value: first.name,
                   status: domainStatus(first),
-                  badgeTone: expiryTone(first.expiresAt),
+                  badgeTone: expiryTone(first.expiresAt, now),
               }
     })()
     const wallet = (() => {
@@ -162,7 +164,7 @@ export const OverviewSignals = (props: OverviewSignalsProps) => {
                     : `${money(unpaid.amountVnd)} · ${t("wallet.dueAt", {
                           date: day(unpaid.dueAt),
                       })}`,
-            badgeTone: unpaid === undefined ? undefined : dueTone(unpaid.dueAt),
+            badgeTone: unpaid === undefined ? undefined : dueTone(unpaid.dueAt, now),
             emphasis: "accent" as const,
         }
     })()

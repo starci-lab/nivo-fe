@@ -1,7 +1,7 @@
 "use client"
 
 import { useFormatter, useTranslations } from "next-intl"
-import { useOverviewData, useRouter } from "@/hooks"
+import { useNow, useOverviewData, useRouter } from "@/hooks"
 import { BILLING_CURRENCY } from "@/modules/config"
 import { OverviewAccountBase, type OverviewAccountFact, type OverviewAccountInvoiceRow } from "./component"
 /** Public API role for OverviewAccountProps. */
@@ -9,8 +9,8 @@ export type OverviewAccountProps = {
     readonly label: string
 }
 export type { OverviewAccountFact, OverviewAccountInvoiceRow } from "./component"
-/** Whether a due date already lies behind the current instant. */
-const isPast = (dueAt: string): boolean => new Date(dueAt).getTime() < Date.now()
+/** Whether a due date already lies behind the given instant; an instant not yet known is never past. */
+const isPast = (dueAt: string, now: number | null): boolean => now !== null && new Date(dueAt).getTime() < now
 const SKELETON_FACTS: ReadonlyArray<OverviewAccountFact> = [
     { id: "pending-balance", label: "", value: "", isSkeleton: true },
     { id: "pending-unpaid", label: "", value: "", isSkeleton: true },
@@ -28,6 +28,7 @@ const SKELETON_INVOICE_ROW: OverviewAccountInvoiceRow = {
 export const OverviewAccount = (props: OverviewAccountProps) => {
     const { label } = props
     const { wallet, invoices } = useOverviewData()
+    const now = useNow()
     const t = useTranslations("console")
     const format = useFormatter()
     const router = useRouter()
@@ -64,7 +65,7 @@ export const OverviewAccount = (props: OverviewAccountProps) => {
         },
     ]
     const unpaid = invoices.ok ? invoices.data.find((invoice) => invoice.status === "unpaid") : undefined
-    const isOverdue = unpaid !== undefined && isPast(unpaid.dueAt)
+    const isOverdue = unpaid !== undefined && isPast(unpaid.dueAt, now)
     const invoiceRow: OverviewAccountInvoiceRow | undefined =
         unpaid === undefined
             ? undefined
